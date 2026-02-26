@@ -140,12 +140,22 @@ trivy-frontend:
   needs: ["build-frontend-image"]
 
 # -----------------------------------------------------------------------------
-# STAGE DEPLOY (Même logique que le Back)
+# STAGE DEPLOY
 # -----------------------------------------------------------------------------
 deploy-front-dev:
   stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    # Recreate SSH key from Base64
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Add VM host to known_hosts to avoid SSH prompt
+    - ssh-keyscan -H $VM_HOST >> ~/.ssh/known_hosts
   script:
-    - echo "Déploiement Angular automatique en DEV"
+    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: always
