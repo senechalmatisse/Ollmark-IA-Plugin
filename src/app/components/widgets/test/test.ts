@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { TestService } from '../test-service';
+import { TestService } from '../../../services/test/test-service';
 import { OnInit } from '@angular/core';
 
 @Component({
