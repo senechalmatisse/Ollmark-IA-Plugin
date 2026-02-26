@@ -7,7 +7,7 @@
 /bazel-out
 
 # Node
-test/Front/node_modules
+node_modules
 npm-debug.log
 yarn-error.log
 
@@ -42,4 +42,3 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 .env
-/test/Front/node_modules
