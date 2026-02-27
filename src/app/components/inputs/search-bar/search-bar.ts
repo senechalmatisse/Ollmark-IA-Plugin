@@ -17,7 +17,7 @@ export class SearchBar {
 
   onInputUpdate(event: Event) {
     clearTimeout(this.timerId)
-    const data = (event.target as HTMLInputElement).value
-    this.timerId = setTimeout(() => this.inputUpdated.emit(data), DEFAULT_TIME)
+    const userInput = (event.target as HTMLInputElement).value
+    this.timerId = setTimeout(() => this.inputUpdated.emit(userInput), DEFAULT_TIME)
   }
 }
