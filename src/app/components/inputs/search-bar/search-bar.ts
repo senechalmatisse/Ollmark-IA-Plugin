@@ -1,6 +1,8 @@
 import {Component, output} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 
+const DEFAULT_TIME = 500 // 0.5 second(s)
+
 @Component({
   selector: 'app-search-bar',
   imports: [
@@ -11,10 +13,11 @@ import {NgOptimizedImage} from '@angular/common';
 })
 export class SearchBar {
   inputUpdated = output<string>()
+  timerId = 0
 
   onInputUpdate(event: Event) {
+    clearTimeout(this.timerId)
     const data = (event.target as HTMLInputElement).value
-    console.log(data)
-    this.inputUpdated.emit(data)
+    this.timerId = setTimeout(() => this.inputUpdated.emit(data), DEFAULT_TIME)
   }
 }
