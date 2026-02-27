@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Test } from './test';
-import { TestService } from '../test-service';
+import { TestService } from '../../../services/test-service/test-service';
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
