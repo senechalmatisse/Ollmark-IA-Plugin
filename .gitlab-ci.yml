@@ -49,11 +49,13 @@ sonar_front:
     key: "sonar-cache-$CI_COMMIT_REF_SLUG"
     paths:
       - "${SONAR_USER_HOME}/cache"
-  script:
-    - sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}"
-  allow_failure: true
+  script: 
+    - sonar-scanner \
+      -Dsonar.host.url="${SONAR_HOST_URL}" \
+      -Dsonar.token="${SONAR_TOKEN}" \
+      -Dsonar.qualitygate.wait=true
+  allow_failure: false
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH == 'main'
   needs: ["eslint_front"]
 
@@ -67,6 +69,7 @@ build-frontend:
     - npm install
   script:
     - npm run build -- --configuration=production
+  allow_failure: false
   artifacts:
     paths:
       - dist/
