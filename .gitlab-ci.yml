@@ -31,6 +31,7 @@ eslint_front:
   script:
     - npx eslint "src/**/*.ts"
   rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH =~ /^(feat|feature)\/.*/
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "preprod"
@@ -41,14 +42,14 @@ eslint_front:
 # -----------------------------------------------------------------------------
 sonar_front:
   stage: sonar
-  image: 
+  image:
     name: sonarsource/sonar-scanner-cli:11
     entrypoint: [""]
   cache:
     key: "sonar-cache-$CI_COMMIT_REF_SLUG"
     paths:
       - "${SONAR_USER_HOME}/cache"
-  script: 
+  script:
     - sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}"
   allow_failure: true
   rules:
@@ -74,7 +75,7 @@ build-frontend:
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "preprod"
     - if: $CI_COMMIT_BRANCH == "main"
-  needs: 
+  needs:
     - job: eslint_front
     - job: sonar_front
       optional: true
@@ -103,7 +104,7 @@ front-unit-test:
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "preprod"
     - if: $CI_COMMIT_BRANCH == "main"
-  needs: 
+  needs:
     - job: build-frontend
       optional: true
 
