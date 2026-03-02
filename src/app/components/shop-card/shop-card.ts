@@ -16,6 +16,12 @@ export class ShopCard {
   @Output() generate = new EventEmitter<Shop>();
   @Output() add = new EventEmitter<Shop>();
 
+  get imageUrl(): string {
+    return this.shop.logo?.url
+      || this.shop.photos?.[0]?.url
+      || 'https://via.placeholder.com/300x200?text=No+Image';
+  }
+
   onGenerate(event: Event): void {
     event.stopPropagation();
     this.generate.emit(this.shop);

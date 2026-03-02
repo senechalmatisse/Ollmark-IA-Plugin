@@ -1,0 +1,23 @@
+{
+  "/shop-api": {
+    "target": "https://api.ollca.com/shop-api",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/shop-api": ""
+    },
+    "logLevel": "info"
+  },
+  "/product-api": {
+    "target": "https://api.ollca.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/discount-api": {
+    "target": "https://api.ollca.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}
