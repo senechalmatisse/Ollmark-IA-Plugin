@@ -75,6 +75,7 @@ build-frontend:
       - dist/
     expire_in: 30 days
   rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feat|feature)\/.*/
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "preprod"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -109,7 +110,6 @@ front-unit-test:
     - if: $CI_COMMIT_BRANCH == "main"
   needs:
     - job: build-frontend
-      optional: true
 
 # -----------------------------------------------------------------------------
 # STAGE BUILD IMAGE
@@ -162,7 +162,7 @@ deploy-front-dev:
     - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
-      when: always
+      when: on_success
   needs: ["build-frontend-image"]
 
 deploy-front-preprod:
