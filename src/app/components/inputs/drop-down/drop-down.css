@@ -1,0 +1,28 @@
+/* le style de conteneur de dropdown */
+.dropdown-wrapper {
+  display: flex;
+  height: 40px;
+  min-width: 120px;
+  padding: var(--sds-size-space-300);
+  align-items: center;
+  gap: var(--sds-size-space-200);
+  align-self: stretch;
+  border-radius: var(--sds-size-radius-200);
+  width: 150px;
+}
+
+/* le style de select */
+.dropdown-select {
+  flex: 1 0 0;
+font-style: normal;
+  line-height: 100%;
+  border: none;
+  background: none;
+  width: 100%;
+}
+
+/* L'icône */
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
