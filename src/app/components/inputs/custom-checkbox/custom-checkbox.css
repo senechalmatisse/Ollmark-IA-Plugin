@@ -1,0 +1,36 @@
+.checkbox-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: 'Inter', Roboto, sans-serif; 
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  margin-top: 2px; 
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.text-wrapper {
+  display: flex;
+  flex-direction: column; 
+  gap: 4px;
+}
+
+.checkbox-title {
+  font-size: 16px;
+  font-weight: 400; 
+  color: #1a1a1a;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.checkbox-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #737373; 
+  line-height: 1.2;
+}

@@ -1,0 +1,14 @@
+<div class="checkbox-wrapper">
+  <input 
+    type="checkbox" 
+    [id]="inputId"
+    [checked]="checked" 
+    (change)="onToggle($event)"
+    class="checkbox-input" 
+  />
+
+  <div class="text-wrapper">
+    <label [for]="inputId" class="checkbox-title">{{ title }}</label>
+    <span class="checkbox-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
+  </div>
+</div>
