@@ -1,16 +1,38 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ShopCard } from './shop-card';
-import { Shop } from '../../models/shop.model';
+import { Shop, ShopAddress } from '../../models/shop.model';
+
+function createMockShop(overrides: Partial<Shop> = {}): Shop {
+  const defaultAddress: ShopAddress = {
+    street: '123 Rue du Commerce',
+    city: 'Paris',
+    zipCode: '75001',
+    country: 'France',
+    complement: null,
+    phone: null,
+    formatted: '123 Rue du Commerce, 75001 Paris'
+  };
+
+  return {
+    id: '1',
+    label: 'Ma Boutique',
+    address: defaultAddress,
+    humanUrl: 'ollca.com/paris/boutiques/ma-boutique',
+    technicalUrl: null,
+    eligibilityUrl: null,
+    logo: { id: 'logo1', url: 'https://example.com/logo.jpg' },
+    photos: [],
+    primaryCategory: { id: 'cat1', label: 'Boulangerie' },
+    geolocation: { latitude: 48.8566, longitude: 2.3522 },
+    ...overrides
+  };
+}
 
 describe('ShopCard', () => {
   let component: ShopCard;
   let fixture: ComponentFixture<ShopCard>;
 
-  const mockShop: Shop = {
-    id: '1',
-    name: 'Ma Boutique',
-    imageUrl: 'https://example.com/shop.jpg',
-  };
+  const mockShop: Shop = createMockShop();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -27,15 +49,34 @@ describe('ShopCard', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display shop name', () => {
+  it('should display shop label', () => {
     const nameElement = fixture.nativeElement.querySelector('.shop-name');
     expect(nameElement.textContent).toContain('Ma Boutique');
   });
 
-  it('should display shop image', () => {
+  it('should display shop logo as image', () => {
     const imgElement = fixture.nativeElement.querySelector('.shop-image img');
-    expect(imgElement.src).toBe('https://example.com/shop.jpg');
+    expect(imgElement.src).toBe('https://example.com/logo.jpg');
     expect(imgElement.alt).toBe('Ma Boutique');
+  });
+
+  it('should use first photo if no logo', () => {
+    const shopWithPhoto = createMockShop({
+      logo: null,
+      photos: [{ id: 'photo1', url: 'https://example.com/photo.jpg' }]
+    });
+    component.shop = shopWithPhoto;
+    fixture.detectChanges();
+
+    expect(component.imageUrl).toBe('https://example.com/photo.jpg');
+  });
+
+  it('should use placeholder if no logo and no photos', () => {
+    const shopNoImages = createMockShop({ logo: null, photos: [] });
+    component.shop = shopNoImages;
+    fixture.detectChanges();
+
+    expect(component.imageUrl).toBe('https://via.placeholder.com/300x200?text=No+Image');
   });
 
   it('should have loading set to false by default', () => {
@@ -68,12 +109,8 @@ describe('ShopCard', () => {
     expect(infoElement).toBeTruthy();
   });
 
-  it('should update displayed name when shop input changes', () => {
-    const newShop: Shop = {
-      id: '2',
-      name: 'Nouvelle Boutique',
-      imageUrl: 'https://example.com/new-shop.jpg',
-    };
+  it('should update displayed label when shop input changes', () => {
+    const newShop = createMockShop({ id: '2', label: 'Nouvelle Boutique' });
     component.shop = newShop;
     fixture.detectChanges();
 
@@ -82,26 +119,22 @@ describe('ShopCard', () => {
   });
 
   it('should update image when shop input changes', () => {
-    const newShop: Shop = {
+    const newShop = createMockShop({
       id: '2',
-      name: 'Nouvelle Boutique',
-      imageUrl: 'https://example.com/new-shop.jpg',
-    };
+      label: 'Nouvelle Boutique',
+      logo: { id: 'logo2', url: 'https://example.com/new-logo.jpg' }
+    });
     component.shop = newShop;
     fixture.detectChanges();
 
     const imgElement = fixture.nativeElement.querySelector('.shop-image img');
-    expect(imgElement.src).toBe('https://example.com/new-shop.jpg');
+    expect(imgElement.src).toBe('https://example.com/new-logo.jpg');
     expect(imgElement.alt).toBe('Nouvelle Boutique');
   });
 
-  it('should handle shop with empty name', () => {
-    const emptyNameShop: Shop = {
-      id: '3',
-      name: '',
-      imageUrl: 'https://example.com/shop.jpg',
-    };
-    component.shop = emptyNameShop;
+  it('should handle shop with empty label', () => {
+    const emptyLabelShop = createMockShop({ id: '3', label: '' });
+    component.shop = emptyLabelShop;
     fixture.detectChanges();
 
     const nameElement = fixture.nativeElement.querySelector('.shop-name');
@@ -193,11 +226,7 @@ describe('ShopCard', () => {
   });
 
   it('should emit generate event with updated shop after input change', () => {
-    const newShop: Shop = {
-      id: '5',
-      name: 'Boutique Mise à Jour',
-      imageUrl: 'https://example.com/updated.jpg',
-    };
+    const newShop = createMockShop({ id: '5', label: 'Boutique Mise à Jour' });
     component.shop = newShop;
     fixture.detectChanges();
 
@@ -209,11 +238,7 @@ describe('ShopCard', () => {
   });
 
   it('should emit add event with updated shop after input change', () => {
-    const newShop: Shop = {
-      id: '6',
-      name: 'Autre Boutique',
-      imageUrl: 'https://example.com/autre.jpg',
-    };
+    const newShop = createMockShop({ id: '6', label: 'Autre Boutique' });
     component.shop = newShop;
     fixture.detectChanges();
 

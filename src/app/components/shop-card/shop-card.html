@@ -6,11 +6,11 @@
   }
 
   <div class="shop-image">
-    <img [src]="shop.imageUrl" [alt]="shop.name" />
+    <img [src]="imageUrl" [alt]="shop.label" />
   </div>
 
   <div class="shop-info">
-    <h3 class="shop-name">{{ shop.name }}</h3>
+    <h3 class="shop-name">{{ shop.label }}</h3>
     <div class="shop-actions">
       <button class="action-btn" title="Générer dans Penpot" (click)="onGenerate($event)">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
