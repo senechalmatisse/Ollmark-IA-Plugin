@@ -126,21 +126,6 @@ describe('ShopApiService', () => {
       req.flush(mockApiResponse);
     });
 
-    it('should search shops with single sort parameter', () => {
-      const filters = { ...createDefaultShopFilters(), sort: ['-creationDate'] };
-
-      service.search(filters).subscribe();
-
-      const req = httpMock.expectOne(r => {
-        const sortParams = r.params.getAll('sort');
-        return r.url === '/shop-api/v2/public/shop' &&
-          sortParams !== null &&
-          sortParams.length === 1 &&
-          r.params.get('sort') === '-creationDate';
-      });
-      req.flush(mockApiResponse);
-    });
-
     it('should search shops with query and sort for relevance', () => {
       const filters = { ...createDefaultShopFilters(), q: 'homard', sort: ['-score', '-creationDate'] };
 

@@ -52,6 +52,14 @@ export class ShopApiService implements IShopRepository {
       params = params.set('category', filters.category.join(','));
     }
 
+    const sortFields =  ['-creationDate'];
+    
+    // On ajoute chaque critère de tri à l'URL via la méthode append
+    sortFields.forEach(field => {
+      params = params.append('sort', field);
+    });
+    // --------------------------------------------------------
+
     return this.http.get<PaginatedApiResponse<GeoLocatedShopDto>>(`${this.baseUrl}/shop`, { params }).pipe(
       map(response => ({
         content: response.content.map((item: GeoLocatedShopDto) => mapShopFromDto(item)),

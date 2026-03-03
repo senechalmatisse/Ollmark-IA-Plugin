@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router';
 import { Test } from './components/widgets/test/test';
+import { ShopViewComponent } from './components/containers/ShopViewComponent/shop-view.component';
 
 export const routes: Routes = [
-    {path: '', component: Test},
-];
+  // Redirection automatique : quand on ouvre l'app, on va directement sur /boutique
+  { path: '', redirectTo: 'boutique', pathMatch: 'full' },
+  
+  // La route qui affiche la page
+  { path: 'boutique', component: ShopViewComponent },
 
-// TODO
+  //  ancienne route de test
+  { path: 'test', component: Test }
+];
