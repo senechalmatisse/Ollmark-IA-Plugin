@@ -126,6 +126,8 @@ build-frontend-image:
     - docker build -t $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG -t $FRONTEND_IMAGE_NAME:latest .
     - docker push $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
     - docker push $FRONTEND_IMAGE_NAME:latest
+  after_script:
+    - docker system prune -af || true
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "preprod"

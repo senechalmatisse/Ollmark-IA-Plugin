@@ -6,6 +6,7 @@ import { ShopViewComponent } from './components/containers/shop-view/shop-view.c
   standalone: true,
   imports: [ShopViewComponent],
   templateUrl: './app.html',
+  encapsulation: ViewEncapsulation.None,
   styleUrl: './app.css'
 })
 export class App implements OnInit {
