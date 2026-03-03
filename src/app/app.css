@@ -1,24 +1,6 @@
-.app-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.shop-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.loading-state,
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-.loading-state p,
-.empty-state p {
-  font-size: 1.1rem;
+/* App root - Plugin Penpot container */
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
 }

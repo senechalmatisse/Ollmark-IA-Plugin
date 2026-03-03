@@ -1,0 +1,93 @@
+/* Plugin Penpot - Container vertical */
+.shop-view-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px;
+  height: 100vh;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #ffffff;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.filters-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.search-wrapper {
+  width: 100%;
+}
+
+.dropdown-wrapper {
+  width: 100%;
+}
+
+.shops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scrollbar personnalisée */
+.shops-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shops-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.shops-grid::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.shops-grid::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.loading-text,
+.empty-text {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px 12px;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Scroll infini - Loading */
+.loading-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #009688;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #00B5A0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -150,8 +150,7 @@ describe('ShopApiService', () => {
         const sortParams = r.params.getAll('sort');
         return r.url === '/shop-api/v2/public/shop' &&
           r.params.get('q') === 'homard' &&
-          sortParams !== null &&
-          sortParams.includes('-score');
+          (sortParams?.includes('-score') ?? false);
       });
       req.flush(mockApiResponse);
     });
