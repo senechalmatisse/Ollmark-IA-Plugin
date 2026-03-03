@@ -6,7 +6,7 @@
   }
 
   <div class="shop-image">
-    <img [src]="imageUrl" [alt]="shop.label" />
+    <img [src]="imageUrl" [alt]="shop.label" (error)="onImageError()" />
   </div>
 
   <div class="shop-info">

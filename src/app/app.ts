@@ -1,60 +1,16 @@
-import {Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
-import {ShopApiService} from './core/http/shop-api.service';
-import {createDefaultShopFilters, Shop} from './models/shop.model';
-
-// import { RouterOutlet } from '@angular/router';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ShopViewComponent } from './components/containers/shop-view/shop-view.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
+  imports: [ShopViewComponent],
   templateUrl: './app.html',
   encapsulation: ViewEncapsulation.None,
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  private readonly shopApi = inject(ShopApiService);
-
-  shops: Shop[] = [];
-  loading = true;
-  loadingShopId: string | null = null;
-  searchQuery = '';
-
   ngOnInit(): void {
     document.title = 'Ollca - Génération Contenu';
-    this.loadShops();
   }
-
-  loadShops(): void {
-    this.loading = true;
-    const filters = { ...createDefaultShopFilters(), q: this.searchQuery };
-
-    this.shopApi.search(filters).subscribe({
-      next: (result) => {
-        this.shops = result.content;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Erreur chargement boutiques:', err);
-        this.loading = false;
-      }
-    });
-  }
-
-  onSearch(query: string): void {
-    this.searchQuery = query;
-    this.loadShops();
-  }
-
-  onGenerate(shop: Shop): void {
-    console.log('Generate:', shop.label);
-    this.loadingShopId = shop.id;
-    // TODO: Implement Penpot generation
-  }
-
-  onAdd(shop: Shop): void {
-    console.log('Add:', shop.label);
-    // TODO: Implement add to selection
-  }
-
-  protected readonly console = console;
 }

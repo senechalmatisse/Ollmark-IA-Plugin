@@ -76,7 +76,8 @@ describe('ShopCard', () => {
     component.shop = shopNoImages;
     fixture.detectChanges();
 
-    expect(component.imageUrl).toBe('https://via.placeholder.com/300x200?text=No+Image');
+    expect(component.imageUrl).toContain('data:image/svg+xml');
+    expect(component.imageUrl).toContain('Image%20non%20disponible');
   });
 
   it('should have loading set to false by default', () => {
