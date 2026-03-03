@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ShopViewComponent } from './components/containers/ShopViewComponent/shop-view.component';
+import { ShopViewComponent } from './components/containers/shop-view/shop-view.component';
 
 @Component({
   selector: 'app-root',

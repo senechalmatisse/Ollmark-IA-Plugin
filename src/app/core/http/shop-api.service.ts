@@ -42,6 +42,12 @@ export class ShopApiService implements IShopRepository {
       params = params.set('q', filters.q);
     }
 
+    if (filters.sort?.length) {
+      for (const sortField of filters.sort) {
+        params = params.append('sort', sortField);
+      }
+    }
+
     if (filters.category?.length) {
       params = params.set('category', filters.category.join(','));
     }
