@@ -1,4 +1,10 @@
-<div class="search-bar">
+<div class="search-bar" [ngClass]="{focused: isFocused()}">
   <img alt="search" ngSrc="https://img.icons8.com/FFFFFF/ios/50/search--v1.png" width="20" height="20"/>
-  <input type="text" placeholder="Rechercher" (input)="onInputUpdate($event)"/>
+  <input
+    type="text"
+    placeholder="Rechercher..."
+    (input)="onInputUpdate($event)"
+    (focus)="isFocused.set(true)"
+    (blur)="isFocused.set(false)"
+  />
 </div>

@@ -35,20 +35,59 @@ describe('SearchBar', () => {
   });
 
   it('should not send emit right away', () => {
-    component.onInputUpdate({target: {value: "test"}} as unknown as Event)
+    const testValue = "boulangerie"
+    const input = (fixture.nativeElement as HTMLDivElement)
+      .querySelector("input")
+    if (input === null) {
+      fail();
+      return
+    }
+    input.value = testValue
+    input.dispatchEvent(new Event("input"))
     expect(component.timerId).not.toBe(0)
     expect(value).toBe("")
     expect(called).toBe(0)
   })
 
   it('should send emit after >500ms', async () => {
-    const testValue = "test"
-    const wait = (t: number) => new Promise<void>(
-      (resolve) => setTimeout(resolve, t)
-    )
-    component.onInputUpdate({target: {value: testValue}} as unknown as Event)
-    await wait(520)
+    const testValue = "boulangerie"
+    const input = (fixture.nativeElement as HTMLDivElement)
+      .querySelector("input")
+    if (input === null) {
+      fail();
+      return
+    }
+    input.value = testValue
+    input.dispatchEvent(new Event("input"))
+    await fixture.whenStable()
     expect(value).toBe(testValue)
-    expect(called).not.toBe(0)
+    expect(called).toBeGreaterThan(0)
+  })
+
+  it('should be focused if input is clicked', async () => {
+    const input = (fixture.nativeElement as HTMLDivElement)
+      .querySelector("input")
+    if (input === null) {
+      fail();
+      return
+    }
+    input.click()
+    input.dispatchEvent(new Event("focus"))
+    await fixture.whenStable()
+    expect(component.isFocused()).toBeTrue()
+  })
+
+  it('should be unfocused if input is blurred', async () => {
+    const input = (fixture.nativeElement as HTMLDivElement)
+      .querySelector("input")
+    if (input === null) {
+      fail();
+      return
+    }
+    input.dispatchEvent(new Event("focus"))
+    await fixture.whenStable()
+    input.dispatchEvent(new Event("blur"))
+    await fixture.whenStable()
+    expect(component.isFocused()).toBeFalse()
   })
 });
