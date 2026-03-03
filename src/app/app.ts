@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewEncapsulation } from '@angular/core';
 import { SearchBar } from './components/inputs/search-bar/search-bar';
 import { ShopCard } from './components/shop-card/shop-card';
 import { ShopApiService } from './core/http/shop-api.service';
