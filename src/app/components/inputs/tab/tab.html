@@ -1,0 +1,9 @@
+<button
+  class="Tab"
+  [ngClass]="{
+    selected: isSelected(),
+    special: isSpecial()
+  }"
+  (click)="tabClicked.emit()">
+  <p>{{ tabText() }}</p>
+</button>

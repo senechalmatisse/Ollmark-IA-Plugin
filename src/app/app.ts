@@ -1,16 +1,12 @@
-import { CommonModule } from '@angular/common';
-import {Component, OnInit, inject, ViewEncapsulation} from '@angular/core';
-import { Button } from './components/inputs/button/button';
-import { SearchBar } from './components/inputs/search-bar/search-bar';
-import { ShopCard } from './components/shop-card/shop-card';
-import { ShopApiService } from './core/http/shop-api.service';
-import { ButtonType } from './models/ButtonType';
-import { Shop, createDefaultShopFilters } from './models/shop.model';
+import {Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
+import {ShopApiService} from './core/http/shop-api.service';
+import {createDefaultShopFilters, Shop} from './models/shop.model';
+
+// import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SearchBar, ShopCard, Button],
   templateUrl: './app.html',
   encapsulation: ViewEncapsulation.None,
   styleUrl: './app.css'
@@ -61,5 +57,4 @@ export class App implements OnInit {
   }
 
   protected readonly console = console;
-  protected readonly ButtonType = ButtonType;
 }
