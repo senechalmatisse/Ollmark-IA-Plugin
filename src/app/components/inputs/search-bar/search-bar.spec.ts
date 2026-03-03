@@ -1,7 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-
 import {SearchBar} from './search-bar';
-import {OutputEmitterRef} from '@angular/core';
 
 describe('SearchBar', () => {
   let component: SearchBar;
@@ -21,13 +19,10 @@ describe('SearchBar', () => {
     value = ""
     called = 0
     component.timerId = 0
-    component.inputUpdated = {
-      emit: (event: string) => {
-        value = event
-        called += 1
-      }
-    } as unknown as OutputEmitterRef<string>
-
+    component.inputUpdated.subscribe((v) => {
+      value = v
+      called += 1
+    })
   });
 
   it('should create', () => {
