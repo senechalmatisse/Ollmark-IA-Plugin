@@ -1,4 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
+import {ShopApiService} from './core/http/shop-api.service';
+import {createDefaultShopFilters, Shop} from './models/shop.model';
+
+// import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -53,5 +57,4 @@ export class App implements OnInit {
   }
 
   protected readonly console = console;
-  protected readonly ButtonType = ButtonType;
 }
