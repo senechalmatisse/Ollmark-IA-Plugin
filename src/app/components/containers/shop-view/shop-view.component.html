@@ -1,0 +1,58 @@
+<div class="shop-view-container">
+
+  <app-navbar
+    [tabs]="navTabs"
+    rightButtonLabel="Sélectionné"
+    (selectedClick)="onSelectedClick($event)">
+  </app-navbar>
+
+  <div class="filters-row">
+
+    <div class="search-wrapper">
+      <app-search-bar (inputUpdated)="onSearchUpdate($event)"></app-search-bar>
+    </div>
+
+    <div class="dropdown-wrapper">
+      <app-drop-down
+        [options]="categoryOptions"
+        (selectionChange)="onCategorySelect($event)">
+      </app-drop-down>
+    </div>
+
+    <div class="dropdown-wrapper">
+      <app-drop-down
+        [options]="marketplaceOptions"
+        (selectionChange)="onMarketplaceSelect($event)">
+      </app-drop-down>
+    </div>
+
+  </div>
+
+  <div class="shops-grid" (scroll)="onScroll($event)">
+
+    @if (loading) {
+      <p class="loading-text">Chargement des boutiques...</p>
+    }
+
+    @for (shop of shops; track shop.id) {
+      <app-shop-card
+        [shop]="shop"
+        (generate)="onGenerate($event)"
+        (add)="onAdd($event)">
+      </app-shop-card>
+    } @empty {
+      @if (!loading) {
+        <p class="empty-text">Aucune boutique trouvée.</p>
+      }
+    }
+
+    @if (loadingMore) {
+      <div class="loading-more">
+        <div class="spinner"></div>
+        <span>Chargement...</span>
+      </div>
+    }
+
+  </div>
+
+</div>
