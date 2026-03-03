@@ -11,6 +11,7 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [CommonModule, SearchBar, ShopCard, RouterOutlet],
   templateUrl: './app.html',
+  encapsulation: ViewEncapsulation.None,
   styleUrl: './app.css'
 })
 export class App implements OnInit {

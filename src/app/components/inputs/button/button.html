@@ -1,0 +1,11 @@
+<button
+  class="Button"
+  (click)="buttonClicked.emit()"
+  [ngClass]="{
+    primary: buttonType() === ButtonType.PRIMARY,
+    destructive: buttonType() === ButtonType.DESTRUCTIVE,
+    ghost: buttonType() === ButtonType.GHOST
+  }"
+>
+  <p> {{ buttonText() }}</p>
+</button>
