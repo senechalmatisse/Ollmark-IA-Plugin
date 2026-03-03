@@ -1,3 +1,11 @@
 <nav class="NavBar">
+  <div class="nav-tabs">
+    @for (tab of tabs; track tab.route) {
+      <a class="nav-tab" [attr.href]="tab.route">{{ tab.label }}</a>
+    }
+  </div>
   <ng-content/>
+  @if (rightButtonLabel) {
+    <button class="nav-right-button" (click)="onRightButtonClick()">{{ rightButtonLabel }}</button>
+  }
 </nav>
