@@ -15,13 +15,6 @@ describe('NavbarComponent', () => {
 
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
-
-    fixture.componentRef.setInput('tabs', [
-      { label: 'Boutique', route: '/boutique' },
-      { label: 'Produit', route: '/produit' }
-    ]);
-    fixture.componentRef.setInput('rightButtonLabel', 'Sélectionné');
-
     fixture.detectChanges();
   });
 

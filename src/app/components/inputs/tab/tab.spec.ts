@@ -14,6 +14,7 @@ describe('Tab', () => {
 
     fixture = TestBed.createComponent(Tab);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput("tabText", "TEST")
     fixture.detectChanges();
   });
 
