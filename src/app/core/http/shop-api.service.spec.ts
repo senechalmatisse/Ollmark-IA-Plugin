@@ -110,6 +110,35 @@ describe('ShopApiService', () => {
       );
       req.flush(mockApiResponse);
     });
+
+    it('should search shops with sort parameter', () => {
+      const filters = { ...createDefaultShopFilters(), sort: ['-score', '-creationDate'] };
+
+      service.search(filters).subscribe();
+
+      const req = httpMock.expectOne(r => {
+        const sortParams = r.params.getAll('sort');
+        return r.url === '/shop-api/v2/public/shop' &&
+          sortParams !== null &&
+          sortParams.includes('-score') &&
+          sortParams.includes('-creationDate');
+      });
+      req.flush(mockApiResponse);
+    });
+
+    it('should search shops with query and sort for relevance', () => {
+      const filters = { ...createDefaultShopFilters(), q: 'homard', sort: ['-score', '-creationDate'] };
+
+      service.search(filters).subscribe();
+
+      const req = httpMock.expectOne(r => {
+        const sortParams = r.params.getAll('sort');
+        return r.url === '/shop-api/v2/public/shop' &&
+          r.params.get('q') === 'homard' &&
+          (sortParams?.includes('-score') ?? false);
+      });
+      req.flush(mockApiResponse);
+    });
   });
 
   describe('getCategories', () => {
