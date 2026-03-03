@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent, NavItem } from '../../widgets/navbar/navbar';
+import { NavbarComponent, NavItem } from '../navbar/navbar';
 import { SearchBar } from '../../inputs/search-bar/search-bar';
 import { DropDownComponent, DropDownOption } from '../../inputs/drop-down/drop-down';
 import { ShopApiService } from '../../../core/http/shop-api.service';

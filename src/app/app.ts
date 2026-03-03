@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ShopViewComponent } from './components/containers/shop-view/shop-view.component';
 
 @Component({
