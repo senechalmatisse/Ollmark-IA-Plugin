@@ -1,29 +1,47 @@
 .checkbox-wrapper {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  font-family: 'Inter', Roboto, sans-serif; 
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
 }
 
-.checkbox-input {
+.checkbox-wrapper > input {
+  appearance: none;
+  background: #00000080;
   width: 18px;
   height: 18px;
-  margin: 0;
-  margin-top: 2px; 
+  margin: 0 0 0 0;
   cursor: pointer;
   border-radius: 4px;
+  transition: al 0.2s ease-in;
+}
+
+.checkbox-wrapper > input:checked {
+  background: var(--button-primary);
+}
+
+.checkbox-wrapper > input:checked::after {
+  content: "✓";
+  font-size: 1.5em;
+  line-height: 80%;
+  width: 100%;
+  margin-left: 2px;
+  text-align: center;
+  color: var(--background);
 }
 
 .text-wrapper {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   gap: 4px;
 }
 
 .checkbox-title {
   font-size: 16px;
-  font-weight: 400; 
-  color: #1a1a1a;
+  font-weight: 400;
+  color: var(--text-main);
   cursor: pointer;
   line-height: 1.2;
 }
@@ -31,6 +49,6 @@
 .checkbox-subtitle {
   font-size: 14px;
   font-weight: 400;
-  color: #737373; 
+  color: var(--text-sub);
   line-height: 1.2;
 }
