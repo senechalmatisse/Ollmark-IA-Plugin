@@ -39,6 +39,7 @@ export interface ShopGeoPoint {
 export interface ShopFilters {
   q?: string;
   category?: string[];
+  sort?: string[];
   page: number;
   size: number;
 }

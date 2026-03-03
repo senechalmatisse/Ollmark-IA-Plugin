@@ -4,11 +4,12 @@ import { ShopCard } from './components/shop-card/shop-card';
 import { ShopApiService } from './core/http/shop-api.service';
 import { Shop, createDefaultShopFilters } from './models/shop.model';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SearchBar, ShopCard],
+  imports: [CommonModule, SearchBar, ShopCard, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
