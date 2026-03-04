@@ -1,0 +1,58 @@
+<button
+  class="overlay"
+  (click)="onClose()"
+  aria-label="Fermer"
+></button>
+
+<div class="modal">
+  <div class="modal-header">
+    <h2 class="shop-name">{{ shop().label }}</h2>
+    <button class="close-btn" (click)="onClose()" aria-label="Fermer">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <div class="attributes-list">
+      @for (attribute of attributes; track attribute) {
+        @if (attribute !== 'photos') {
+          <app-custom-checkbox
+            [title]="attributeLabels[attribute]"
+            [subtitle]="getSubtitle(attribute)"
+            [checked]="isAttributeSelected(attribute)"
+            (checkedChange)="onAttributeToggle(attribute)"
+          />
+        }
+        @if (attribute === 'photos') {
+          <div class="photos-field">
+            <app-custom-checkbox
+              title="Images"
+              [checked]="isAttributeSelected('photos')"
+              (checkedChange)="onAttributeToggle('photos')"
+            />
+            @if (photoItems.length > 0) {
+              <div class="photos-carousel">
+                <div class="carousel-wrapper" [class.disabled]="!isAttributeSelected('photos')">
+                  <app-carousel
+                    [items]="photoItems"
+                    [visibleCount]="4"
+                    [selectedIds]="store.selectedPhotoIds()"
+                    (itemSelected)="isAttributeSelected('photos') && onPhotoToggle($event.id)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      class="confirm-btn"
+      [disabled]="!store.hasSelection()"
+      (click)="onConfirm()"
+    >
+      {{ mode() === 'quick' ? 'Import rapide' : 'Importer' }}
+    </button>
+  </div>
+</div>

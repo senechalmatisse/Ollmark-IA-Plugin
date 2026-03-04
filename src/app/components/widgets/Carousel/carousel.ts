@@ -1,5 +1,5 @@
 import {Component, input, output} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 
 export interface CarouselItem {
   id: string;
@@ -8,20 +8,20 @@ export interface CarouselItem {
 
 @Component({
   selector: 'app-carousel',
-  imports: [CommonModule, NgOptimizedImage],
+  imports: [CommonModule],
   templateUrl: './carousel.html',
   styleUrl: './carousel.css',
 })
 export class Carousel {
   items = input<CarouselItem[]>([]);
   visibleCount = input<number>(4);
+  selectedIds = input<ReadonlySet<string>>(new Set());
 
   itemSelected = output<CarouselItem>();
   slideChanged = output<number>();
 
   currentIndex = 0;
   selectedIndex = 0;
-
   readonly itemWidth = 64;
 
   get maxIndex(): number {
