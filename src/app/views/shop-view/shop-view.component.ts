@@ -1,32 +1,27 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NavbarComponent, NavItem } from '../navbar/navbar';
-import { SearchBar } from '../../inputs/search-bar/search-bar';
-import { DropDownComponent, DropDownOption } from '../../inputs/drop-down/drop-down';
-import { ShopApiService } from '../../../core/http/shop-api.service';
-import { ShopCard } from '../../shop-card/shop-card';
-import { Shop, ShopFilters } from '../../../models/shop.model';
+import {Component, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {NavbarComponent} from '../../components/containers/navbar/navbar';
+import {SearchBar} from '../../components/inputs/search-bar/search-bar';
+import {DropDownComponent, DropDownOption} from '../../components/inputs/drop-down/drop-down';
+import {ShopApiService} from '../../core/http/shop-api.service';
+import {ShopCard} from '../../components/shop-card/shop-card';
+import {Shop, ShopFilters} from '../../models/shop.model';
+import {Tab} from '../../components/inputs/tab/tab';
 
 @Component({
   selector: 'app-shop-view',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard],
+  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab],
   templateUrl: './shop-view.component.html',
   styleUrl: './shop-view.component.css'
 })
 export class ShopViewComponent implements OnInit {
   private readonly shopApi = inject(ShopApiService);
 
-  navTabs: NavItem[] = [
-    { label: 'Boutique', route: '/boutique' },
-    { label: 'Produit', route: '/produit' },
-    { label: 'Codes promotionnels', route: '/promo' }
-  ];
-
   categoryOptions: DropDownOption[] = [];
   marketplaceOptions: DropDownOption[] = [
-    { key: 'all', value: 'Marketplace' },
-    { key: 'rouen', value: 'Rouen Local' }
+    {key: 'all', value: 'Marketplace'},
+    {key: 'rouen', value: 'Rouen Local'}
   ];
 
   shops: Shop[] = [];

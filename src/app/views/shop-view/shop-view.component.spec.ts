@@ -1,9 +1,9 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ShopViewComponent } from './shop-view.component';
-import { ShopApiService } from '../../../core/http/shop-api.service';
+import { ShopApiService } from '../../core/http/shop-api.service';
 import { of, throwError } from 'rxjs';
-import { Shop, ShopAddress, ShopCategory } from '../../../models/shop.model';
-import { Paginated } from '../../../models/pagination.model';
+import { Shop, ShopAddress, ShopCategory } from '../../models/shop.model';
+import { Paginated } from '../../models/pagination.model';
 import { provideRouter } from '@angular/router';
 
 function createMockShop(overrides: Partial<Shop> = {}): Shop {

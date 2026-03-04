@@ -1,5 +1,5 @@
 import {Component, output, signal} from '@angular/core';
-import {NgClass, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 
 const DEFAULT_TIME = 500 // 0.5 second(s)
 
@@ -7,7 +7,6 @@ const DEFAULT_TIME = 500 // 0.5 second(s)
   selector: 'app-search-bar',
   imports: [
     NgOptimizedImage,
-    NgClass
   ],
   templateUrl: './search-bar.html',
   styleUrl: './search-bar.css',
