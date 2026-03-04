@@ -15,6 +15,7 @@
     <div class="dropdown-wrapper">
       <app-drop-down
         [options]="categoryOptions"
+        [showPlaceholder]="false"
         (selectionChange)="onCategorySelect($event)">
       </app-drop-down>
     </div>
@@ -42,7 +43,7 @@
       </app-shop-card>
     } @empty {
       @if (!loading) {
-        <p class="empty-text">Aucune boutique trouvée.</p>
+        <p class="empty-text">Aucune boutique trouvée pour cette catégorie.</p>
       }
     }
 

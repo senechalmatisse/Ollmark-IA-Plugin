@@ -35,8 +35,7 @@ export class ShopApiService implements IShopRepository {
   search(filters: ShopFilters): Observable<Paginated<Shop>> {
     let params = new HttpParams()
       .set('page', (filters.page).toString())
-      .set('size', filters.size.toString())
-      .set('onlineOnly', 'true');
+      .set('size', filters.size.toString());
 
     if (filters.q) {
       params = params.set('q', filters.q);
@@ -58,16 +57,16 @@ export class ShopApiService implements IShopRepository {
     sortFields.forEach(field => {
       params = params.append('sort', field);
     });
-    // --------------------------------------------------------
+    // -------------------------------------------------------
 
     return this.http.get<PaginatedApiResponse<GeoLocatedShopDto>>(`${this.baseUrl}/shop`, { params }).pipe(
       map(response => ({
-        content: response.content.map((item: GeoLocatedShopDto) => mapShopFromDto(item)),
-        totalElements: response.totalElements,
-        totalPages: response.totalPages,
+        content: (response.content || []).map((item: GeoLocatedShopDto) => mapShopFromDto(item)),
+        totalElements: response.totalElements || 0,
+        totalPages: response.totalPages || 0,
         size: response.size,
-        number: response.number + 1,
-        last: response.last
+        number: (response.number || 0) + 1,
+        last: response.last ?? true
       }))
     );
   }
@@ -76,7 +75,9 @@ export class ShopApiService implements IShopRepository {
    * Récupère les catégories - GET /v2/public/category
    */
   getCategories(): Observable<ShopCategory[]> {
-    return this.http.get<PaginatedApiResponse<CategoryDto>>(`${this.baseUrl}/category`).pipe(
+    let params = new HttpParams().set('size', '1000');
+
+    return this.http.get<PaginatedApiResponse<CategoryDto>>(`${this.baseUrl}/category`, { params }).pipe(
       map(response => {
         const content = response.content || [];
         return content.map((dto: CategoryDto) => mapCategoryFromDto(dto));
@@ -98,12 +99,12 @@ export class ShopApiService implements IShopRepository {
 
     return this.http.get<PaginatedApiResponse<CategoryDto>>(`${this.baseUrl}/category`, { params }).pipe(
       map(response => ({
-        content: response.content.map((dto: CategoryDto) => mapCategoryFromDto(dto)),
-        totalElements: response.totalElements,
-        totalPages: response.totalPages,
+        content: (response.content || []).map((dto: CategoryDto) => mapCategoryFromDto(dto)),
+        totalElements: response.totalElements || 0,
+        totalPages: response.totalPages || 0,
         size: response.size,
-        number: response.number,
-        last: response.last
+        number: response.number || 0,
+        last: response.last ?? true
       }))
     );
   }

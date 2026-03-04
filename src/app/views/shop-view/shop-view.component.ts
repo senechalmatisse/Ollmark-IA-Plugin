@@ -34,6 +34,8 @@ export class ShopViewComponent implements OnInit {
   pageSize = 20;
   hasMore = true;
 
+  selectedCategoryId?: string;
+
   ngOnInit(): void {
     this.loadCategories();
     this.loadShops();
@@ -54,10 +56,15 @@ export class ShopViewComponent implements OnInit {
   private loadCategories(): void {
     this.shopApi.getCategories().subscribe({
       next: (categories) => {
-        this.categoryOptions = categories.map(cat => ({
+        const apiOptions = categories.map(cat => ({
           key: cat.id,
           value: cat.label
         }));
+        
+        this.categoryOptions = [
+          { key: '', value: 'Toutes les catégories' },
+          ...apiOptions
+        ];
       },
       error: (err) => console.error('Erreur chargement catégories:', err)
     });
@@ -76,7 +83,8 @@ export class ShopViewComponent implements OnInit {
       page: this.currentPage,
       size: this.pageSize,
       q: this.searchQuery || undefined,
-      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate']
+      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined
     };
 
     this.shopApi.search(filters).subscribe({
@@ -102,7 +110,8 @@ export class ShopViewComponent implements OnInit {
       page: this.currentPage,
       size: this.pageSize,
       q: this.searchQuery || undefined,
-      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate']
+      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined
     };
 
     this.shopApi.search(filters).subscribe({
@@ -131,6 +140,8 @@ export class ShopViewComponent implements OnInit {
 
   onCategorySelect(categoryId: string | number): void {
     console.log('Catégorie sélectionnée :', categoryId);
+    this.selectedCategoryId = categoryId ? categoryId.toString() : undefined;
+    this.loadShops();
   }
 
   onMarketplaceSelect(marketplaceId: string | number): void {

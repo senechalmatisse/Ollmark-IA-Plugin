@@ -19,6 +19,7 @@ export interface DropDownOption {
 export class DropDownComponent {
   label = input<string>("")
   options = input<DropDownOption[]>([])
+  showPlaceholder = input<boolean>(true);
 
   selectionChange = output<string | number>();
 
