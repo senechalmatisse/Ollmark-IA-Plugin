@@ -19,6 +19,7 @@
 }
 
 .carousel-item {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,6 +40,10 @@
 
 .carousel-item.active {
   opacity: 1;
+}
+
+.carousel-item.selected {
+  opacity: 1;
   border-color: #2e7d32;
 }
 
@@ -47,6 +52,23 @@
   height: 56px;
   object-fit: cover;
   display: block;
+}
+
+/* ── Checkmark sélection ──────────────────────────────── */
+.selected-mark {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: #2e7d32;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .carousel-btn {

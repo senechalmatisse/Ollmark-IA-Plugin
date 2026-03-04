@@ -164,23 +164,21 @@ describe('ShopViewComponent', () => {
     expect(fixture.componentInstance.hasMore).toBeTrue();
   }));
 
-  it('should log when onGenerate is called', () => {
+  it('should update state when onGenerate is called', () => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     const shop = createMockShop({ label: 'Test Shop' });
-    spyOn(console, 'log');
-
     fixture.componentInstance.onGenerate(shop);
-
-    expect(console.log).toHaveBeenCalledWith('Générer pour :', 'Test Shop');
+    expect(fixture.componentInstance.selectedShop).toBe(shop);
+    expect(fixture.componentInstance.selectedMode).toBe('quick');
+    expect(fixture.componentInstance.showModal).toBeTrue();
   });
 
-  it('should log when onAdd is called', () => {
+  it('should update state when onAdd is called', () => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     const shop = createMockShop({ label: 'Test Shop' });
-    spyOn(console, 'log');
-
     fixture.componentInstance.onAdd(shop);
-
-    expect(console.log).toHaveBeenCalledWith('Ajouter :', 'Test Shop');
+    expect(fixture.componentInstance.selectedShop).toBe(shop);
+    expect(fixture.componentInstance.selectedMode).toBe('select');
+    expect(fixture.componentInstance.showModal).toBeTrue();
   });
 });
