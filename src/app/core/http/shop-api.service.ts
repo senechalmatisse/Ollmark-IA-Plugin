@@ -75,7 +75,7 @@ export class ShopApiService implements IShopRepository {
    * Récupère les catégories - GET /v2/public/category
    */
   getCategories(): Observable<ShopCategory[]> {
-    let params = new HttpParams().set('size', '1000');
+    const params = new HttpParams().set('size', '1000');
 
     return this.http.get<PaginatedApiResponse<CategoryDto>>(`${this.baseUrl}/category`, { params }).pipe(
       map(response => {

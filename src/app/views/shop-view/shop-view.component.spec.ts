@@ -89,7 +89,7 @@ describe('ShopViewComponent', () => {
     tick();
 
     expect(mockShopApiService.getCategories).toHaveBeenCalled();
-    expect(fixture.componentInstance.categoryOptions.length).toBe(2);
+    expect(fixture.componentInstance.categoryOptions.length).toBe(3);
   }));
 
   it('should search shops with sort by creationDate when no query', fakeAsync(() => {
