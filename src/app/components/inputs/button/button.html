@@ -1,7 +1,7 @@
 <button
   class="Button"
   (click)="buttonClicked.emit()"
-  [ngClass]="{
+  [class]="{
     primary: buttonType() === ButtonType.PRIMARY,
     destructive: buttonType() === ButtonType.DESTRUCTIVE,
     ghost: buttonType() === ButtonType.GHOST

@@ -1,5 +1,5 @@
 import {Component, input, output} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 
 export interface CarouselItem {
   id: string;
@@ -8,7 +8,7 @@ export interface CarouselItem {
 
 @Component({
   selector: 'app-carousel',
-  imports: [CommonModule],
+  imports: [CommonModule, NgOptimizedImage],
   templateUrl: './carousel.html',
   styleUrl: './carousel.css',
 })

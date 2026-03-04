@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
-/**  OLM-1103 dropdown (clé/valeur) 
+/**  OLM-1103 dropdown (clé/valeur)
  *
  */
 export interface DropDownOption {
@@ -17,10 +17,10 @@ export interface DropDownOption {
   styleUrl: './drop-down.css'
 })
 export class DropDownComponent {
-  @Input() label = ''; 
+  label = input<string>("")
+  options = input<DropDownOption[]>([])
 
-  @Input() options: DropDownOption[] = [];
-  @Output() selectionChange = new EventEmitter<string | number>();
+  selectionChange = output<string | number>();
 
   onSelect(event: Event): void {
     const target = event.target as HTMLSelectElement;

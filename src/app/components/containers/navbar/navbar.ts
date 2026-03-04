@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
+import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
 export interface NavItem {
@@ -11,15 +11,7 @@ export interface NavItem {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './navbar.html',
-  encapsulation: ViewEncapsulation.None,
   styleUrl: './navbar.css'
 })
 export class NavbarComponent {
-  @Input() tabs: NavItem[] = [];
-  @Input() rightButtonLabel = '';
-  @Output() selectedClick = new EventEmitter<string>();
-
-  onRightButtonClick(): void {
-    this.selectedClick.emit(this.rightButtonLabel);
-  }
 }

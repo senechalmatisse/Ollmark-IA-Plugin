@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Shop } from '../../models/shop.model';
+import {Component, Input, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Shop} from '../../models/shop.model';
 
 @Component({
   selector: 'app-shop-card',
@@ -9,6 +9,7 @@ import { Shop } from '../../models/shop.model';
   templateUrl: './shop-card.html',
   styleUrl: './shop-card.css',
 })
+
 export class ShopCard {
   private _shop!: Shop;
   private _imageUrlOverride: string | null = null;
@@ -19,19 +20,20 @@ export class ShopCard {
     </svg>
   `.trim());
 
-  @Input({ required: true })
+  @Input({required: true})
   set shop(value: Shop) {
     this._shop = value;
     this._imageUrlOverride = null; // Reset override when shop changes
   }
-  get shop(): Shop {
-    return this._shop;
+
+  get shop() {
+    return this._shop
   }
 
-  @Input() loading = false;
+  loading = input<boolean>(false)
 
-  @Output() generate = new EventEmitter<Shop>();
-  @Output() add = new EventEmitter<Shop>();
+  generate = output<Shop>();
+  add = output<Shop>();
 
   get imageUrl(): string {
     if (this._imageUrlOverride) {

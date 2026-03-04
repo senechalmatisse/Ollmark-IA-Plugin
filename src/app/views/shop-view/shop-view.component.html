@@ -1,9 +1,9 @@
 <div class="shop-view-container">
-
-  <app-navbar
-    [tabs]="navTabs"
-    rightButtonLabel="Sélectionné"
-    (selectedClick)="onSelectedClick($event)">
+  <app-navbar>
+    <app-tab tabText="Boutiques" (tabClicked)="onSelectedClick('/boutiques')"/>
+    <app-tab tabText="Produits" (tabClicked)="onSelectedClick('/products')"/>
+    <app-tab tabText="Codes promo." (tabClicked)="onSelectedClick('/codes')"/>
+    <app-tab tabText="Sélectionnés" [isSpecial]="true" (tabClicked)="onSelectedClick('/selected')"/>
   </app-navbar>
 
   <div class="filters-row">

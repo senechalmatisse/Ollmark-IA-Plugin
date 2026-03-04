@@ -1,5 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CustomCheckbox } from './custom-checkbox';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {CustomCheckbox} from './custom-checkbox';
 
 describe('CustomCheckbox', () => {
   let component: CustomCheckbox;
@@ -22,10 +22,9 @@ describe('CustomCheckbox', () => {
 
   // Test pour vérifier l'affichage
   it('devrait afficher correctement le titre et le sous-titre', () => {
-    component.title = 'Nom';
-    component.subtitle = 'Boucherie';
-    
-    fixture.detectChanges(); 
+    fixture.componentRef.setInput("title", 'Nom');
+    fixture.componentRef.setInput("subtitle", 'Boucherie');
+    fixture.detectChanges();
 
     // On va chercher les éléments HTML générés
     const compiled = fixture.nativeElement as HTMLElement;

@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DropDownComponent, DropDownOption } from './drop-down'; 
-import { By } from '@angular/platform-browser';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {DropDownComponent, DropDownOption} from './drop-down';
+import {By} from '@angular/platform-browser';
 
 describe('DropDownComponent', () => {
   let component: DropDownComponent;
@@ -8,8 +8,8 @@ describe('DropDownComponent', () => {
 
   // mes données
   const mockOptions: DropDownOption[] = [
-    { key: 'cat_1', value: 'Boulangerie' },
-    { key: 'cat_2', value: 'Boucherie' }
+    {key: 'cat_1', value: 'Boulangerie'},
+    {key: 'cat_2', value: 'Boucherie'}
   ];
 
   beforeEach(async () => {
@@ -19,11 +19,11 @@ describe('DropDownComponent', () => {
 
     fixture = TestBed.createComponent(DropDownComponent);
     component = fixture.componentInstance;
-    
+
     // On initialise les inputs pour le test
-    component.label = 'Catégorie';
-    component.options = mockOptions;
-    
+    fixture.componentRef.setInput("label", "Catégorie")
+    fixture.componentRef.setInput("options", mockOptions)
+
     fixture.detectChanges();
   });
 
@@ -53,9 +53,9 @@ describe('DropDownComponent', () => {
   });
 //je teste ici si le contenu de mes options
   it('should render correct option values', () => {
-  const options = fixture.debugElement.queryAll(By.css('option'));
+    const options = fixture.debugElement.queryAll(By.css('option'));
 
-  expect(options[1].nativeElement.textContent).toContain('Boulangerie');
-  expect(options[2].nativeElement.textContent).toContain('Boucherie');
-});
+    expect(options[1].nativeElement.textContent).toContain('Boulangerie');
+    expect(options[2].nativeElement.textContent).toContain('Boucherie');
+  });
 });

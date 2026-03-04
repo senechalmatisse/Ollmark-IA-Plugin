@@ -81,11 +81,11 @@ describe('ShopCard', () => {
   });
 
   it('should have loading set to false by default', () => {
-    expect(component.loading).toBeFalse();
+    expect(component.loading()).toBeFalse();
   });
 
   it('should display spinner when loading is true', () => {
-    component.loading = true;
+    fixture.componentRef.setInput("loading", true)
     fixture.detectChanges();
 
     const spinnerOverlay = fixture.nativeElement.querySelector('.spinner-overlay');
@@ -93,7 +93,7 @@ describe('ShopCard', () => {
   });
 
   it('should not display spinner when loading is false', () => {
-    component.loading = false;
+    fixture.componentRef.setInput("loading", false)
     fixture.detectChanges();
 
     const spinnerOverlay = fixture.nativeElement.querySelector('.spinner-overlay');
@@ -143,19 +143,19 @@ describe('ShopCard', () => {
   });
 
   it('should toggle loading state correctly', () => {
-    expect(component.loading).toBeFalse();
+    expect(component.loading()).toBeFalse();
 
-    component.loading = true;
+    fixture.componentRef.setInput("loading", true)
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.spinner-overlay')).toBeTruthy();
 
-    component.loading = false;
+    fixture.componentRef.setInput("loading", false)
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.spinner-overlay')).toBeFalsy();
   });
 
   it('should contain spinner element inside spinner-overlay when loading', () => {
-    component.loading = true;
+    fixture.componentRef.setInput("loading", true)
     fixture.detectChanges();
 
     const spinner = fixture.nativeElement.querySelector('.spinner-overlay .spinner');
