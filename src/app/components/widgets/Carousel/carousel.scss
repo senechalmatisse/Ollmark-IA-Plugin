@@ -8,7 +8,6 @@
 
 .carousel-track-container {
   flex: 1;
-  overflow: hidden;
 }
 
 .carousel-track {
@@ -28,13 +27,13 @@
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid transparent;
   transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   opacity: 0.75;
+  border: solid 4px transparent;
 }
 
 .carousel-item:hover {
-  transform: scale(1.05);
+  border-color: var(--button-ghost-active);
   opacity: 1;
 }
 
@@ -44,7 +43,8 @@
 
 .carousel-item.selected {
   opacity: 1;
-  border-color: #2e7d32;
+  border-color: var(--button-primary);
+  border-width: 4px;
 }
 
 .item-image {
@@ -57,18 +57,18 @@
 /* ── Checkmark sélection ──────────────────────────────── */
 .selected-mark {
   position: absolute;
-  top: 3px;
-  right: 3px;
-  background: #2e7d32;
-  color: white;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  font-size: 10px;
+  top: 0;
+  right: 0;
+  background: var(--button-primary);
+  color: var(--background);
+  border-radius: 0 0 0 4px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
 }
 
 .carousel-btn {
@@ -86,13 +86,13 @@
   transition: color 0.2s;
 }
 
-.carousel-btn svg {
+.carousel-btn img {
   width: 18px;
   height: 18px;
 }
 
 .carousel-btn:hover:not(:disabled) {
-  color: #2e7d32;
+  background: var(--button-ghost-hover);
 }
 
 .carousel-btn:disabled {
