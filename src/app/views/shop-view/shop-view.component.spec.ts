@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ShopViewComponent } from './shop-view.component';
 import { ShopApiService } from '../../core/http/shop-api.service';
 import { of, throwError } from 'rxjs';
-import { Shop, ShopAddress, ShopCategory } from '../../models/shop.model';
+import { Shop, ShopAddress, ShopCategory, Marketplace } from '../../models/shop.model';
 import { Paginated } from '../../models/pagination.model';
 import { provideRouter } from '@angular/router';
 
@@ -52,11 +52,29 @@ describe('ShopViewComponent', () => {
     { id: 'cat1', label: 'Boulangerie' },
     { id: 'cat2', label: 'Restaurant' }
   ];
+  const mockMarketplaces = [
+    {
+      id: 'm1',
+      label: 'Paris',
+      shopCatalogs: [
+        { id: 'catalog-paris-1', label: 'Catalogue Paris' },
+        { id: 'catalog-versailles-1', label: 'Catalogue Versailles' }
+      ]
+    },
+    {
+      id: 'm2',
+      label: 'Rouen',
+      shopCatalogs: [
+        { id: 'catalog-rouen-1', label: 'Catalogue Rouen' }
+      ]
+    }
+  ] as Marketplace[];
 
   beforeEach(async () => {
-    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories']);
+    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories', 'getMarketplaces']);
     mockShopApiService.search.and.returnValue(of(mockPaginatedResponse));
     mockShopApiService.getCategories.and.returnValue(of(mockCategories));
+    mockShopApiService.getMarketplaces.and.returnValue(of(mockMarketplaces));
 
     await TestBed.configureTestingModule({
       imports: [ShopViewComponent],
@@ -183,4 +201,31 @@ describe('ShopViewComponent', () => {
 
     expect(console.log).toHaveBeenCalledWith('Ajouter :', 'Test Shop');
   });
+it('should load marketplaces and flatten catalogs on init (DAT30_F1_US3)', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    expect(mockShopApiService.getMarketplaces).toHaveBeenCalled();
+    expect(fixture.componentInstance.marketplaceOptions.length).toBe(4);
+    expect(fixture.componentInstance.marketplaceOptions[1].key).toBe('catalog-paris-1');
+    expect(fixture.componentInstance.marketplaceOptions[3].value).toBe('Rouen');
+  }));
+
+  it('should filter shops when a marketplace is selected (DAT30_F1_US3)', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    // L'utilisateur simule un clic sur le catalogue de Paris
+    fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
+    tick();
+
+    // On vérifie que le composant a bien mémorisé l'ID
+    expect(fixture.componentInstance.selectedCatalogId).toBe('catalog-paris-1');
+    
+    // On vérifie que la commande envoyée au service contient bien cet ID
+    const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
+    expect(callArgs.catalog).toBe('catalog-paris-1');
+  }));
 });
