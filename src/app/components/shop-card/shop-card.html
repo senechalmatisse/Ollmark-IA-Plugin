@@ -5,7 +5,13 @@
     </div>
   }
   <div class="shop-image">
-    <img [src]="imageUrl" [alt]="shop.label" (error)="onImageError()" />
+    <img 
+      [src]="imageUrl" 
+      [alt]="shop.label" 
+      loading="lazy" 
+      decoding="async" 
+      fetchpriority="low"
+      (error)="onImageError()" />
   </div>
   <div class="shop-info" [class.selected]="isSelected()">
     <h3 class="shop-name">{{ shop.label }}</h3>

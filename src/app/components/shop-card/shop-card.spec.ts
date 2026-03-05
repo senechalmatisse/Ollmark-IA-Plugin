@@ -112,7 +112,7 @@ describe('ShopCard', () => {
 
   it('should update displayed label when shop input changes', () => {
     const newShop = createMockShop({ id: '2', label: 'Nouvelle Boutique' });
-    component.shop = newShop;
+    fixture.componentRef.setInput('shop', newShop);
     fixture.detectChanges();
 
     const nameElement = fixture.nativeElement.querySelector('.shop-name');
@@ -125,7 +125,7 @@ describe('ShopCard', () => {
       label: 'Nouvelle Boutique',
       logo: { id: 'logo2', url: 'https://example.com/new-logo.jpg' }
     });
-    component.shop = newShop;
+    fixture.componentRef.setInput('shop', newShop);
     fixture.detectChanges();
 
     const imgElement = fixture.nativeElement.querySelector('.shop-image img');
@@ -135,7 +135,7 @@ describe('ShopCard', () => {
 
   it('should handle shop with empty label', () => {
     const emptyLabelShop = createMockShop({ id: '3', label: '' });
-    component.shop = emptyLabelShop;
+    fixture.componentRef.setInput('shop', emptyLabelShop);
     fixture.detectChanges();
 
     const nameElement = fixture.nativeElement.querySelector('.shop-name');
@@ -256,6 +256,24 @@ describe('ShopCard', () => {
     buttons.forEach((button: HTMLElement) => {
       const svg = button.querySelector('svg');
       expect(svg).toBeTruthy();
+    });
+  });
+
+  // Image optimization tests
+  describe('Image Optimization', () => {
+    it('should have lazy loading attribute on image', () => {
+      const imgElement = fixture.nativeElement.querySelector('.shop-image img');
+      expect(imgElement.getAttribute('loading')).toBe('lazy');
+    });
+
+    it('should have async decoding attribute on image', () => {
+      const imgElement = fixture.nativeElement.querySelector('.shop-image img');
+      expect(imgElement.getAttribute('decoding')).toBe('async');
+    });
+
+    it('should have low fetchpriority attribute on image', () => {
+      const imgElement = fixture.nativeElement.querySelector('.shop-image img');
+      expect(imgElement.getAttribute('fetchpriority')).toBe('low');
     });
   });
 });
