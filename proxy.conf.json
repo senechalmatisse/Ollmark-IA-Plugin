@@ -19,5 +19,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
+  },
+  "/marketplace-api": {
+    "target": "https://api.ollca.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
   }
 }

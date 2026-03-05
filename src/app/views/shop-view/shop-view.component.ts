@@ -19,10 +19,7 @@ export class ShopViewComponent implements OnInit {
   private readonly shopApi = inject(ShopApiService);
 
   categoryOptions: DropDownOption[] = [];
-  marketplaceOptions: DropDownOption[] = [
-    {key: 'all', value: 'Marketplace'},
-    {key: 'rouen', value: 'Rouen Local'}
-  ];
+  marketplaceOptions: DropDownOption[] = [];
 
   shops: Shop[] = [];
   loading = true;
@@ -35,9 +32,11 @@ export class ShopViewComponent implements OnInit {
   hasMore = true;
 
   selectedCategoryId?: string;
+  selectedCatalogId?: string;
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadMarketplaces();
     this.loadShops();
   }
 
@@ -69,12 +68,44 @@ export class ShopViewComponent implements OnInit {
       error: (err) => console.error('Erreur chargement catégories:', err)
     });
   }
+  private loadMarketplaces(): void {
+    this.shopApi.getMarketplaces().subscribe({
+      next: (marketplaces) => {
+        const apiOptions: DropDownOption[] = [];
+
+        // On parcourt le tableau des marketplaces
+        marketplaces.forEach(m => {
+          if (m.shopCatalogs && m.shopCatalogs.length > 0) {
+            
+            // On parcourt le tableau des catalogues pour CHAQUE marketplace
+            m.shopCatalogs.forEach(catalog => {
+              apiOptions.push({
+                key: catalog.id, // On donne l'ID unique de ce catalogue
+                
+                // Si la ville a plusieurs catalogues (ex: Paris), on précise le nom
+                // Sinon (ex: Rouen), on affiche juste le nom de la ville
+                value: m.shopCatalogs.length > 1 ? `${m.label} - ${catalog.label}` : m.label
+              });
+            });
+
+          }
+        });
+
+        this.marketplaceOptions = [
+          { key: '', value: 'Toutes les marketplaces' },
+          ...apiOptions
+        ];
+      },
+      error: (err) => console.error('Erreur chargement marketplaces:', err)
+    });
+  }
 
   /**
    * Charge les boutiques via l'API avec tri par date de création décroissante
-   * et score de pertinence si recherche (DAT30_F1_US2)
+   * et score de pertinence si recherche
    */
   private loadShops(): void {
+    console.log('1. loadShops() a bien démarré');
     this.loading = true;
     this.currentPage = 1;
     this.hasMore = true;
@@ -84,8 +115,10 @@ export class ShopViewComponent implements OnInit {
       size: this.pageSize,
       q: this.searchQuery || undefined,
       sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
-      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined,
+      catalog: this.selectedCatalogId ? this.selectedCatalogId : undefined
     };
+     console.log('2. Filtres préparés pour le service :', filters);
 
     this.shopApi.search(filters).subscribe({
       next: (result) => {
@@ -111,7 +144,8 @@ export class ShopViewComponent implements OnInit {
       size: this.pageSize,
       q: this.searchQuery || undefined,
       sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
-      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined,
+      catalog: this.selectedCatalogId ? this.selectedCatalogId : undefined
     };
 
     this.shopApi.search(filters).subscribe({
@@ -146,6 +180,8 @@ export class ShopViewComponent implements OnInit {
 
   onMarketplaceSelect(marketplaceId: string | number): void {
     console.log('Marketplace sélectionnée :', marketplaceId);
+    this.selectedCatalogId = marketplaceId ? marketplaceId.toString() : undefined;
+    this.loadShops();
   }
 
   onGenerate(shop: Shop): void {

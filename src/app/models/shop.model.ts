@@ -40,6 +40,7 @@ export interface ShopFilters {
   q?: string;
   category?: string[];
   sort?: string[];
+  catalog?: string;
   page: number;
   size: number;
 }
@@ -56,4 +57,15 @@ export interface CategoryFilters {
 
 export function createDefaultCategoryFilters(): CategoryFilters {
   return { page: 1, size: 20 };
+}
+export interface MarketplaceCatalog {
+  id: string;
+  label: string;
+}
+
+export interface Marketplace {
+  id: string;
+  label: string;
+  online: boolean;
+  shopCatalogs: MarketplaceCatalog[];
 }

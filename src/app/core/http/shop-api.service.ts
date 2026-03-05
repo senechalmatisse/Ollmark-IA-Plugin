@@ -1,7 +1,7 @@
 import { Injectable, inject, InjectionToken } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Shop, ShopFilters, ShopCategory, CategoryFilters } from '../../models/shop.model';
+import { Shop, ShopFilters, ShopCategory, CategoryFilters, Marketplace } from '../../models/shop.model';
 import { Paginated } from '../../models/pagination.model';
 import { mapShopFromDto, mapCategoryFromDto, GeoLocatedShopDto, CategoryDto } from './shop.mapper';
 
@@ -18,6 +18,7 @@ export interface IShopRepository {
   search(filters: ShopFilters): Observable<Paginated<Shop>>;
   getCategories(): Observable<ShopCategory[]>;
   searchCategories(filters: CategoryFilters): Observable<Paginated<ShopCategory>>;
+  getMarketplaces(): Observable<Marketplace[]>;
 }
 
 export const SHOP_REPOSITORY = new InjectionToken<IShopRepository>('IShopRepository');
@@ -28,11 +29,13 @@ export const SHOP_REPOSITORY = new InjectionToken<IShopRepository>('IShopReposit
 export class ShopApiService implements IShopRepository {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/shop-api/v2/public';
+  private readonly marketplaceBaseUrl = '/marketplace-api/v2/public';
 
   /**
    * Recherche paginée des boutiques - GET /v2/public/shop
    */
   search(filters: ShopFilters): Observable<Paginated<Shop>> {
+    console.log('3. Le service a bien reçu la commande avec :', filters);
     let params = new HttpParams()
       .set('page', (filters.page).toString())
       .set('size', filters.size.toString());
@@ -50,6 +53,9 @@ export class ShopApiService implements IShopRepository {
     if (filters.category?.length) {
       params = params.set('category', filters.category.join(','));
     }
+    if (filters.catalog) {
+      params = params.set('catalog', filters.catalog);
+    }
 
     const sortFields =  ['-creationDate'];
     
@@ -58,7 +64,7 @@ export class ShopApiService implements IShopRepository {
       params = params.append('sort', field);
     });
     // -------------------------------------------------------
-
+    console.log('URL finale générée par Angular :', params.toString());
     return this.http.get<PaginatedApiResponse<GeoLocatedShopDto>>(`${this.baseUrl}/shop`, { params }).pipe(
       map(response => ({
         content: (response.content || []).map((item: GeoLocatedShopDto) => mapShopFromDto(item)),
@@ -106,6 +112,15 @@ export class ShopApiService implements IShopRepository {
         number: response.number || 0,
         last: response.last ?? true
       }))
+    );
+  }
+  getMarketplaces(): Observable<Marketplace[]> {
+    const params = new HttpParams()
+      .set('page', '1')
+      .set('size', '1000');
+
+    return this.http.get<PaginatedApiResponse<Marketplace>>(`${this.marketplaceBaseUrl}/marketplace`, { params }).pipe(
+      map(response => response.content || [])
     );
   }
 }
