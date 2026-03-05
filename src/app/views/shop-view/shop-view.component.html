@@ -6,6 +6,8 @@
     <app-tab tabText="Sélectionnés" [isSpecial]="true" (tabClicked)="onSelectedClick('/selected')"/>
   </app-navbar>
 
+  @if (!showSelected) {
+
   <div class="filters-row">
 
     <div class="search-wrapper">
@@ -44,7 +46,7 @@
       </app-shop-card>
     } @empty {
       @if (!loading) {
-        <p class="empty-text">Aucune boutique trouvée pour cette catégorie.</p>
+        <p class="empty-text">Aucune boutique trouvée.</p>
       }
     }
 
@@ -54,7 +56,19 @@
         <span>Chargement...</span>
       </div>
     }
-
   </div>
+  }
+  @if (showSelected) {
+    <app-selected-view (editEntry)="onEditShop($event)" />
+  }
 
+  @if (showModal && selectedShop) {
+    <app-shop-field-selector
+      [shop]="selectedShop"
+      [mode]="selectedMode"
+      (closed)="onModalClose()"
+      (confirmed)="onModalConfirm()"
+    />
+  }
+    <app-toast/>
 </div>

@@ -180,24 +180,22 @@ describe('ShopViewComponent', () => {
     expect(fixture.componentInstance.hasMore).toBeTrue();
   }));
 
-  it('should log when onGenerate is called', () => {
+  it('should update state when onGenerate is called', () => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     const shop = createMockShop({ label: 'Test Shop' });
-    spyOn(console, 'log');
-
     fixture.componentInstance.onGenerate(shop);
-
-    expect(console.log).toHaveBeenCalledWith('Générer pour :', 'Test Shop');
+    expect(fixture.componentInstance.selectedShop).toBe(shop);
+    expect(fixture.componentInstance.selectedMode).toBe('quick');
+    expect(fixture.componentInstance.showModal).toBeTrue();
   });
 
-  it('should log when onAdd is called', () => {
+  it('should update state when onAdd is called', () => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     const shop = createMockShop({ label: 'Test Shop' });
-    spyOn(console, 'log');
-
     fixture.componentInstance.onAdd(shop);
-
-    expect(console.log).toHaveBeenCalledWith('Ajouter :', 'Test Shop');
+    expect(fixture.componentInstance.selectedShop).toBe(shop);
+    expect(fixture.componentInstance.selectedMode).toBe('select');
+    expect(fixture.componentInstance.showModal).toBeTrue();
   });
 it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     const fixture = TestBed.createComponent(ShopViewComponent);
@@ -215,14 +213,11 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     fixture.detectChanges();
     tick();
 
-    // L'utilisateur simule un clic sur le catalogue de Paris
     fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
     tick();
 
-    // On vérifie que le composant a bien mémorisé l'ID
     expect(fixture.componentInstance.selectedCatalogId).toBe('catalog-paris-1');
     
-    // On vérifie que la commande envoyée au service contient bien cet ID
     const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
     expect(callArgs.catalog).toBe('catalog-paris-1');
   }));
@@ -231,26 +226,21 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     fixture.detectChanges();
     tick();
 
-    // L'utilisateur clique sur la catégorie "Boulangerie"
     fixture.componentInstance.onCategorySelect('cat1');
     tick();
 
-    // L'utilisateur sélectionne la ville de "Paris"
     fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
     tick();
 
-    // L'utilisateur tape "croissant" dans la barre de recherche
     fixture.componentInstance.onSearchUpdate('croissant');
     tick();
 
     const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
 
-    //On vérifie que le colis contient bien TOUS les critères en même temps !
     expect(callArgs.q).toBe('croissant');
     expect(callArgs.category).toEqual(['cat1']);
     expect(callArgs.catalog).toBe('catalog-paris-1');
     
-    // On vérifie aussi que la règle de tri est bien respectée : pertinence PUIS date
     expect(callArgs.sort).toEqual(['-score', '-creationDate']);
   }));
 });

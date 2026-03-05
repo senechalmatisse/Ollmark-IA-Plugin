@@ -38,6 +38,16 @@
   gap: 0.3rem;
 }
 
+.shop-info.selected {
+  background: linear-gradient(135deg, #a5a8aa 0%, #9b9a9a 100%);
+}
+
+.action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .shop-name {
   margin: 0;
   font-size: 0.7rem;

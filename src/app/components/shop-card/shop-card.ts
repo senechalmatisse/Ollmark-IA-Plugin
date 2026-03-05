@@ -31,7 +31,7 @@ export class ShopCard {
   }
 
   loading = input<boolean>(false)
-
+  isSelected = input<boolean>(false);
   generate = output<Shop>();
   add = output<Shop>();
 

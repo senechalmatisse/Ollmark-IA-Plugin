@@ -1,0 +1,9 @@
+{
+  "name": "OllMark Generation",
+  "description": "Plugin d'import de contenu Ollca",
+  "code": "plugin.js",
+  "permissions": [
+    "content:read",
+    "content:write"
+  ]
+}

@@ -1,22 +1,37 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {NavbarComponent} from '../../components/containers/navbar/navbar';
+import {NavbarComponent, NavItem} from '../../components/containers/navbar/navbar';
 import {SearchBar} from '../../components/inputs/search-bar/search-bar';
 import {DropDownComponent, DropDownOption} from '../../components/inputs/drop-down/drop-down';
 import {ShopApiService} from '../../core/http/shop-api.service';
 import {ShopCard} from '../../components/shop-card/shop-card';
 import {Shop, ShopFilters} from '../../models/shop.model';
 import {Tab} from '../../components/inputs/tab/tab';
+import {ShopFieldSelector} from '../../components/modals/shop-field-selector/shop-field-selector';
+import {SelectedView} from '../selected-view/selected-view';
+import {ShopSelectionService} from '../../services/shop-selection/shop-selection.service';
+import { ToastComponent } from '../../components/toast/toast.component';
+
+import {ShopSelectionStore} from '../../stores/shop-selection.store';
+
 
 @Component({
   selector: 'app-shop-view',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab],
+  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab, ShopFieldSelector, SelectedView, ToastComponent],
   templateUrl: './shop-view.component.html',
   styleUrl: './shop-view.component.css'
 })
 export class ShopViewComponent implements OnInit {
   private readonly shopApi = inject(ShopApiService);
+  private readonly selectionService = inject(ShopSelectionService);
+  private readonly shopStore = inject(ShopSelectionStore);
+
+  navTabs: NavItem[] = [
+    { label: 'Boutique', route: '/boutique' },
+    { label: 'Produit', route: '/produit' },
+    { label: 'Codes promotionnels', route: '/promo' }
+  ];
 
   categoryOptions: DropDownOption[] = [];
   marketplaceOptions: DropDownOption[] = [];
@@ -26,13 +41,17 @@ export class ShopViewComponent implements OnInit {
   loadingMore = false;
   searchQuery = '';
 
-  // Scroll infini
   currentPage = 1;
   pageSize = 20;
   hasMore = true;
 
   selectedCategoryId?: string;
   selectedCatalogId?: string;
+
+  selectedShop: Shop | null = null;
+  selectedMode: 'select' | 'quick' = 'select';
+  showModal = false;
+  showSelected = false;
 
   ngOnInit(): void {
     this.loadCategories();
@@ -73,17 +92,13 @@ export class ShopViewComponent implements OnInit {
       next: (marketplaces) => {
         const apiOptions: DropDownOption[] = [];
 
-        // On parcourt le tableau des marketplaces
         marketplaces.forEach(m => {
           if (m.shopCatalogs && m.shopCatalogs.length > 0) {
             
-            // On parcourt le tableau des catalogues pour CHAQUE marketplace
             m.shopCatalogs.forEach(catalog => {
               apiOptions.push({
                 key: catalog.id,
                 
-                // Si la ville a plusieurs catalogues (ex: Paris), on précise le nom
-                // Sinon (ex: Rouen), on affiche juste le nom de la ville
                 value: m.shopCatalogs.length > 1 ? `${m.label} - ${catalog.label}` : m.label
               });
             });
@@ -100,10 +115,6 @@ export class ShopViewComponent implements OnInit {
     });
   }
 
-  /**
-   * Charge les boutiques via l'API avec tri par date de création décroissante
-   * et score de pertinence si recherche
-   */
   private loadShops(): void {
     console.log('1. loadShops() a bien démarré');
     this.loading = true;
@@ -158,10 +169,11 @@ export class ShopViewComponent implements OnInit {
     });
   }
 
-  // --- Écouteurs d'événements ---
+
 
   onSelectedClick(label: string): void {
-    console.log('Onglet droit cliqué :', label);
+    console.log(label + " not implemented")
+    this.showSelected = !this.showSelected;
   }
 
   onSearchUpdate(searchTerm: string): void {
@@ -182,10 +194,35 @@ export class ShopViewComponent implements OnInit {
   }
 
   onGenerate(shop: Shop): void {
-    console.log('Générer pour :', shop.label);
+    this.selectedShop = shop;
+    this.selectedMode = 'quick';
+    this.showModal = true;
   }
 
   onAdd(shop: Shop): void {
-    console.log('Ajouter :', shop.label);
+    this.selectedShop = shop;
+    this.selectedMode = 'select';
+    this.showModal = true;
+  }
+
+  onModalClose(): void {
+    this.showModal = false;
+    this.selectedShop = null;
+  }
+
+  onModalConfirm(): void {
+    this.showModal = false;
+    this.selectedShop = null;
+  }
+
+  onEditShop(shop: Shop): void {
+    console.log('BOUTON ENGRENAGE CLIQUÉ POUR :', shop.label);
+    this.selectedShop = shop;
+    this.selectedMode = 'select'; 
+    this.showModal = true;
+  }
+
+  isShopSelected(shopId: string): boolean {
+    return this.shopStore.entries().some((e) => e.shop.id === shopId);
   }
 }

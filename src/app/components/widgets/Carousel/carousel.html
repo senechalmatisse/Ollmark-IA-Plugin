@@ -5,8 +5,7 @@
     [disabled]="currentIndex === 0"
     aria-label="Précédent"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-         stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"/>
       <polyline points="11 18 5 12 11 6"/>
     </svg>
@@ -17,18 +16,21 @@
       class="carousel-track"
       [style.transform]="'translateX(-' + (currentIndex * itemWidth) + 'px)'"
     >
-      @for (item of items(); track $index) {
-        <div
-          class="carousel-item"
-          [class]="{'active': $index === selectedIndex}"
-          (click)="onSelectItem($index)"
-          (keydown.enter)="onSelectItem($index)"
-          tabindex="0"
-          role="button"
-        >
-          <img class="item-image" [ngSrc]="item.imageUrl" [alt]="item.id" fill/>
-        </div>
-      }
+      <div
+        class="carousel-item"
+        *ngFor="let item of items(); let i = index"
+        [ngClass]="{
+          'active': i === selectedIndex,
+          'selected': selectedIds().has(item.id)
+        }"
+        (click)="onSelectItem(i)"
+        (keydown.enter)="onSelectItem(i)"
+        tabindex="0"
+        role="button"
+      >
+        <img class="item-image" [src]="item.imageUrl" alt="image de la boutique" />
+        <span class="selected-mark" *ngIf="selectedIds().has(item.id)">✓</span>
+      </div>
     </div>
   </div>
 
@@ -38,8 +40,7 @@
     [disabled]="currentIndex >= maxIndex"
     aria-label="Suivant"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-         stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="5" y1="12" x2="19" y2="12"/>
       <polyline points="13 6 19 12 13 18"/>
     </svg>
