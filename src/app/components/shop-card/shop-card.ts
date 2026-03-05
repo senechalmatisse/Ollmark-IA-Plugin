@@ -7,7 +7,7 @@ import {Shop} from '../../models/shop.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './shop-card.html',
-  styleUrl: './shop-card.css',
+  styleUrl: './shop-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 

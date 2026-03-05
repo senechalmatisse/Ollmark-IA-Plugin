@@ -1,14 +1,12 @@
-import { Routes } from '@angular/router';
-import { Test } from './components/widgets/test/test';
+import {Routes} from '@angular/router';
+import {Test} from './components/widgets/test/test';
 import {ShopViewComponent} from './views/shop-view/shop-view.component';
+import {SelectedView} from './views/selected-view/selected-view';
 
 export const routes: Routes = [
-  // Redirection automatique : quand on ouvre l'app, on va directement sur /boutique
-  { path: '', redirectTo: 'boutique', pathMatch: 'full' },
-
-  // La route qui affiche la page
-  { path: 'boutique', component: ShopViewComponent },
-
-  //  ancienne route de test
-  { path: 'test', component: Test }
+  {path: '', redirectTo: 'shops', pathMatch: 'full'},
+  {path: 'shops', component: ShopViewComponent},
+  {path: 'products', component: Test}, // TODO
+  {path: 'codes', component: Test}, // TODO
+  {path: 'selected', component: SelectedView}
 ];

@@ -1,17 +1,14 @@
-import {Component, inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf} from '@angular/cdk/scrolling';
-import {NavbarComponent, NavItem} from '../../components/containers/navbar/navbar';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {SearchBar} from '../../components/inputs/search-bar/search-bar';
 import {DropDownComponent, DropDownOption} from '../../components/inputs/drop-down/drop-down';
 import {ShopApiService} from '../../core/http/shop-api.service';
 import {ShopCard} from '../../components/shop-card/shop-card';
 import {Shop, ShopFilters} from '../../models/shop.model';
-import {Tab} from '../../components/inputs/tab/tab';
 import {ShopFieldSelector} from '../../components/modals/shop-field-selector/shop-field-selector';
-import {SelectedView} from '../selected-view/selected-view';
 import {ShopSelectionService} from '../../services/shop-selection/shop-selection.service';
-import { ToastComponent } from '../../components/toast/toast.component';
+import {ToastComponent} from '../../components/toast/toast.component';
 
 import {ShopSelectionStore} from '../../stores/shop-selection.store';
 
@@ -19,9 +16,9 @@ import {ShopSelectionStore} from '../../stores/shop-selection.store';
 @Component({
   selector: 'app-shop-view',
   standalone: true,
-  imports: [CommonModule, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab, ShopFieldSelector, SelectedView, ToastComponent],
+  imports: [CommonModule, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, SearchBar, DropDownComponent, ShopCard, ShopFieldSelector, ToastComponent],
   templateUrl: './shop-view.component.html',
-  styleUrl: './shop-view.component.css',
+  styleUrl: './shop-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShopViewComponent implements OnInit {
@@ -29,12 +26,6 @@ export class ShopViewComponent implements OnInit {
   private readonly selectionService = inject(ShopSelectionService);
   private readonly shopStore = inject(ShopSelectionStore);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  navTabs: NavItem[] = [
-    { label: 'Boutique', route: '/boutique' },
-    { label: 'Produit', route: '/produit' },
-    { label: 'Codes promotionnels', route: '/promo' }
-  ];
 
   categoryOptions: DropDownOption[] = [];
   marketplaceOptions: DropDownOption[] = [];
@@ -53,7 +44,7 @@ export class ShopViewComponent implements OnInit {
   private readonly scrollThrottleMs = 100;
 
   // Height of each row (shop-card height + gap)
-  readonly rowHeight = 125;
+  readonly rowHeight = 156;
 
   selectedCategoryId?: string;
   selectedCatalogId?: string;
@@ -61,7 +52,6 @@ export class ShopViewComponent implements OnInit {
   selectedShop: Shop | null = null;
   selectedMode: 'select' | 'quick' = 'select';
   showModal = false;
-  showSelected = false;
 
   ngOnInit(): void {
     this.loadCategories();
@@ -106,7 +96,7 @@ export class ShopViewComponent implements OnInit {
           value: cat.label
         }));
         this.categoryOptions = [
-          { key: '', value: 'Toutes les catégories' },
+          {key: '', value: 'Toutes les catégories'},
           ...apiOptions
         ];
         this.cdr.markForCheck();
@@ -114,6 +104,7 @@ export class ShopViewComponent implements OnInit {
       error: (err) => console.error('Erreur chargement catégories:', err)
     });
   }
+
   private loadMarketplaces(): void {
     this.shopApi.getMarketplaces().subscribe({
       next: (marketplaces) => {
@@ -121,11 +112,11 @@ export class ShopViewComponent implements OnInit {
 
         marketplaces.forEach(m => {
           if (m.shopCatalogs && m.shopCatalogs.length > 0) {
-            
+
             m.shopCatalogs.forEach(catalog => {
               apiOptions.push({
                 key: catalog.id,
-                
+
                 value: m.shopCatalogs.length > 1 ? `${m.label} - ${catalog.label}` : m.label
               });
             });
@@ -134,7 +125,7 @@ export class ShopViewComponent implements OnInit {
         });
 
         this.marketplaceOptions = [
-          { key: '', value: 'Toutes les marketplaces' },
+          {key: '', value: 'Toutes les marketplaces'},
           ...apiOptions
         ];
         this.cdr.markForCheck();
@@ -203,13 +194,6 @@ export class ShopViewComponent implements OnInit {
     });
   }
 
-
-
-  onSelectedClick(label: string): void {
-    console.log(label + " not implemented")
-    this.showSelected = !this.showSelected;
-  }
-
   onSearchUpdate(searchTerm: string): void {
     this.searchQuery = searchTerm;
     this.loadShops();
@@ -247,16 +231,5 @@ export class ShopViewComponent implements OnInit {
   onModalConfirm(): void {
     this.showModal = false;
     this.selectedShop = null;
-  }
-
-  onEditShop(shop: Shop): void {
-    console.log('BOUTON ENGRENAGE CLIQUÉ POUR :', shop.label);
-    this.selectedShop = shop;
-    this.selectedMode = 'select'; 
-    this.showModal = true;
-  }
-
-  isShopSelected(shopId: string): boolean {
-    return this.shopStore.entries().some((e) => e.shop.id === shopId);
   }
 }

@@ -1,3 +1,7 @@
+:host {
+  flex: 1 1 0;
+}
+
 .search-bar {
   display: flex;
   flex-direction: row;
@@ -6,6 +10,7 @@
   background: var(--widget-surface);
   border-radius: 8px;
   padding-left: 8px;
+  height: 100%;
 }
 
 .search-bar, .search-bar > * {
@@ -25,7 +30,9 @@
 }
 
 .search-bar > input {
-  flex-grow: 1;
+  height: 100%;
+  flex: 1 1 0;
+  max-width: 164px;
   background: none;
   border: none;
   color: var(--text-main);

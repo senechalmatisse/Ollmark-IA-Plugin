@@ -1,6 +1,7 @@
 <button
   class="Button"
   (click)="buttonClicked.emit()"
+  [disabled]="disabled()"
   [class]="{
     primary: buttonType() === ButtonType.PRIMARY,
     destructive: buttonType() === ButtonType.DESTRUCTIVE,
