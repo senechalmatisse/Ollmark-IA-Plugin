@@ -199,7 +199,7 @@ describe('ShopViewComponent', () => {
 
     expect(console.log).toHaveBeenCalledWith('Ajouter :', 'Test Shop');
   });
-it('should load marketplaces and flatten catalogs on init (DAT30_F1_US3)', fakeAsync(() => {
+it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     fixture.detectChanges();
     tick();
@@ -210,7 +210,7 @@ it('should load marketplaces and flatten catalogs on init (DAT30_F1_US3)', fakeA
     expect(fixture.componentInstance.marketplaceOptions[3].value).toBe('Rouen');
   }));
 
-  it('should filter shops when a marketplace is selected (DAT30_F1_US3)', fakeAsync(() => {
+  it('should filter shops when a marketplace is selected', fakeAsync(() => {
     const fixture = TestBed.createComponent(ShopViewComponent);
     fixture.detectChanges();
     tick();
@@ -225,5 +225,32 @@ it('should load marketplaces and flatten catalogs on init (DAT30_F1_US3)', fakeA
     // On vérifie que la commande envoyée au service contient bien cet ID
     const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
     expect(callArgs.catalog).toBe('catalog-paris-1');
+  }));
+  it('should send multiple filters together (search, category, marketplace) and sort by relevance', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    // L'utilisateur clique sur la catégorie "Boulangerie"
+    fixture.componentInstance.onCategorySelect('cat1');
+    tick();
+
+    // L'utilisateur sélectionne la ville de "Paris"
+    fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
+    tick();
+
+    // L'utilisateur tape "croissant" dans la barre de recherche
+    fixture.componentInstance.onSearchUpdate('croissant');
+    tick();
+
+    const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
+
+    //On vérifie que le colis contient bien TOUS les critères en même temps !
+    expect(callArgs.q).toBe('croissant');
+    expect(callArgs.category).toEqual(['cat1']);
+    expect(callArgs.catalog).toBe('catalog-paris-1');
+    
+    // On vérifie aussi que la règle de tri est bien respectée : pertinence PUIS date
+    expect(callArgs.sort).toEqual(['-score', '-creationDate']);
   }));
 });
