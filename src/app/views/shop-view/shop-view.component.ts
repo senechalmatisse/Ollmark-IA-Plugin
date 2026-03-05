@@ -34,10 +34,7 @@ export class ShopViewComponent implements OnInit {
   ];
 
   categoryOptions: DropDownOption[] = [];
-  marketplaceOptions: DropDownOption[] = [
-    { key: 'all', value: 'Marketplace' },
-    { key: 'rouen', value: 'Rouen Local' }
-  ];
+  marketplaceOptions: DropDownOption[] = [];
 
   shops: Shop[] = [];
   loading = true;
@@ -48,6 +45,9 @@ export class ShopViewComponent implements OnInit {
   pageSize = 20;
   hasMore = true;
 
+  selectedCategoryId?: string;
+  selectedCatalogId?: string;
+
   selectedShop: Shop | null = null;
   selectedMode: 'select' | 'quick' = 'select';
   showModal = false;
@@ -55,6 +55,7 @@ export class ShopViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadMarketplaces();
     this.loadShops();
   }
 
@@ -73,20 +74,49 @@ export class ShopViewComponent implements OnInit {
   private loadCategories(): void {
     this.shopApi.getCategories().subscribe({
       next: (categories) => {
-        this.categoryOptions = categories.map(cat => ({
+        const apiOptions = categories.map(cat => ({
           key: cat.id,
           value: cat.label
         }));
+        
+        this.categoryOptions = [
+          { key: '', value: 'Toutes les catégories' },
+          ...apiOptions
+        ];
       },
       error: (err) => console.error('Erreur chargement catégories:', err)
     });
   }
+  private loadMarketplaces(): void {
+    this.shopApi.getMarketplaces().subscribe({
+      next: (marketplaces) => {
+        const apiOptions: DropDownOption[] = [];
 
-  /**
-   * Charge les boutiques via l'API avec tri par date de création décroissante
-   * et score de pertinence si recherche (DAT30_F1_US2)
-   */
+        marketplaces.forEach(m => {
+          if (m.shopCatalogs && m.shopCatalogs.length > 0) {
+            
+            m.shopCatalogs.forEach(catalog => {
+              apiOptions.push({
+                key: catalog.id,
+                
+                value: m.shopCatalogs.length > 1 ? `${m.label} - ${catalog.label}` : m.label
+              });
+            });
+
+          }
+        });
+
+        this.marketplaceOptions = [
+          { key: '', value: 'Toutes les marketplaces' },
+          ...apiOptions
+        ];
+      },
+      error: (err) => console.error('Erreur chargement marketplaces:', err)
+    });
+  }
+
   private loadShops(): void {
+    console.log('1. loadShops() a bien démarré');
     this.loading = true;
     this.currentPage = 1;
     this.hasMore = true;
@@ -95,7 +125,9 @@ export class ShopViewComponent implements OnInit {
       page: this.currentPage,
       size: this.pageSize,
       q: this.searchQuery || undefined,
-      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate']
+      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined,
+      catalog: this.selectedCatalogId ? this.selectedCatalogId : undefined
     };
 
     this.shopApi.search(filters).subscribe({
@@ -104,8 +136,7 @@ export class ShopViewComponent implements OnInit {
         this.hasMore = !result.last;
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Erreur chargement boutiques:', err);
+      error: () => {
         this.loading = false;
       }
     });
@@ -121,7 +152,9 @@ export class ShopViewComponent implements OnInit {
       page: this.currentPage,
       size: this.pageSize,
       q: this.searchQuery || undefined,
-      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate']
+      sort: this.searchQuery ? ['-score', '-creationDate'] : ['-creationDate'],
+      category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined,
+      catalog: this.selectedCatalogId ? this.selectedCatalogId : undefined
     };
 
     this.shopApi.search(filters).subscribe({
@@ -130,8 +163,7 @@ export class ShopViewComponent implements OnInit {
         this.hasMore = !result.last;
         this.loadingMore = false;
       },
-      error: (err) => {
-        console.error('Erreur chargement boutiques:', err);
+      error: () => {
         this.loadingMore = false;
       }
     });
@@ -151,10 +183,14 @@ export class ShopViewComponent implements OnInit {
 
   onCategorySelect(categoryId: string | number): void {
     console.log('Catégorie sélectionnée :', categoryId);
+    this.selectedCategoryId = categoryId ? categoryId.toString() : undefined;
+    this.loadShops();
   }
 
   onMarketplaceSelect(marketplaceId: string | number): void {
     console.log('Marketplace sélectionnée :', marketplaceId);
+    this.selectedCatalogId = marketplaceId ? marketplaceId.toString() : undefined;
+    this.loadShops();
   }
 
   onGenerate(shop: Shop): void {

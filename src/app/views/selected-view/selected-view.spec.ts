@@ -28,7 +28,6 @@ describe('SelectedView - Logique de Sélection', () => {
     component = fixture.componentInstance;
     store = TestBed.inject(ShopSelectionStore);
     
-    // On simule une entrée déjà présente dans la liste
     store.addEntry(mockShop, ['label'], []);
     fixture.detectChanges();
   });

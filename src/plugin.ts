@@ -127,7 +127,7 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
       if (textNode) {
         textNode.x = currentX;
         textNode.y = currentY;
-        if (board) board.appendChild(textNode); // <-- Rangement DANS le board
+        if (board) board.appendChild(textNode);
         currentY += 40;
       }
     };
@@ -146,7 +146,7 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
           rect.resize(200, 200);
           rect.x = currentX;
           rect.y = currentY;
-          if (board) board.appendChild(rect); // <-- Rangement DANS le board
+          if (board) board.appendChild(rect);
           
           currentY += 220;
 

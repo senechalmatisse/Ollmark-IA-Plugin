@@ -2,9 +2,8 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { App } from './app';
 import { ShopApiService } from './core/http/shop-api.service';
 import { of } from 'rxjs';
-import { Shop, ShopAddress } from './models/shop.model';
+import { Shop, ShopAddress, ShopCategory } from './models/shop.model';
 import { Paginated } from './models/pagination.model';
-import { ShopCategory } from './models/shop.model';
 import { provideRouter } from '@angular/router';
 
 function createMockShop(overrides: Partial<Shop> = {}): Shop {
@@ -54,9 +53,10 @@ describe('App', () => {
   ];
 
   beforeEach(async () => {
-    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories']);
+    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories', 'getMarketplaces']);
     mockShopApiService.search.and.returnValue(of(mockPaginatedResponse));
     mockShopApiService.getCategories.and.returnValue(of(mockCategories));
+    mockShopApiService.getMarketplaces.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [App],

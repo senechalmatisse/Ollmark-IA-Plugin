@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ShopViewComponent } from './shop-view.component';
 import { ShopApiService } from '../../core/http/shop-api.service';
 import { of, throwError } from 'rxjs';
-import { Shop, ShopAddress, ShopCategory } from '../../models/shop.model';
+import { Shop, ShopAddress, ShopCategory, Marketplace } from '../../models/shop.model';
 import { Paginated } from '../../models/pagination.model';
 import { provideRouter } from '@angular/router';
 
@@ -52,11 +52,29 @@ describe('ShopViewComponent', () => {
     { id: 'cat1', label: 'Boulangerie' },
     { id: 'cat2', label: 'Restaurant' }
   ];
+  const mockMarketplaces = [
+    {
+      id: 'm1',
+      label: 'Paris',
+      shopCatalogs: [
+        { id: 'catalog-paris-1', label: 'Catalogue Paris' },
+        { id: 'catalog-versailles-1', label: 'Catalogue Versailles' }
+      ]
+    },
+    {
+      id: 'm2',
+      label: 'Rouen',
+      shopCatalogs: [
+        { id: 'catalog-rouen-1', label: 'Catalogue Rouen' }
+      ]
+    }
+  ] as Marketplace[];
 
   beforeEach(async () => {
-    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories']);
+    mockShopApiService = jasmine.createSpyObj('ShopApiService', ['search', 'getCategories', 'searchCategories', 'getMarketplaces']);
     mockShopApiService.search.and.returnValue(of(mockPaginatedResponse));
     mockShopApiService.getCategories.and.returnValue(of(mockCategories));
+    mockShopApiService.getMarketplaces.and.returnValue(of(mockMarketplaces));
 
     await TestBed.configureTestingModule({
       imports: [ShopViewComponent],
@@ -89,7 +107,7 @@ describe('ShopViewComponent', () => {
     tick();
 
     expect(mockShopApiService.getCategories).toHaveBeenCalled();
-    expect(fixture.componentInstance.categoryOptions.length).toBe(2);
+    expect(fixture.componentInstance.categoryOptions.length).toBe(3);
   }));
 
   it('should search shops with sort by creationDate when no query', fakeAsync(() => {
@@ -130,12 +148,10 @@ describe('ShopViewComponent', () => {
     mockShopApiService.search.and.returnValue(throwError(() => new Error('API Error')));
 
     const fixture = TestBed.createComponent(ShopViewComponent);
-    spyOn(console, 'error');
     fixture.detectChanges();
     tick();
 
     expect(fixture.componentInstance.loading).toBeFalse();
-    expect(console.error).toHaveBeenCalled();
   }));
 
   it('should reset pagination on new search', fakeAsync(() => {
@@ -181,4 +197,50 @@ describe('ShopViewComponent', () => {
     expect(fixture.componentInstance.selectedMode).toBe('select');
     expect(fixture.componentInstance.showModal).toBeTrue();
   });
+it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    expect(mockShopApiService.getMarketplaces).toHaveBeenCalled();
+    expect(fixture.componentInstance.marketplaceOptions.length).toBe(4);
+    expect(fixture.componentInstance.marketplaceOptions[1].key).toBe('catalog-paris-1');
+    expect(fixture.componentInstance.marketplaceOptions[3].value).toBe('Rouen');
+  }));
+
+  it('should filter shops when a marketplace is selected', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
+    tick();
+
+    expect(fixture.componentInstance.selectedCatalogId).toBe('catalog-paris-1');
+    
+    const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
+    expect(callArgs.catalog).toBe('catalog-paris-1');
+  }));
+  it('should send multiple filters together (search, category, marketplace) and sort by relevance', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ShopViewComponent);
+    fixture.detectChanges();
+    tick();
+
+    fixture.componentInstance.onCategorySelect('cat1');
+    tick();
+
+    fixture.componentInstance.onMarketplaceSelect('catalog-paris-1');
+    tick();
+
+    fixture.componentInstance.onSearchUpdate('croissant');
+    tick();
+
+    const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
+
+    expect(callArgs.q).toBe('croissant');
+    expect(callArgs.category).toEqual(['cat1']);
+    expect(callArgs.catalog).toBe('catalog-paris-1');
+    
+    expect(callArgs.sort).toEqual(['-score', '-creationDate']);
+  }));
 });

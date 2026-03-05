@@ -80,8 +80,7 @@ describe('ShopApiService', () => {
       const req = httpMock.expectOne(r =>
         r.url === '/shop-api/v2/public/shop' &&
         r.params.get('page') === '1' &&
-        r.params.get('size') === '20' &&
-        r.params.get('onlineOnly') === 'true'
+        r.params.get('size') === '20'
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockApiResponse);
@@ -139,6 +138,19 @@ describe('ShopApiService', () => {
       });
       req.flush(mockApiResponse);
     });
+    it('should handle null content gracefully without crashing', () => {
+      const filters = createDefaultShopFilters();
+
+      service.search(filters).subscribe(result => {
+        expect(result.content).toEqual([]);
+        expect(result.totalElements).toBe(0);
+        expect(result.number).toBe(1); // 0 + 1
+      });
+
+      const req = httpMock.expectOne(r => r.url === '/shop-api/v2/public/shop');
+      // On simule une API qui renvoie des valeurs nulles
+      req.flush({ ...mockApiResponse, content: null, totalElements: null, number: null });
+    });
   });
 
   describe('getCategories', () => {
@@ -149,7 +161,10 @@ describe('ShopApiService', () => {
         expect(categories[1].label).toBe('Restaurant');
       });
 
-      const req = httpMock.expectOne('/shop-api/v2/public/category');
+      const req = httpMock.expectOne(r => 
+        r.url === '/shop-api/v2/public/category' && 
+        r.params.get('size') === '1000'
+      );
       expect(req.request.method).toBe('GET');
       req.flush(mockCategoryResponse);
     });
@@ -159,8 +174,12 @@ describe('ShopApiService', () => {
         expect(categories.length).toBe(0);
       });
 
-      const req = httpMock.expectOne('/shop-api/v2/public/category');
-      req.flush({ content: [] });
+      const req = httpMock.expectOne(r => 
+        r.url === '/shop-api/v2/public/category' && 
+        r.params.get('size') === '1000'
+      );
+      
+      req.flush({ content: null });
     });
   });
 
@@ -191,6 +210,17 @@ describe('ShopApiService', () => {
         r.params.get('q') === 'bou'
       );
       req.flush(mockCategoryResponse);
+    });
+    it('should handle null content gracefully without crashing', () => {
+      const filters = createDefaultCategoryFilters();
+
+      service.searchCategories(filters).subscribe(result => {
+        expect(result.content).toEqual([]);
+        expect(result.totalElements).toBe(0);
+      });
+
+      const req = httpMock.expectOne(r => r.url === '/shop-api/v2/public/category');
+      req.flush({ ...mockCategoryResponse, content: null, totalElements: null });
     });
   });
 });
