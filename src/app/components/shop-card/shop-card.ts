@@ -1,4 +1,4 @@
-import {Component, Input, input, output} from '@angular/core';
+import {Component, Input, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Shop} from '../../models/shop.model';
 
@@ -8,6 +8,7 @@ import {Shop} from '../../models/shop.model';
   imports: [CommonModule],
   templateUrl: './shop-card.html',
   styleUrl: './shop-card.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class ShopCard {

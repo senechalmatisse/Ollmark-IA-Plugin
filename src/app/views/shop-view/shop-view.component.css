@@ -28,6 +28,19 @@
   width: 100%;
 }
 
+/* Virtual scroll viewport */
+.shops-viewport {
+  flex: 1;
+  width: 100%;
+}
+
+.shop-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
 .shops-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -38,20 +51,24 @@
 }
 
 /* Scrollbar personnalisée */
+.shops-viewport::-webkit-scrollbar,
 .shops-grid::-webkit-scrollbar {
   width: 6px;
 }
 
+.shops-viewport::-webkit-scrollbar-track,
 .shops-grid::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
+.shops-viewport::-webkit-scrollbar-thumb,
 .shops-grid::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
 }
 
+.shops-viewport::-webkit-scrollbar-thumb:hover,
 .shops-grid::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }

@@ -32,31 +32,32 @@
 
   </div>
 
-  <div class="shops-grid" (scroll)="onScroll($event)">
-
-    @if (loading) {
-      <p class="loading-text">Chargement des boutiques...</p>
-    }
-
-    @for (shop of shops; track shop.id) {
-      <app-shop-card
-        [shop]="shop"
-        (generate)="onGenerate($event)"
-        (add)="onAdd($event)">
-      </app-shop-card>
-    } @empty {
-      @if (!loading) {
-        <p class="empty-text">Aucune boutique trouvée.</p>
-      }
-    }
-
-    @if (loadingMore) {
-      <div class="loading-more">
-        <div class="spinner"></div>
-        <span>Chargement...</span>
+  @if (loading) {
+    <p class="loading-text">Chargement des boutiques...</p>
+  } @else if (shopRows.length === 0) {
+    <p class="empty-text">Aucune boutique trouvée.</p>
+  } @else {
+    <cdk-virtual-scroll-viewport
+      [itemSize]="rowHeight"
+      class="shops-viewport"
+      (scrolledIndexChange)="onVirtualScroll($event)">
+      <div *cdkVirtualFor="let row of shopRows; trackBy: trackRow" class="shop-row">
+        @for (shop of row; track shop.id) {
+          <app-shop-card
+            [shop]="shop"
+            (generate)="onGenerate($event)"
+            (add)="onAdd($event)">
+          </app-shop-card>
+        }
       </div>
-    }
-  </div>
+      @if (loadingMore) {
+        <div class="loading-more">
+          <div class="spinner"></div>
+          <span>Chargement...</span>
+        </div>
+      }
+    </cdk-virtual-scroll-viewport>
+  }
   }
   @if (showSelected) {
     <app-selected-view (editEntry)="onEditShop($event)" />
