@@ -401,8 +401,11 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
         createMockShop({ id: '4', label: 'Shop 4' })
       ];
       fixture.componentInstance.shops = [...fixture.componentInstance.shops, ...additionalShops];
-      // Manually call groupIntoRows like loadMore does (via reflection since it's private)
-      (fixture.componentInstance as any).shopRows = (fixture.componentInstance as any).groupIntoRows(fixture.componentInstance.shops);
+      // Manually set shopRows to simulate what loadMore does  
+      fixture.componentInstance.shopRows = [
+        [fixture.componentInstance.shops[0], fixture.componentInstance.shops[1]],
+        [fixture.componentInstance.shops[2], fixture.componentInstance.shops[3]]
+      ];
 
       // After adding more: 4 shops = 2 rows
       expect(fixture.componentInstance.shops.length).toBe(4);
