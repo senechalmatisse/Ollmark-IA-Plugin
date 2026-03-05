@@ -80,7 +80,7 @@ export class ShopViewComponent implements OnInit {
             // On parcourt le tableau des catalogues pour CHAQUE marketplace
             m.shopCatalogs.forEach(catalog => {
               apiOptions.push({
-                key: catalog.id, // On donne l'ID unique de ce catalogue
+                key: catalog.id,
                 
                 // Si la ville a plusieurs catalogues (ex: Paris), on précise le nom
                 // Sinon (ex: Rouen), on affiche juste le nom de la ville
@@ -118,7 +118,6 @@ export class ShopViewComponent implements OnInit {
       category: this.selectedCategoryId ? [this.selectedCategoryId] : undefined,
       catalog: this.selectedCatalogId ? this.selectedCatalogId : undefined
     };
-     console.log('2. Filtres préparés pour le service :', filters);
 
     this.shopApi.search(filters).subscribe({
       next: (result) => {
@@ -126,8 +125,7 @@ export class ShopViewComponent implements OnInit {
         this.hasMore = !result.last;
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Erreur chargement boutiques:', err);
+      error: () => {
         this.loading = false;
       }
     });
@@ -154,8 +152,7 @@ export class ShopViewComponent implements OnInit {
         this.hasMore = !result.last;
         this.loadingMore = false;
       },
-      error: (err) => {
-        console.error('Erreur chargement boutiques:', err);
+      error: () => {
         this.loadingMore = false;
       }
     });

@@ -148,12 +148,10 @@ describe('ShopViewComponent', () => {
     mockShopApiService.search.and.returnValue(throwError(() => new Error('API Error')));
 
     const fixture = TestBed.createComponent(ShopViewComponent);
-    spyOn(console, 'error');
     fixture.detectChanges();
     tick();
 
     expect(fixture.componentInstance.loading).toBeFalse();
-    expect(console.error).toHaveBeenCalled();
   }));
 
   it('should reset pagination on new search', fakeAsync(() => {

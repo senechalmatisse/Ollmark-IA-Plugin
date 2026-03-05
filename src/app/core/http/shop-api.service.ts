@@ -38,7 +38,8 @@ export class ShopApiService implements IShopRepository {
     console.log('3. Le service a bien reçu la commande avec :', filters);
     let params = new HttpParams()
       .set('page', (filters.page).toString())
-      .set('size', filters.size.toString());
+      .set('size', filters.size.toString())
+      .set('onlineOnly', 'true'); 
 
     if (filters.q) {
       params = params.set('q', filters.q);
@@ -81,7 +82,10 @@ export class ShopApiService implements IShopRepository {
    * Récupère les catégories - GET /v2/public/category
    */
   getCategories(): Observable<ShopCategory[]> {
-    const params = new HttpParams().set('size', '1000');
+    const params = new HttpParams()
+    .set('size', '1000')
+    .set('sort', '-score')
+    .set('rootOnly', 'true');
 
     return this.http.get<PaginatedApiResponse<CategoryDto>>(`${this.baseUrl}/category`, { params }).pipe(
       map(response => {
@@ -97,7 +101,7 @@ export class ShopApiService implements IShopRepository {
   searchCategories(filters: CategoryFilters): Observable<Paginated<ShopCategory>> {
     let params = new HttpParams()
       .set('page', filters.page.toString())
-      .set('size', filters.size.toString());
+      .set('size', filters.size.toString())
 
     if (filters.q) {
       params = params.set('q', filters.q);
@@ -117,7 +121,7 @@ export class ShopApiService implements IShopRepository {
   getMarketplaces(): Observable<Marketplace[]> {
     const params = new HttpParams()
       .set('page', '1')
-      .set('size', '1000');
+      .set('size', '99');
 
     return this.http.get<PaginatedApiResponse<Marketplace>>(`${this.marketplaceBaseUrl}/marketplace`, { params }).pipe(
       map(response => response.content || [])
