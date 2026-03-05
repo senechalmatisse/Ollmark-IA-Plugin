@@ -10,12 +10,13 @@ import { PENPOT_SERVICE } from '../../../core/penpot/penpot.service';
 import { ShopSelectionStore } from '../../../stores/shop-selection.store';
 import {Button} from '../../inputs/button/button';
 import {ButtonType} from '../../../models/ButtonType';
+import {Popin} from '../../containers/popin/popin';
 export type SelectorMode = 'select' | 'quick';
 
 @Component({
   selector: 'app-shop-field-selector',
   standalone: true,
-  imports: [CommonModule, CustomCheckbox, Carousel, Button],
+  imports: [CommonModule, CustomCheckbox, Carousel, Button, Popin],
   templateUrl: './shop-field-selector.html',
   styleUrl: './shop-field-selector.scss',
 })
