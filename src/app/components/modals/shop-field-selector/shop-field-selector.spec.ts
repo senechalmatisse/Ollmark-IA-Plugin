@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ShopFieldSelector } from './shop-field-selector';
 import { ContentSelectionStore } from '../../../stores/content-selection.store';
 import { Shop } from '../../../models/shop.model';
-
+import { PENPOT_SERVICE } from '../../../core/penpot/penpot.service';
 describe('ShopFieldSelector - Logique UI', () => {
   let fixture: ComponentFixture<ShopFieldSelector>;
   let component: ShopFieldSelector;
   let store: ContentSelectionStore;
-
+  const mockPenpotService = jasmine.createSpyObj('IPenpotService', ['createText', 'createImage', 'notify', 'closePlugin']);
   const mockShopMinimal = {
     id: '1',
     label: 'Test Shop',
@@ -19,7 +19,7 @@ describe('ShopFieldSelector - Logique UI', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ShopFieldSelector],
-      providers: [ContentSelectionStore],
+      providers: [ContentSelectionStore, { provide: PENPOT_SERVICE, useValue: mockPenpotService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ShopFieldSelector);

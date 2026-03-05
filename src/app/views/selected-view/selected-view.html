@@ -22,8 +22,13 @@
             <span class="entry-address">{{ entry.shop.address.formatted }}</span>
           </div>
           <div class="entry-actions">
-            <button class="action-btn" aria-label="Paramètres">⚙️</button>
-            <button class="action-btn delete-btn" (click)="removeEntry(entry.shop.id)" aria-label="Supprimer">🗑️</button>
+           <button class="action-btn" aria-label="Paramètres" (click)="onEditClick(entry.shop)">
+  <img src="https://img.icons8.com/ios/50/settings--v1.png" alt="Paramètres" width="20" height="20" />
+</button>
+
+<button class="action-btn delete-btn" (click)="removeEntry(entry.shop.id)" aria-label="Supprimer">
+  <img src="https://img.icons8.com/ios/50/trash--v1.png" alt="Supprimer" width="20" height="20" />
+</button>
           </div>
         </div>
 
@@ -69,4 +74,18 @@
       </div>
     }
   </div>
+
+  @if (store.hasEntries()) {
+    <div class="footer-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
+      <button class="generate-btn" (click)="onGenerateAll()" style="display: flex; gap: 8px; align-items: center; padding: 10px 16px; background: #333; color: white; border-radius: 6px; cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        Générer la sélection
+      </button>
+    </div>
+  }
+
 </div>

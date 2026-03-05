@@ -1,4 +1,4 @@
-import {Component, input, output, inject} from '@angular/core';
+import {Component, input, output, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CustomCheckbox} from '../../inputs/custom-checkbox/custom-checkbox';
 import {Carousel, CarouselItem} from '../../widgets/Carousel/carousel';
@@ -6,7 +6,8 @@ import {Shop} from '../../../models/shop.model';
 import {ContentSelectionStore} from '../../../stores/content-selection.store';
 import {ShopSelectionService} from '../../../services/shop-selection/shop-selection.service';
 import {SHOP_ATTRIBUTE_LABELS, SHOP_ATTRIBUTES, ShopAttribute} from '../../../models/shop-attribute.model';
-
+import { PENPOT_SERVICE } from '../../../core/penpot/penpot.service';
+import { ShopSelectionStore } from '../../../stores/shop-selection.store';
 export type SelectorMode = 'select' | 'quick';
 
 @Component({
@@ -16,7 +17,7 @@ export type SelectorMode = 'select' | 'quick';
   templateUrl: './shop-field-selector.html',
   styleUrl: './shop-field-selector.css',
 })
-export class ShopFieldSelector {
+export class ShopFieldSelector implements OnInit {
   shop = input.required<Shop>();
   mode = input<SelectorMode>('select');
 
@@ -25,7 +26,8 @@ export class ShopFieldSelector {
 
   readonly store = inject(ContentSelectionStore);
   private readonly selectionService = inject(ShopSelectionService);
-
+  private readonly penpotService = inject(PENPOT_SERVICE);
+  readonly shopStore = inject(ShopSelectionStore);
   readonly attributes = SHOP_ATTRIBUTES;
   readonly attributeLabels = SHOP_ATTRIBUTE_LABELS;
 
@@ -78,13 +80,48 @@ export class ShopFieldSelector {
     this.store.togglePhoto(photoId);
   }
 
+  
+
   onConfirm(): void {
-    this.selectionService.importSelectedFields(this.shop());
+    if (this.mode() === 'quick') {
+      
+      this.selectionService.quickImport(this.shop());
+    } else {
+      
+      this.selectionService.importSelectedFields(this.shop());
+    }
+    
     this.confirmed.emit();
   }
 
   onClose(): void {
     this.store.clearSelection();
     this.closed.emit();
+  }
+
+  ngOnInit(): void {
+    // On s'assure de partir d'un état vierge
+    this.store.clearSelection();
+
+    // On cherche si cette boutique est déjà dans le panier
+    const existingEntry = this.shopStore.entries().find(e => e.shop.id === this.shop().id);
+
+    if (existingEntry) {
+      // 1. On recoche les champs textes
+      existingEntry.selectedAttributes.forEach(attr => {
+        this.store.toggleAttribute(attr);
+      });
+
+      
+      if (existingEntry.selectedPhotos.length > 0) {
+        
+        this.store.toggleAttribute('photos');
+
+        
+        existingEntry.selectedPhotos.forEach(photo => {
+          this.store.togglePhoto(photo.id);
+        });
+      }
+    }
   }
 }

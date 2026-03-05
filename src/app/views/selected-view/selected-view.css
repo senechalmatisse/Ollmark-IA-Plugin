@@ -154,3 +154,34 @@
   background: rgba(255, 255, 255, 0.5);
   border-radius: 4px;
 }
+
+
+.entries-list {
+  /* Définit la zone de scroll */
+  max-height: 380px; /* Ajuste cette valeur si le bouton du bas est trop proche */
+  overflow-y: auto;
+  
+  /* Esthétique */
+  padding-right: 8px; /* Évite que le scroll colle aux cartes */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+
+.entries-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.entries-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.entries-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}

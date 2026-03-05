@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "build-plugin": "npx esbuild src/plugin.ts --bundle --outfile=./public/plugin.js"
   },
   "prettier": {
     "printWidth": 100,
@@ -37,6 +38,7 @@
     "@angular/build": "^20.3.10",
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
+    "@penpot/plugin-types": "^1.4.2",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "20.6.0",
     "eslint": "^9.39.0",
