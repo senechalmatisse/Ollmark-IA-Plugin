@@ -1,8 +1,11 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CustomCheckbox} from '../../components/inputs/custom-checkbox/custom-checkbox';
 import {ImportedShopEntry, ShopSelectionStore} from '../../stores/shop-selection.store';
 import {SHOP_ATTRIBUTE_LABELS, ShopAttribute} from '../../models/shop-attribute.model';
+import { PENPOT_SERVICE } from '../../core/penpot/penpot.service';
+import { Shop } from '../../models/shop.model';
+import { ToastService } from '../../services/toast/toast.service';
 
 @Component({
   selector: 'app-selected-view',
@@ -14,7 +17,11 @@ import {SHOP_ATTRIBUTE_LABELS, ShopAttribute} from '../../models/shop-attribute.
 export class SelectedView {
   readonly store = inject(ShopSelectionStore);
   readonly attributeLabels = SHOP_ATTRIBUTE_LABELS;
-
+  private readonly penpotService = inject(PENPOT_SERVICE);
+  
+  private readonly toastService = inject(ToastService);
+  editEntry = output<Shop>();
+  
   removeEntry(shopId: string): void {
     this.store.removeEntry(shopId);
   }
@@ -44,5 +51,39 @@ export class SelectedView {
       case 'primaryCategory': return shop.primaryCategory?.label ?? '';
       default: return '';
     }
+  }
+
+  
+  onGenerateAll(): void {
+    const entries = this.store.entries();
+    if (entries.length === 0) return;
+    this.toastService.showWait();
+    entries.forEach(entry => {
+      
+      entry.selectedAttributes.forEach(attr => {
+        const textValue = this.getSubtitleForAttribute(entry, attr);
+        if (textValue) {
+          this.penpotService.createText(`${this.attributeLabels[attr]} : ${textValue}`);
+        }
+      });
+
+      
+      entry.selectedPhotos.forEach(photo => {
+        this.penpotService.createImage(photo.url);
+      });
+    });
+
+    setTimeout(() => {
+      this.toastService.showSuccess();
+      this.store.clearEntries(); 
+    }, 300);
+    this.penpotService.notify('Génération de la sélection terminée avec succès !');
+    
+   
+    this.store.clearEntries(); 
+  }
+  onEditClick(shop: Shop): void {
+    console.log('CLIC CAPTÉ DANS ENFANT (SelectedView) POUR :', shop.label);
+    this.editEntry.emit(shop);
   }
 }

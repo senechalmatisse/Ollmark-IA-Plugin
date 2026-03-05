@@ -10,17 +10,22 @@ import {Tab} from '../../components/inputs/tab/tab';
 import {ShopFieldSelector} from '../../components/modals/shop-field-selector/shop-field-selector';
 import {SelectedView} from '../selected-view/selected-view';
 import {ShopSelectionService} from '../../services/shop-selection/shop-selection.service';
+import { ToastComponent } from '../../components/toast/toast.component';
+
+import {ShopSelectionStore} from '../../stores/shop-selection.store';
+
 
 @Component({
   selector: 'app-shop-view',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab, ShopFieldSelector, SelectedView],
+  imports: [CommonModule, NavbarComponent, SearchBar, DropDownComponent, ShopCard, Tab, ShopFieldSelector, SelectedView, ToastComponent],
   templateUrl: './shop-view.component.html',
   styleUrl: './shop-view.component.css'
 })
 export class ShopViewComponent implements OnInit {
   private readonly shopApi = inject(ShopApiService);
   private readonly selectionService = inject(ShopSelectionService);
+  private readonly shopStore = inject(ShopSelectionStore);
 
   navTabs: NavItem[] = [
     { label: 'Boutique', route: '/boutique' },
@@ -132,7 +137,7 @@ export class ShopViewComponent implements OnInit {
     });
   }
 
-  // --- Écouteurs d'événements ---
+
 
   onSelectedClick(label: string): void {
     console.log(label + " not implemented")
@@ -171,9 +176,17 @@ export class ShopViewComponent implements OnInit {
 
   onModalConfirm(): void {
     this.showModal = false;
-    if (this.selectedMode === 'quick') {
-      this.showSelected = true;
-    }
     this.selectedShop = null;
+  }
+
+  onEditShop(shop: Shop): void {
+    console.log('BOUTON ENGRENAGE CLIQUÉ POUR :', shop.label);
+    this.selectedShop = shop;
+    this.selectedMode = 'select'; 
+    this.showModal = true;
+  }
+
+  isShopSelected(shopId: string): boolean {
+    return this.shopStore.entries().some((e) => e.shop.id === shopId);
   }
 }

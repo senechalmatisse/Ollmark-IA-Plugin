@@ -2,12 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SelectedView } from './selected-view';
 import { ShopSelectionStore } from '../../stores/shop-selection.store';
 import { Shop } from '../../models/shop.model';
-
+import { PENPOT_SERVICE } from '../../core/penpot/penpot.service';
 describe('SelectedView - Logique de Sélection', () => {
   let fixture: ComponentFixture<SelectedView>;
   let component: SelectedView;
   let store: ShopSelectionStore;
-
+  
+  const mockPenpotService = jasmine.createSpyObj('IPenpotService', ['createText', 'createImage', 'notify', 'closePlugin']);
   const mockShop = {
     id: 'shop-123',
     label: 'Boucherie Saint Clement',
@@ -20,7 +21,7 @@ describe('SelectedView - Logique de Sélection', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SelectedView],
-      providers: [ShopSelectionStore]
+      providers: [ShopSelectionStore, { provide: PENPOT_SERVICE, useValue: mockPenpotService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SelectedView);
