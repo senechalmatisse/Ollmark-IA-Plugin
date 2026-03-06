@@ -1,14 +1,13 @@
-FROM node:20
-
+# Stage 1: Build
+FROM node:22-alpine AS builder
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm install
-
+RUN npm ci
 COPY . .
+RUN npm run build -- --configuration=production
 
-RUN rm -rf .angular/cache
-
-EXPOSE 4200
-
-CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
+# Stage 2: Serve avec nginx
+FROM nginx:alpine
+COPY --from=builder /app/dist/Front/browser /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

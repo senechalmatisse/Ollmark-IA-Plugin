@@ -139,9 +139,30 @@ build-frontend-image:
 # -----------------------------------------------------------------------------
 trivy-frontend:
   stage: scan
-  image: { name: "aquasec/trivy:latest", entrypoint: [""] }
+  image: 
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  variables:
+    TRIVY_USERNAME: $CI_REGISTRY_USER
+    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
+    TRIVY_AUTH_URL: $DOCKER_REGISTRY
+    TRIVY_CACHE_DIR: ".trivycache/" # On déplace le cache dans le dossier du projet
+  cache:
+    key: trivy-db-cache
+    paths:
+      - .trivycache/
   script:
-    - trivy image --exit-code 0 --severity HIGH,CRITICAL $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+    # 1. Nettoyage initial des fichiers temporaires pour libérer de l'espace
+    - trivy clean --scan-cache
+    
+    # 2. Premier passage : Affichage informatif (ne bloque pas) pour les vulnérabilités HIGH
+    - trivy image --exit-code 0 --severity HIGH --cache-dir $TRIVY_CACHE_DIR $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+    
+    # 3. Second passage : BLOQUANT (exit 1) si des vulnérabilités CRITICAL sont trouvées
+    - trivy image --exit-code 1 --severity CRITICAL --cache-dir $TRIVY_CACHE_DIR $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+  after_script:
+    # Optionnel : Nettoyage après exécution pour ne pas encombrer le runner
+    - rm -rf .trivycache/tmp
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -171,8 +192,18 @@ deploy-front-dev:
 
 deploy-front-preprod:
   stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    # Recreate SSH key from Base64
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Add VM host to known_hosts to avoid SSH prompt
+    - ssh-keyscan -H $VM_HOST_PREPROD >> ~/.ssh/known_hosts
   script:
-    - echo "Déploiement Angular manuel en PREPROD"
+    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
       when: manual
