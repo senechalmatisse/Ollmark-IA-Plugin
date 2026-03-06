@@ -9,6 +9,9 @@ export interface DropDownOption {
   value: string;
 }
 
+let globalDropdownCounter = 0
+
+
 @Component({
   selector: 'app-drop-down',
   standalone: true,
@@ -20,8 +23,19 @@ export class DropDownComponent {
   label = input<string>("")
   options = input<DropDownOption[]>([])
   showPlaceholder = input<boolean>(true);
-
   selectionChange = output<string | number>();
+
+  compId: number
+
+  constructor() {
+    this.compId = globalDropdownCounter
+    globalDropdownCounter = (globalDropdownCounter + 1) % 9999
+  }
+
+  get dropId(): string {
+    return `dropdown${this.compId}`;
+  }
+
 
   onSelect(event: Event): void {
     const target = event.target as HTMLSelectElement;

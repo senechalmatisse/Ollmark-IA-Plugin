@@ -1,13 +1,13 @@
 <div class="checkbox-wrapper">
   <input
     type="checkbox"
-    [id]="inputId"
+    [id]="checkId"
     [checked]="checked()"
     (change)="onToggle($event)"
     class="checkbox-input"
   />
   <div class="text-wrapper">
-    <label [for]="inputId" class="checkbox-title">{{ title() }}</label>
+    <label [for]="checkId" class="checkbox-title">{{ title() }}</label>
     @if (subtitle()) {
       <span class="checkbox-subtitle">{{ subtitle() }}</span>
     }
