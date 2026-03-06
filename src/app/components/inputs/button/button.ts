@@ -1,4 +1,4 @@
-import {Component, Input, input, output} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import {ButtonType} from '../../../models/ButtonType';
 
 @Component({

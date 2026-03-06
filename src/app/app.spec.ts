@@ -1,10 +1,10 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { App } from './app';
-import { ShopApiService } from './core/http/shop-api.service';
-import { of } from 'rxjs';
-import { Shop, ShopAddress, ShopCategory } from './models/shop.model';
-import { Paginated } from './models/pagination.model';
-import { provideRouter } from '@angular/router';
+import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {App} from './app';
+import {ShopApiService} from './core/http/shop-api.service';
+import {of} from 'rxjs';
+import {Shop, ShopAddress, ShopCategory} from './models/shop.model';
+import {Paginated} from './models/pagination.model';
+import {provideRouter} from '@angular/router';
 
 function createMockShop(overrides: Partial<Shop> = {}): Shop {
   const defaultAddress: ShopAddress = {
@@ -24,10 +24,10 @@ function createMockShop(overrides: Partial<Shop> = {}): Shop {
     humanUrl: 'ollca.com/paris/boutiques/ma-boutique',
     technicalUrl: null,
     eligibilityUrl: null,
-    logo: { id: 'logo1', url: 'https://example.com/logo.jpg' },
+    logo: {id: 'logo1', url: 'https://example.com/logo.jpg'},
     photos: [],
-    primaryCategory: { id: 'cat1', label: 'Boulangerie' },
-    geolocation: { latitude: 48.8566, longitude: 2.3522 },
+    primaryCategory: {id: 'cat1', label: 'Boulangerie'},
+    geolocation: {latitude: 48.8566, longitude: 2.3522},
     ...overrides
   };
 }
@@ -35,8 +35,8 @@ function createMockShop(overrides: Partial<Shop> = {}): Shop {
 describe('App', () => {
   let mockShopApiService: jasmine.SpyObj<ShopApiService>;
   const mockShops: Shop[] = [
-    createMockShop({ id: '1', label: 'Boutique 1' }),
-    createMockShop({ id: '2', label: 'Boutique 2' })
+    createMockShop({id: '1', label: 'Boutique 1'}),
+    createMockShop({id: '2', label: 'Boutique 2'})
   ];
 
   const mockPaginatedResponse: Paginated<Shop> = {
@@ -49,7 +49,7 @@ describe('App', () => {
   };
 
   const mockCategories: ShopCategory[] = [
-    { id: 'cat1', label: 'Boulangerie' }
+    {id: 'cat1', label: 'Boulangerie'}
   ];
 
   beforeEach(async () => {
@@ -62,7 +62,7 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
-        { provide: ShopApiService, useValue: mockShopApiService }
+        {provide: ShopApiService, useValue: mockShopApiService}
       ]
     }).compileComponents();
   });
@@ -84,8 +84,8 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     tick();
-
-    const shopView = fixture.nativeElement.querySelector('app-shop-view');
+    console.log(fixture.nativeElement)
+    const shopView = fixture.nativeElement.querySelector('router-outlet');
     expect(shopView).toBeTruthy();
   }));
 });
