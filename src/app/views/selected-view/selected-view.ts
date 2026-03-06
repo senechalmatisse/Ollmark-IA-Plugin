@@ -6,11 +6,14 @@ import {SHOP_ATTRIBUTE_LABELS, ShopAttribute} from '../../models/shop-attribute.
 import { PENPOT_SERVICE } from '../../core/penpot/penpot.service';
 import { Shop } from '../../models/shop.model';
 import { ToastService } from '../../services/toast/toast.service';
+import {Card} from '../../components/containers/card/card';
+import {Button} from '../../components/inputs/button/button';
+import {ButtonType} from '../../models/ButtonType';
 
 @Component({
   selector: 'app-selected-view',
   standalone: true,
-  imports: [CommonModule, CustomCheckbox],
+  imports: [CommonModule, CustomCheckbox, Card, Button],
   templateUrl: './selected-view.html',
   styleUrl: './selected-view.scss',
 })
@@ -86,4 +89,6 @@ export class SelectedView {
     console.log('CLIC CAPTÉ DANS ENFANT (SelectedView) POUR :', shop.label);
     this.editEntry.emit(shop);
   }
+
+  protected readonly ButtonType = ButtonType;
 }

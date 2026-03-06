@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToastComponent } from './toast.component';
-import { ToastService } from '../../services/toast/toast.service';
+import { ToastService } from '../../../services/toast/toast.service';
 
 describe('ToastComponent', () => {
-  
+
   let fixture: ComponentFixture<ToastComponent>;
   let toastService: ToastService;
 
@@ -14,7 +14,7 @@ describe('ToastComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToastComponent);
-    
+
     toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
   });

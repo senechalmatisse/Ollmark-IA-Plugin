@@ -5,16 +5,16 @@ type UIToPluginMessage =
   | { type: 'create-rectangle-with-image'; content: string }
   | { type: 'notify'; content: string }
   | { type: 'close' }
-  | { 
-      type: 'quick-import-direct'; 
-      data: {
-        shopLabel: string | null;
-        address: string | null;
-        url: string | null;
-        category: string | null;
-        photos: string[];
-      }
-    };
+  | {
+  type: 'quick-import-direct';
+  data: {
+    shopLabel: string | null;
+    address: string | null;
+    url: string | null;
+    category: string | null;
+    photos: string[];
+  }
+};
 
 type PluginToUIMessage =
   | { type: 'notify'; content: string }
@@ -28,14 +28,14 @@ penpot.ui.open('OllMark Generation', 'index.html', {
 });
 
 function notifyUI(content: string): void {
-  const msg: PluginToUIMessage = { type: 'notify', content };
+  const msg: PluginToUIMessage = {type: 'notify', content};
   penpot.ui.sendMessage(msg);
 }
 
 function getCanvasParent(): Board | Page | null {
   const currentPage = penpot.currentPage;
   if (currentPage) return currentPage;
-  
+
   const root = penpot.root as unknown;
   if (root && typeof root === 'object' && 'type' in root) {
     const type = (root as { type: string }).type;
@@ -49,9 +49,12 @@ function getCanvasParent(): Board | Page | null {
 
 function getStartingPosition(): { x: number, y: number, targetBoard: Board | null } {
   if (penpot.selection.length === 0) {
+    const viewCenterX = penpot.viewport.center.x;
+    const viewCenterY = penpot.viewport.center.y;
+
     return {
-      x: -750,  
-      y: -1000, 
+      x: viewCenterX - 100,
+      y: viewCenterY - 200,
       targetBoard: null
     };
   }
@@ -65,10 +68,10 @@ function getStartingPosition(): { x: number, y: number, targetBoard: Board | nul
     targetBoard = selected as Board;
     let maxBottom = startY;
 
-    
-    const children = 'children' in targetBoard 
-  ? (targetBoard as unknown as { children: { y: number, height: number }[] }).children 
-  : [];
+
+    const children = 'children' in targetBoard
+      ? (targetBoard as unknown as { children: { y: number, height: number }[] }).children
+      : [];
     for (const child of children) {
       const childBottom = child.y + child.height;
       if (childBottom > maxBottom) {
@@ -82,7 +85,7 @@ function getStartingPosition(): { x: number, y: number, targetBoard: Board | nul
     }
   }
 
-  return { x: startX, y: startY, targetBoard };
+  return {x: startX, y: startY, targetBoard};
 }
 
 // Variables globales pour l'import de masse ("Sélectionnés")
@@ -100,8 +103,8 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
   if (message.type === 'notify') {
     notifyUI(message.content);
     if (message.content === 'Génération de la sélection terminée avec succès !') {
-      penpot.ui.sendMessage({ type: 'generation-success' });
-      isCursorInitialized = false; 
+      penpot.ui.sendMessage({type: 'generation-success'});
+      isCursorInitialized = false;
     }
     return;
   }
@@ -112,9 +115,9 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
     return;
   }
 
-  
+
   if (message.type === 'quick-import-direct') {
-    const { data } = message;
+    const {data} = message;
 
     // On calcule la position idéale (sous les éléments existants s'il y en a)
     const startPos = getStartingPosition();
@@ -147,13 +150,13 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
           rect.x = currentX;
           rect.y = currentY;
           if (board) board.appendChild(rect);
-          
+
           currentY += 220;
 
           try {
             const imageData = await penpot.uploadMediaUrl('plugin-image', photoUrl);
             if (imageData) {
-              rect.fills = [{ fillOpacity: 1, fillImage: imageData }];
+              rect.fills = [{fillOpacity: 1, fillImage: imageData}];
             }
           } catch (error) {
             console.error('Erreur lors du téléchargement de la photo', error);
@@ -163,11 +166,11 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
     }
 
     notifyUI('Import rapide terminé avec succès !');
-    penpot.ui.sendMessage({ type: 'import-success' });
+    penpot.ui.sendMessage({type: 'import-success'});
     return;
   }
 
- 
+
   if (!isCursorInitialized && (message.type === 'create-text' || message.type === 'create-rectangle-with-image')) {
     const startPos = getStartingPosition();
     globalCursorX = startPos.x;
@@ -185,10 +188,10 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
 
     textNode.x = globalCursorX;
     textNode.y = globalCursorY;
-    if (globalTargetBoard) globalTargetBoard.appendChild(textNode); 
-    globalCursorY += 40; 
+    if (globalTargetBoard) globalTargetBoard.appendChild(textNode);
+    globalCursorY += 40;
 
-    penpot.ui.sendMessage({ type: 'done', action: 'create-text' } as PluginToUIMessage);
+    penpot.ui.sendMessage({type: 'done', action: 'create-text'} as PluginToUIMessage);
     return;
   }
 
@@ -202,16 +205,16 @@ penpot.ui.onMessage<UIToPluginMessage>(async (message) => {
     rect.resize(200, 200);
     rect.x = globalCursorX;
     rect.y = globalCursorY;
-    if (globalTargetBoard) globalTargetBoard.appendChild(rect); 
-    globalCursorY += 220; 
+    if (globalTargetBoard) globalTargetBoard.appendChild(rect);
+    globalCursorY += 220;
 
     try {
       const imageData = await penpot.uploadMediaUrl('plugin-image', message.content);
       if (imageData) {
-        rect.fills = [{ fillOpacity: 1, fillImage: imageData }];
+        rect.fills = [{fillOpacity: 1, fillImage: imageData}];
       }
 
-      penpot.ui.sendMessage({ type: 'done', action: 'create-rectangle-with-image' } as PluginToUIMessage);
+      penpot.ui.sendMessage({type: 'done', action: 'create-rectangle-with-image'} as PluginToUIMessage);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       notifyUI(`Erreur lors de l’importation de l’image : ${errorMessage}`);
