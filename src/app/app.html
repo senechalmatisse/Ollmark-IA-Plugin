@@ -1,7 +1,20 @@
 <app-navbar>
-  <app-tab tabText="Boutiques" (tabClicked)="onSelectedClick('/shops')"/>
-  <app-tab tabText="Produits" (tabClicked)="onSelectedClick('/products')"/>
-  <app-tab tabText="Codes promo." (tabClicked)="onSelectedClick('/codes')"/>
-  <app-tab tabText="Sélectionnés" [isSpecial]="true" (tabClicked)="onSelectedClick('/selected')"/>
+  <app-tab
+    tabText="Boutiques"
+    [isSelected]="router.url === '/shops'"
+    (tabClicked)="onSelectedClick('/shops')"/>
+  <app-tab
+    tabText="Produits"
+    [isSelected]="router.url === '/products'"
+    (tabClicked)="onSelectedClick('/products')"/>
+  <app-tab
+    tabText="Codes promo."
+    [isSelected]="router.url === '/codes'"
+    (tabClicked)="onSelectedClick('/codes')"/>
+  <app-tab
+    tabText="Sélectionnés"
+    [isSpecial]="true"
+    [isSelected]="router.url === '/selected'"
+    (tabClicked)="onSelectedClick('/selected')"/>
 </app-navbar>
 <router-outlet/>
