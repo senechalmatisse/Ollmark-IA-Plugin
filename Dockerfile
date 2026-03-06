@@ -1,13 +1,12 @@
-# Stage 1: Build
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build -- --configuration=production
+FROM node:20
 
-# Stage 2: Serve avec nginx
-FROM nginx:alpine
-COPY --from=builder /app/dist/Front/browser /usr/share/nginx/html
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
 EXPOSE 4200
-CMD ["nginx", "-g", "daemon off;"]
+
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
