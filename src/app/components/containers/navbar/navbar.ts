@@ -11,7 +11,7 @@ export interface NavItem {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.css'
+  styleUrl: './navbar.scss'
 })
 export class NavbarComponent {
 }

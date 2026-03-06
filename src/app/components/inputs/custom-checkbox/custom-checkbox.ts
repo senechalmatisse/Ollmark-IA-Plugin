@@ -4,7 +4,7 @@ import {Component, input, output} from '@angular/core';
   selector: 'app-custom-checkbox',
   standalone: true,
   templateUrl: './custom-checkbox.html',
-  styleUrls: ['./custom-checkbox.css']
+  styleUrls: ['./custom-checkbox.scss']
 })
 export class CustomCheckbox {
   private static counter = 0;

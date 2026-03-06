@@ -1,15 +1,7 @@
-<button
-  class="overlay"
-  (click)="onClose()"
-  aria-label="Fermer"
-></button>
-
-<div class="modal">
-  <div class="modal-header">
-    <h2 class="shop-name">{{ shop().label }}</h2>
-    <button class="close-btn" (click)="onClose()" aria-label="Fermer">✕</button>
-  </div>
-
+<app-popin
+  [label]="shop().label"
+  (closed)="onClose()"
+>
   <div class="modal-body">
     <div class="attributes-list">
       @for (attribute of attributes; track attribute) {
@@ -47,12 +39,11 @@
   </div>
 
   <div class="modal-footer">
-    <button
+    <app-button
       class="confirm-btn"
       [disabled]="!store.hasSelection()"
       (click)="onConfirm()"
-    >
-      {{ mode() === 'quick' ? 'Import rapide' : 'Importer' }}
-    </button>
+      [buttonText]="mode() === 'quick' ? 'Import rapide' : 'Importer'" [buttonType]="ButtonType.PRIMARY">
+    </app-button>
   </div>
-</div>
+</app-popin>

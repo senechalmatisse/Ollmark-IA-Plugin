@@ -10,7 +10,7 @@ export interface CarouselItem {
   selector: 'app-carousel',
   imports: [CommonModule],
   templateUrl: './carousel.html',
-  styleUrl: './carousel.css',
+  styleUrl: './carousel.scss',
 })
 export class Carousel {
   items = input<CarouselItem[]>([]);

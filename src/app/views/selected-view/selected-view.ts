@@ -12,16 +12,16 @@ import { ToastService } from '../../services/toast/toast.service';
   standalone: true,
   imports: [CommonModule, CustomCheckbox],
   templateUrl: './selected-view.html',
-  styleUrl: './selected-view.css',
+  styleUrl: './selected-view.scss',
 })
 export class SelectedView {
   readonly store = inject(ShopSelectionStore);
   readonly attributeLabels = SHOP_ATTRIBUTE_LABELS;
   private readonly penpotService = inject(PENPOT_SERVICE);
-  
+
   private readonly toastService = inject(ToastService);
   editEntry = output<Shop>();
-  
+
   removeEntry(shopId: string): void {
     this.store.removeEntry(shopId);
   }
@@ -53,13 +53,13 @@ export class SelectedView {
     }
   }
 
-  
+
   onGenerateAll(): void {
     const entries = this.store.entries();
     if (entries.length === 0) return;
     this.toastService.showWait();
     entries.forEach(entry => {
-      
+
       entry.selectedAttributes.forEach(attr => {
         const textValue = this.getSubtitleForAttribute(entry, attr);
         if (textValue) {
@@ -67,7 +67,7 @@ export class SelectedView {
         }
       });
 
-      
+
       entry.selectedPhotos.forEach(photo => {
         this.penpotService.createImage(photo.url);
       });
@@ -75,12 +75,12 @@ export class SelectedView {
 
     setTimeout(() => {
       this.toastService.showSuccess();
-      this.store.clearEntries(); 
+      this.store.clearEntries();
     }, 300);
     this.penpotService.notify('Génération de la sélection terminée avec succès !');
-    
-   
-    this.store.clearEntries(); 
+
+
+    this.store.clearEntries();
   }
   onEditClick(shop: Shop): void {
     console.log('CLIC CAPTÉ DANS ENFANT (SelectedView) POUR :', shop.label);

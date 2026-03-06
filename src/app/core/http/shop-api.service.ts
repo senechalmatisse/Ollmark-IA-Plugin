@@ -39,7 +39,7 @@ export class ShopApiService implements IShopRepository {
     let params = new HttpParams()
       .set('page', (filters.page).toString())
       .set('size', filters.size.toString())
-      .set('onlineOnly', 'true'); 
+      .set('onlineOnly', 'true');
 
     if (filters.q) {
       params = params.set('q', filters.q);
@@ -59,7 +59,7 @@ export class ShopApiService implements IShopRepository {
     }
 
     const sortFields =  ['-creationDate'];
-    
+
     // On ajoute chaque critère de tri à l'URL via la méthode append
     sortFields.forEach(field => {
       params = params.append('sort', field);

@@ -6,7 +6,7 @@ import {TestService} from '../../../services/test-service/test-service';
   standalone: true,
   imports: [],
   templateUrl: './test.html',
-  styleUrl: './test.css',
+  styleUrl: './test.scss',
 })
 export class Test implements OnInit {
   private testService = inject(TestService);

@@ -25,7 +25,7 @@ describe('ShopFieldSelector - Logique UI', () => {
     fixture = TestBed.createComponent(ShopFieldSelector);
     component = fixture.componentInstance;
     store = TestBed.inject(ContentSelectionStore);
-    
+
     fixture.componentRef.setInput('shop', mockShopMinimal as unknown as Shop);
     fixture.detectChanges();
   });
@@ -36,9 +36,9 @@ describe('ShopFieldSelector - Logique UI', () => {
   });
 
   it('should enable the confirm button only if something is selected', () => {
-    const getBtn = () => fixture.nativeElement.querySelector('.confirm-btn');
+    const getBtn = () => fixture.nativeElement.querySelector('.confirm-btn button');
     expect(getBtn().disabled).toBeTrue();
-    
+
     store.toggleAttribute('label');
     fixture.detectChanges();
     expect(getBtn().disabled).toBeFalse();

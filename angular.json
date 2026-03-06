@@ -25,8 +25,13 @@
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+              "src/styles.scss"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "**/*.scss"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -86,7 +91,7 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "browsers": "ChromeHeadless",
             "watch": false

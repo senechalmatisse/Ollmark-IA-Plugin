@@ -3,7 +3,7 @@ import {Component, input, output} from '@angular/core';
 @Component({
   selector: 'app-tab',
   templateUrl: './tab.html',
-  styleUrl: './tab.css',
+  styleUrl: './tab.scss',
 })
 export class Tab {
   tabText = input.required<string>()

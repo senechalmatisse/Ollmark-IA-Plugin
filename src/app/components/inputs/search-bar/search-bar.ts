@@ -9,7 +9,7 @@ const DEFAULT_TIME = 500 // 0.5 second(s)
     NgOptimizedImage,
   ],
   templateUrl: './search-bar.html',
-  styleUrl: './search-bar.css',
+  styleUrl: './search-bar.scss',
 })
 export class SearchBar {
   inputUpdated = output<string>()

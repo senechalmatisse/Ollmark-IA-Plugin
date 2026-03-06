@@ -1,14 +1,13 @@
-<div class="dropdown-wrapper">
-  @if (label()) {
-    <label class="dropdown-label" for="dropdown-select">{{ label() }}</label>
-  }
+@if (label()) {
+  <label for="dropdown-select">{{ label() }}</label>
+}
 
-  <select id="dropdown-select" (change)="onSelect($event)" class="dropdown-select">
-    @if (showPlaceholder()) {
-    <option value="" disabled selected>Choisir une option </option>
-    }
-    @for (option of options(); track option.key) {
-      <option [value]="option.key">{{ option.value }}</option>
-    }
-  </select>
-</div>
+<select id="dropdown-select" (change)="onSelect($event)" class="dropdown-select">
+  @if (showPlaceholder()) {
+    <option value="" disabled selected>{{ label() ? label() : "Choisir une option" }}</option>
+  }
+  @for (option of options(); track option.key) {
+    <option [value]="option.key">{{ option.value }}</option>
+  }
+</select>
+

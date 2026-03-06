@@ -1,35 +1,18 @@
 <div class="shop-view-container">
-  <app-navbar>
-    <app-tab tabText="Boutiques" (tabClicked)="onSelectedClick('/boutiques')"/>
-    <app-tab tabText="Produits" (tabClicked)="onSelectedClick('/products')"/>
-    <app-tab tabText="Codes promo." (tabClicked)="onSelectedClick('/codes')"/>
-    <app-tab tabText="Sélectionnés" [isSpecial]="true" (tabClicked)="onSelectedClick('/selected')"/>
-  </app-navbar>
-
-  @if (!showSelected) {
-
   <div class="filters-row">
-
-    <div class="search-wrapper">
-      <app-search-bar (inputUpdated)="onSearchUpdate($event)"></app-search-bar>
-    </div>
-
-    <div class="dropdown-wrapper">
-      <app-drop-down
-        [options]="categoryOptions"
-        [showPlaceholder]="false"
-        (selectionChange)="onCategorySelect($event)">
-      </app-drop-down>
-    </div>
-
-    <div class="dropdown-wrapper">
-      <app-drop-down
-        [options]="marketplaceOptions"
-        [showPlaceholder]="false"
-        (selectionChange)="onMarketplaceSelect($event)">
-      </app-drop-down>
-    </div>
-
+    <app-search-bar (inputUpdated)="onSearchUpdate($event)"></app-search-bar>
+    <app-drop-down
+      label="Catégorie"
+      [options]="categoryOptions"
+      [showPlaceholder]="true"
+      (selectionChange)="onCategorySelect($event)">
+    </app-drop-down>
+    <app-drop-down
+      label="Marketplace"
+      [options]="marketplaceOptions"
+      [showPlaceholder]="true"
+      (selectionChange)="onMarketplaceSelect($event)">
+    </app-drop-down>
   </div>
 
   @if (loading) {
@@ -50,17 +33,13 @@
           </app-shop-card>
         }
       </div>
-      @if (loadingMore) {
+      @if (true) {
         <div class="loading-more">
           <div class="spinner"></div>
           <span>Chargement...</span>
         </div>
       }
     </cdk-virtual-scroll-viewport>
-  }
-  }
-  @if (showSelected) {
-    <app-selected-view (editEntry)="onEditShop($event)" />
   }
 
   @if (showModal && selectedShop) {
@@ -71,5 +50,5 @@
       (confirmed)="onModalConfirm()"
     />
   }
-    <app-toast/>
+  <app-toast/>
 </div>

@@ -8,14 +8,17 @@ import {ShopSelectionService} from '../../../services/shop-selection/shop-select
 import {SHOP_ATTRIBUTE_LABELS, SHOP_ATTRIBUTES, ShopAttribute} from '../../../models/shop-attribute.model';
 import { PENPOT_SERVICE } from '../../../core/penpot/penpot.service';
 import { ShopSelectionStore } from '../../../stores/shop-selection.store';
+import {Button} from '../../inputs/button/button';
+import {ButtonType} from '../../../models/ButtonType';
+import {Popin} from '../../containers/popin/popin';
 export type SelectorMode = 'select' | 'quick';
 
 @Component({
   selector: 'app-shop-field-selector',
   standalone: true,
-  imports: [CommonModule, CustomCheckbox, Carousel],
+  imports: [CommonModule, CustomCheckbox, Carousel, Button, Popin],
   templateUrl: './shop-field-selector.html',
-  styleUrl: './shop-field-selector.css',
+  styleUrl: './shop-field-selector.scss',
 })
 export class ShopFieldSelector implements OnInit {
   shop = input.required<Shop>();
@@ -80,17 +83,17 @@ export class ShopFieldSelector implements OnInit {
     this.store.togglePhoto(photoId);
   }
 
-  
+
 
   onConfirm(): void {
     if (this.mode() === 'quick') {
-      
+
       this.selectionService.quickImport(this.shop());
     } else {
-      
+
       this.selectionService.importSelectedFields(this.shop());
     }
-    
+
     this.confirmed.emit();
   }
 
@@ -112,16 +115,18 @@ export class ShopFieldSelector implements OnInit {
         this.store.toggleAttribute(attr);
       });
 
-      
+
       if (existingEntry.selectedPhotos.length > 0) {
-        
+
         this.store.toggleAttribute('photos');
 
-        
+
         existingEntry.selectedPhotos.forEach(photo => {
           this.store.togglePhoto(photo.id);
         });
       }
     }
   }
+
+  protected readonly ButtonType = ButtonType;
 }

@@ -5,31 +5,22 @@
     </div>
   }
   <div class="shop-image">
-    <img 
-      [src]="imageUrl" 
-      [alt]="shop.label" 
-      loading="lazy" 
-      decoding="async" 
+    <img
+      [src]="imageUrl"
+      [alt]="shop.label"
+      loading="lazy"
+      decoding="async"
       fetchpriority="low"
       (error)="onImageError()" />
   </div>
   <div class="shop-info" [class.selected]="isSelected()">
-    <h3 class="shop-name">{{ shop.label }}</h3>
+    <p class="shop-name">{{ shop.label }}</p>
     <div class="shop-actions">
       <button class="action-btn" title="Générer dans Penpot" (click)="onGenerate($event)" [disabled]="isSelected()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="13 17 18 12 13 7"></polyline>
-          <polyline points="6 17 11 12 6 7"></polyline>
-        </svg>
+        <img src="https://img.icons8.com/sf-black/FFFFFF/64/fast-forward.png" alt="fast-forward"/>
       </button>
       <button class="action-btn" title="Ajouter à la sélection" (click)="onAdd($event)" [disabled]="isSelected()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="16"></line>
-          <line x1="8" y1="12" x2="16" y2="12"></line>
-        </svg>
+        <img src="https://img.icons8.com/sf-black/FFFFFF/64/add.png" alt="plus-math"/>
       </button>
     </div>
   </div>

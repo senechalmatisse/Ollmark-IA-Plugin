@@ -217,7 +217,7 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     tick();
 
     expect(fixture.componentInstance.selectedCatalogId).toBe('catalog-paris-1');
-    
+
     const callArgs = mockShopApiService.search.calls.mostRecent().args[0];
     expect(callArgs.catalog).toBe('catalog-paris-1');
   }));
@@ -240,7 +240,7 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
     expect(callArgs.q).toBe('croissant');
     expect(callArgs.category).toEqual(['cat1']);
     expect(callArgs.catalog).toBe('catalog-paris-1');
-    
+
     expect(callArgs.sort).toEqual(['-score', '-creationDate']);
   }));
 
@@ -313,7 +313,7 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
 
     it('should have rowHeight defined for virtual scroll', () => {
       const fixture = TestBed.createComponent(ShopViewComponent);
-      expect(fixture.componentInstance.rowHeight).toBe(125);
+      expect(fixture.componentInstance.rowHeight).toBe(156);
     });
 
     it('should throttle onVirtualScroll calls', fakeAsync(() => {
@@ -401,7 +401,7 @@ it('should load marketplaces and flatten catalogs on init', fakeAsync(() => {
         createMockShop({ id: '4', label: 'Shop 4' })
       ];
       fixture.componentInstance.shops = [...fixture.componentInstance.shops, ...additionalShops];
-      // Manually set shopRows to simulate what loadMore does  
+      // Manually set shopRows to simulate what loadMore does
       fixture.componentInstance.shopRows = [
         [fixture.componentInstance.shops[0], fixture.componentInstance.shops[1]],
         [fixture.componentInstance.shops[2], fixture.componentInstance.shops[3]]

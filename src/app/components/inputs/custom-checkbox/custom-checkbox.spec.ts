@@ -26,6 +26,8 @@ describe('CustomCheckbox', () => {
     fixture.componentRef.setInput("subtitle", 'Boucherie');
     fixture.detectChanges();
 
+    fixture.detectChanges();
+
     // On va chercher les éléments HTML générés
     const compiled = fixture.nativeElement as HTMLElement;
     const titleElement = compiled.querySelector('.checkbox-title');

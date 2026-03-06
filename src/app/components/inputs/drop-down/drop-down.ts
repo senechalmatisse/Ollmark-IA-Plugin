@@ -14,7 +14,7 @@ export interface DropDownOption {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './drop-down.html',
-  styleUrl: './drop-down.css'
+  styleUrl: './drop-down.scss'
 })
 export class DropDownComponent {
   label = input<string>("")
