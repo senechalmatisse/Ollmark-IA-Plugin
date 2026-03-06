@@ -170,6 +170,7 @@ deploy-front-dev:
   needs: ["build-frontend-image"]
 
 deploy-front-preprod:
+  stage: deploy
   image: docker:20.10.16
   services:
     - docker:20.10.16-dind
