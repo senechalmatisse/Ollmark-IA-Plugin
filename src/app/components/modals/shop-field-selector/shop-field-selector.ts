@@ -1,7 +1,7 @@
 import {Component, input, output, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CustomCheckbox} from '../../inputs/custom-checkbox/custom-checkbox';
-import {Carousel, CarouselItem} from '../../widgets/Carousel/carousel';
+import {Carousel, CarouselItem} from '../../widgets/carousel/carousel';
 import {Shop} from '../../../models/shop.model';
 import {ContentSelectionStore} from '../../../stores/content-selection.store';
 import {ShopSelectionService} from '../../../services/shop-selection/shop-selection.service';

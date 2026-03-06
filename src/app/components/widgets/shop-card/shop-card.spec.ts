@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ShopCard } from './shop-card';
-import { Shop, ShopAddress } from '../../models/shop.model';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ShopCard} from './shop-card';
+import {Shop, ShopAddress} from '../../../models/shop.model';
 
 function createMockShop(overrides: Partial<Shop> = {}): Shop {
   const defaultAddress: ShopAddress = {
@@ -72,12 +72,10 @@ describe('ShopCard', () => {
   });
 
   it('should use placeholder if no logo and no photos', () => {
-    const shopNoImages = createMockShop({ logo: null, photos: [] });
-    component.shop = shopNoImages;
+    component.shop = createMockShop({logo: null, photos: []});
     fixture.detectChanges();
 
-    expect(component.imageUrl).toContain('data:image/svg+xml');
-    expect(component.imageUrl).toContain('Image%20non%20disponible');
+    expect(component.imageUrl).toBe("/placeholders/shop.svg");
   });
 
   it('should have loading set to false by default', () => {

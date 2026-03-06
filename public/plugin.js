@@ -23,16 +23,16 @@
   }
   function getStartingPosition() {
     if (penpot.selection.length === 0) {
+      const viewCenterX = penpot.viewport.center.x;
+      const viewCenterY = penpot.viewport.center.y;
       return {
-        x: -750,
-        // <-- Modifié ici : Position fixe X
-        y: -1e3,
-        // <-- Modifié ici : Position fixe Y
+        x: viewCenterX - 100,
+        y: viewCenterY - 200,
         targetBoard: null
       };
     }
     const selected = penpot.selection[0];
-    let startX = selected.x + 30;
+    const startX = selected.x + 30;
     let startY = selected.y + 30;
     let targetBoard = null;
     if (selected.type === "board") {
@@ -76,7 +76,7 @@
     if (message.type === "quick-import-direct") {
       const { data } = message;
       const startPos = getStartingPosition();
-      let currentX = startPos.x;
+      const currentX = startPos.x;
       let currentY = startPos.y;
       const board = startPos.targetBoard;
       const addText = (textContent) => {

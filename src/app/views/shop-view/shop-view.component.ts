@@ -4,11 +4,10 @@ import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} fr
 import {SearchBar} from '../../components/inputs/search-bar/search-bar';
 import {DropDownComponent, DropDownOption} from '../../components/inputs/drop-down/drop-down';
 import {ShopApiService} from '../../core/http/shop-api.service';
-import {ShopCard} from '../../components/shop-card/shop-card';
+import {ShopCard} from '../../components/widgets/shop-card/shop-card';
 import {Shop, ShopFilters} from '../../models/shop.model';
 import {ShopFieldSelector} from '../../components/modals/shop-field-selector/shop-field-selector';
 import {ShopSelectionService} from '../../services/shop-selection/shop-selection.service';
-import {ToastComponent} from '../../components/toast/toast.component';
 
 import {ShopSelectionStore} from '../../stores/shop-selection.store';
 
@@ -16,7 +15,7 @@ import {ShopSelectionStore} from '../../stores/shop-selection.store';
 @Component({
   selector: 'app-shop-view',
   standalone: true,
-  imports: [CommonModule, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, SearchBar, DropDownComponent, ShopCard, ShopFieldSelector, ToastComponent],
+  imports: [CommonModule, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, SearchBar, DropDownComponent, ShopCard, ShopFieldSelector],
   templateUrl: './shop-view.component.html',
   styleUrl: './shop-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

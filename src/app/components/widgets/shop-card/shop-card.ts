@@ -1,6 +1,6 @@
 import {Component, Input, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Shop} from '../../models/shop.model';
+import {Shop} from '../../../models/shop.model';
 
 @Component({
   selector: 'app-shop-card',
@@ -14,12 +14,7 @@ import {Shop} from '../../models/shop.model';
 export class ShopCard {
   private _shop!: Shop;
   private _imageUrlOverride: string | null = null;
-  private readonly placeholderUrl = 'data:image/svg+xml,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
-      <rect fill="#f0f0f0" width="300" height="200"/>
-      <text fill="#999" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" x="150" y="100">Image non disponible</text>
-    </svg>
-  `.trim());
+  private readonly placeholderUrl = "/placeholders/shop.svg"
 
   @Input({required: true})
   set shop(value: Shop) {
