@@ -7,6 +7,8 @@ RUN npm install
 
 COPY . .
 
+RUN rm -rf .angular/cache
+
 EXPOSE 4200
 
-CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000", "--no-cache"]
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
