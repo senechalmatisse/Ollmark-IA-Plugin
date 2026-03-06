@@ -2,7 +2,7 @@
   <label for="dropdown-select">{{ label() }}</label>
 }
 
-<select id="dropdown-select" (change)="onSelect($event)" class="dropdown-select">
+<select [id]="dropId" (change)="onSelect($event)" class="dropdown-select">
   @if (showPlaceholder()) {
     <option value="" disabled selected>{{ label() ? label() : "Choisir une option" }}</option>
   }

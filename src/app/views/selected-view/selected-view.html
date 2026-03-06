@@ -81,4 +81,13 @@
         [buttonType]="ButtonType.PRIMARY"/>
     </div>
   }
+
+  @if (showModal && selectedShop) {
+    <app-shop-field-selector
+      [shop]="selectedShop"
+      mode="select"
+      (closed)="onModalClose()"
+      (confirmed)="onModalConfirm()"
+    />
+  }
 </div>

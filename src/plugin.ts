@@ -23,8 +23,8 @@ type PluginToUIMessage =
   | { type: 'generation-success' };
 
 penpot.ui.open('OllMark Generation', 'index.html', {
-  width: 420,
-  height: 550,
+  width: 500,
+  height: 900,
 });
 
 function notifyUI(content: string): void {
