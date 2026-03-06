@@ -139,9 +139,30 @@ build-frontend-image:
 # -----------------------------------------------------------------------------
 trivy-frontend:
   stage: scan
-  image: { name: "aquasec/trivy:latest", entrypoint: [""] }
+  image: 
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  variables:
+    TRIVY_USERNAME: $CI_REGISTRY_USER
+    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
+    TRIVY_AUTH_URL: $DOCKER_REGISTRY
+    TRIVY_CACHE_DIR: ".trivycache/" # On déplace le cache dans le dossier du projet
+  cache:
+    key: trivy-db-cache
+    paths:
+      - .trivycache/
   script:
-    - trivy image --exit-code 0 --severity HIGH,CRITICAL $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+    # 1. Nettoyage initial des fichiers temporaires pour libérer de l'espace
+    - trivy clean --scan-cache
+    
+    # 2. Premier passage : Affichage informatif (ne bloque pas) pour les vulnérabilités HIGH
+    - trivy image --exit-code 0 --severity HIGH --cache-dir $TRIVY_CACHE_DIR $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+    
+    # 3. Second passage : BLOQUANT (exit 1) si des vulnérabilités CRITICAL sont trouvées
+    - trivy image --exit-code 1 --severity CRITICAL --cache-dir $TRIVY_CACHE_DIR $FRONTEND_IMAGE_NAME:$FRONTEND_IMAGE_TAG
+  after_script:
+    # Optionnel : Nettoyage après exécution pour ne pas encombrer le runner
+    - rm -rf .trivycache/tmp
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
     - if: $CI_COMMIT_BRANCH == "main"
