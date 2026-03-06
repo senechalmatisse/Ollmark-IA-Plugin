@@ -170,9 +170,18 @@ deploy-front-dev:
   needs: ["build-frontend-image"]
 
 deploy-front-preprod:
-  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    # Recreate SSH key from Base64
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Add VM host to known_hosts to avoid SSH prompt
+    - ssh-keyscan -H $VM_HOST_PREPROD >> ~/.ssh/known_hosts
   script:
-    - echo "Déploiement Angular manuel en PREPROD"
+    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
       when: manual
