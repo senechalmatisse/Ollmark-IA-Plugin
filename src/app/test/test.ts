@@ -1,15 +1,17 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {TestService} from '../../../services/test-service/test-service';
+import { Component, inject } from '@angular/core';
+import { TestService } from '../test-service';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-test',
   standalone: true,
   imports: [],
   templateUrl: './test.html',
-  styleUrl: './test.scss',
+  styleUrl: './test.css',
 })
 export class Test implements OnInit {
   private testService = inject(TestService);
+
 
   message = "";
 

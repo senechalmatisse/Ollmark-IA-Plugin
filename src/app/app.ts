@@ -1,25 +1,13 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {NavbarComponent} from './components/containers/navbar/navbar';
-import {Tab} from './components/inputs/tab/tab';
-import {Router, RouterOutlet} from '@angular/router';
-import {ToastComponent} from './components/widgets/toast/toast.component';
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NavbarComponent, Tab, RouterOutlet, ToastComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.css'
 })
-
-export class App implements OnInit {
-  router = inject(Router)
-
-  ngOnInit(): void {
-    document.title = 'Ollca - Génération Contenu';
-  }
-
-  protected async onSelectedClick(s: string) {
-    await this.router.navigate([s])
-  }
+export class App {
+  protected readonly title = signal('Front');
 }

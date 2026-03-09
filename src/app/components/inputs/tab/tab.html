@@ -1,9 +1,0 @@
-<button
-  class="Tab"
-  [class]="{
-    selected: isSelected(),
-    special: isSpecial()
-  }"
-  (click)="tabClicked.emit()">
-  <p>{{ tabText() }}</p>
-</button>

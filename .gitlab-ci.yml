@@ -184,7 +184,7 @@ deploy-front-dev:
     # Add VM host to known_hosts to avoid SSH prompt
     - ssh-keyscan -H $VM_HOST >> ~/.ssh/known_hosts
   script:
-    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
+    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "~/ollmark-frontend/pg-ia/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: on_success
@@ -203,7 +203,7 @@ deploy-front-preprod:
     # Add VM host to known_hosts to avoid SSH prompt
     - ssh-keyscan -H $VM_HOST_PREPROD >> ~/.ssh/known_hosts
   script:
-    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD "~/ollmark-frontend/pg-generation-contenu/deploy.sh"
+    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD "~/ollmark-frontend/pg-ia/deploy.sh"
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
       when: manual
