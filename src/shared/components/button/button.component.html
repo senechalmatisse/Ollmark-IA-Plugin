@@ -1,1 +1,16 @@
-<p>button works!</p>
+<button
+  [attr.type]="type"
+  [class]="'btn ' + customClass"
+  [ngStyle]="buttonStyles"
+  [disabled]="disabled"
+  (click)="handleClick($event)"
+  class="reusable-button">
+  
+  <span *ngIf="icon || iconPath" class="button-icon">
+    <img *ngIf="iconPath" [src]="iconPath" alt="icon" class="icon-img">
+    <span *ngIf="icon && !iconPath">{{ icon }}</span>
+  </span>
+  
+  <span *ngIf="text" class="button-text">{{ text }}</span>
+  
+</button>
