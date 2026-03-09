@@ -5,7 +5,9 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 ## Development server
 
 To start a local development server, run:
-
+```bash
+npm install
+```
 ```bash
 ng serve
 ```
@@ -16,9 +18,19 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
 
+## 🚀 Créer des composants et services
+
+### 🧩 Créer un composant
 ```bash
-ng generate component component-name
-```
+# Créer un nouveau composant
+ng generate component nom-du-composant
+# ou plus court
+ng g c nom-du-composant
+
+### ⚙️ Créer un nouveau service
+ng generate service nom-du-service
+# ou plus court
+ng g s nom-du-service
 
 For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
