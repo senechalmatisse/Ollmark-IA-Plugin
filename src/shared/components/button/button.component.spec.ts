@@ -90,21 +90,21 @@ describe('ButtonComponent', () => {
   });
 
   it('should emit click event', () => {
-    spyOn(component.onClick, 'emit');
+    spyOn(component.clicked, 'emit');
 
     button.click();
 
-    expect(component.onClick.emit).toHaveBeenCalled();
+    expect(component.clicked.emit).toHaveBeenCalled();
   });
 
   it('should not emit click when disabled', () => {
     component.disabled = true;
-    spyOn(component.onClick, 'emit');
+    spyOn(component.clicked, 'emit');
     fixture.detectChanges();
 
     button.click();
 
-    expect(component.onClick.emit).not.toHaveBeenCalled();
+    expect(component.clicked.emit).not.toHaveBeenCalled();
   });
 
   it('should apply iconSize value', () => {

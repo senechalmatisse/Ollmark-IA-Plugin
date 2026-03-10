@@ -11,7 +11,7 @@ import { UserMessage } from './message/user-message';
   styleUrl: './app.css',
 })
 export class App {
-  public readonly title = 'Ollmark-plugin-ia';
+  public readonly title:string = 'Ollmark-plugin-ia';
 
   messages: Message[] = [
     new AIMessage('1', 'Bonjour ! Comment puis-je vous aider ?'),

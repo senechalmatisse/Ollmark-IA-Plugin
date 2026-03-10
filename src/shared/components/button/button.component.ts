@@ -80,25 +80,25 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button',
   imports: [CommonModule],
   templateUrl: './button.component.html',
-  styleUrl: './button.component.css',
+  styleUrl: './button.component.scss',
 })
 export class ButtonComponent {
-  @Input() width: string  = 'auto';
-  @Input() height: string = 'auto';
-  @Input() fontSize: string = 'auto';
+  @Input() width  = 'auto';
+  @Input() height = 'auto';
+  @Input() fontSize = 'auto';
   @Input() paddingXY: string | [string, string] = ["auto", "auto"];
   @Input() marginXY: string | [string, string] = ["auto", "auto"];
-  @Input() text: string = '';
-  @Input() icon: string = '';
-  @Input() iconSize: string = '50px';
-  @Input() iconPadding: string = '0.5rem';
-  @Input() rounded: boolean = false;
-  @Input() backgroundColor: string = '#000000';
-  @Input() textColor: string = '#f2ebeb';
+  @Input() text = '';
+  @Input() icon = '';
+  @Input() iconSize = '50px';
+  @Input() iconPadding = '0.5rem';
+  @Input() rounded = false;
+  @Input() backgroundColor = '#000000';
+  @Input() textColor = '#f2ebeb';
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
-  @Input() disabled: boolean = false;
-  @Input() customClass: string = '';
-  @Output() onClick = new EventEmitter<Event>();
+  @Input() disabled = false;
+  @Input() customClass = '';
+  @Output() clicked = new EventEmitter<Event>();
 
   get buttonStyles() {
     return {
@@ -121,7 +121,7 @@ export class ButtonComponent {
 
   handleClick(event: Event) {
     if (!this.disabled) {
-      this.onClick.emit(event);
+      this.clicked.emit(event);
     }
   }
 }
