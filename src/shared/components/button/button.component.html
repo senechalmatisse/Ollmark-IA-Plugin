@@ -1,0 +1,15 @@
+<button
+  [attr.type]="type"
+  [class]="'btn ' + customClass"
+  [ngStyle]="buttonStyles"
+  [disabled]="disabled"
+  (click)="handleClick($event)"
+  class="reusable-button">
+  
+  <span *ngIf="icon" class="button-icon">
+    <img *ngIf="icon" [src]="icon" alt="iconAlt" class="icon-img" [style.width]="iconSize" [style.padding]=iconPadding>
+  </span>
+  
+  <span *ngIf="text" class="button-text">{{ text }}</span>
+  
+</button>
