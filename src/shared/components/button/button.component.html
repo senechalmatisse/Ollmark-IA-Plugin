@@ -6,9 +6,8 @@
   (click)="handleClick($event)"
   class="reusable-button">
   
-  <span *ngIf="icon || iconPath" class="button-icon">
-    <img *ngIf="iconPath" [src]="iconPath" alt="icon" class="icon-img">
-    <span *ngIf="icon && !iconPath">{{ icon }}</span>
+  <span *ngIf="icon" class="button-icon">
+    <img *ngIf="icon" [src]="icon" alt="iconAlt" class="icon-img" [style.width]="iconSize" [style.padding]=iconPadding>
   </span>
   
   <span *ngIf="text" class="button-text">{{ text }}</span>

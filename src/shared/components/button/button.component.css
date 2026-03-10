@@ -25,11 +25,12 @@
 }
 
 .icon-img {
-  width: 20px;
-  height: 20px;
   object-fit: contain;
 }
 
 .button-text {
   line-height: 1;
+}
+.class-to-play-boxshadow{
+  box-shadow: 10px 5px 5px red;
 }
