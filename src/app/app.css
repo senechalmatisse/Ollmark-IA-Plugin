@@ -1,0 +1,12 @@
+.messages__container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #757575;
+  border-radius: 1rem;
+  width: fit-content;
+  padding: 1rem 1rem;
+}
+
+.messages__container * + * {
+  margin-top: 1rem;
+}
