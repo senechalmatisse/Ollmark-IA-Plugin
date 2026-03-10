@@ -1,0 +1,11 @@
+@if (message().type === 'ai') {
+  <div class="message ai">
+    @if (icon()) { <span class="icon">{{ icon() }}</span> }
+    {{ message().content }}
+  </div>
+} @else {
+  <div class="message user">
+    @if (icon()) { <span class="icon">{{ icon() }}</span> }
+    {{ message().content }}
+  </div>
+}

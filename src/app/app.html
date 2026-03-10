@@ -1,3 +1,8 @@
 <div>
-  <h1>{{ title }}</h1>
+<h1>{{ title }}</h1>
+<div class="messages__container">
+  @for (msg of messages; track msg.timestamp) {
+    <app-message [message]="msg" />
+  }
+</div>
 </div>
