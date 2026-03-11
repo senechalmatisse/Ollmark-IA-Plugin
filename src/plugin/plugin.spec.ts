@@ -89,6 +89,87 @@ describe('plugin entry point', () => {
         expect(disconnectSpy).toHaveBeenCalled();
     });
 
+    it('should send fileId when ready message is received', () => {
+        let messageHandler: ((msg: any) => void) | undefined;
+        const onMessageSpy = jasmine.createSpy('onMessage').and.callFake((handler) => {
+            messageHandler = handler;
+        });
+        const sendMessageSpy = jasmine.createSpy('sendMessage');
+
+        (globalThis as any).penpot.ui.onMessage = onMessageSpy;
+        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
+        (globalThis as any).penpot.currentFile = { id: 'test-file-id' };
+
+        bootstrapPlugin({
+            connect: connectSpy,
+            disconnect: disconnectSpy,
+        });
+
+        expect(messageHandler).toBeDefined();
+        messageHandler?.({ type: 'ready' });
+
+        expect(sendMessageSpy).toHaveBeenCalledWith({
+            type: 'fileId',
+            fileId: 'test-file-id',
+        });
+    });
+
+    it('should send fileId when filechange event occurs', () => {
+        let fileChangeHandler: (() => void) | undefined;
+        onSpy.and.callFake((event: string, handler: () => void) => {
+            if (event === 'filechange') {
+                fileChangeHandler = handler;
+            }
+            if (event === 'finish') {
+                finishHandler = handler;
+            }
+        });
+        const sendMessageSpy = jasmine.createSpy('sendMessage');
+        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
+        (globalThis as any).penpot.currentFile = { id: 'new-file-id' };
+
+        bootstrapPlugin({
+            connect: connectSpy,
+            disconnect: disconnectSpy,
+        });
+
+        expect(fileChangeHandler).toBeDefined();
+        fileChangeHandler?.();
+
+        expect(sendMessageSpy).toHaveBeenCalledWith({
+            type: 'fileId',
+            fileId: 'new-file-id',
+        });
+    });
+
+    it('should send fileId when pagechange event occurs', () => {
+        let pageChangeHandler: (() => void) | undefined;
+        onSpy.and.callFake((event: string, handler: () => void) => {
+            if (event === 'pagechange') {
+                pageChangeHandler = handler;
+            }
+            if (event === 'finish') {
+                finishHandler = handler;
+            }
+        });
+        const sendMessageSpy = jasmine.createSpy('sendMessage');
+        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
+        (globalThis as any).penpot.currentFile = { id: 'current-file-id' };
+
+        bootstrapPlugin({
+            connect: connectSpy,
+            disconnect: disconnectSpy,
+        });
+
+        expect(pageChangeHandler).toBeDefined();
+        pageChangeHandler?.();
+
+        expect(sendMessageSpy).toHaveBeenCalledWith({
+            type: 'fileId',
+            fileId: 'current-file-id',
+        });
+    });
+
     it('should auto bootstrap when penpot runtime is available', () => {
         const createClient = jasmine.createSpy('createClient').and.returnValue({
             connect: connectSpy,

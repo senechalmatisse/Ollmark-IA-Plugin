@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ChatService } from './chat.service';
-import { AIMessage } from '../../../app/message/ai-message';
-import { UserMessage } from '../../../app/message/user-message';
+import { AIMessage } from '../../message/ai-message';
+import { UserMessage } from '../../message/user-message';
 
 describe('ChatService', () => {
   let service: ChatService;
@@ -60,7 +60,7 @@ describe('ChatService', () => {
     // CORRECTION : Remplacer 'any' par 'Error | null' ou 'any' si vraiment nécessaire 
     // mais ici on va utiliser 'any' avec une désactivation locale si tu es pressé, 
     // ou mieux, typer correctement :
-    let error: Error | undefined; 
+    let error: Error | undefined;
     service.sendMessage('test').subscribe({ error: e => (error = e) });
     tick();
     expect(error).toBeTruthy();

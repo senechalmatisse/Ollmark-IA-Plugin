@@ -3,12 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { ButtonComponent } from '../shared/components/button/button.component';
-import { MessageComponent, Message } from './message/message';
-import { AIMessage } from './message/ai-message';
-import { UserMessage } from './message/user-message';
+import { MessageComponent, Message } from '../features/message/message';
+import { AIMessage } from '../features/message/ai-message';
+import { UserMessage } from '../features/message/user-message';
 
 // Services et composants supplémentaires
-import { Penpot } from './core/services/penpot/penpot';
+import { Penpot } from '../core/services/penpot/penpot';
 import { ChatInput } from '../features/chat/components/chat-input';
 import { ChatService } from '../features/chat/services/chat.service';
 

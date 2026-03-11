@@ -1,9 +1,9 @@
 import { Injectable, signal, inject, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Message } from '../../../app/message/message'; 
-import { AIMessage } from '../../../app/message/ai-message';
-import { UserMessage } from '../../../app/message/user-message';
+import { Message } from '../../message/message';
+import { AIMessage } from '../../message/ai-message';
+import { UserMessage } from '../../message/user-message';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
