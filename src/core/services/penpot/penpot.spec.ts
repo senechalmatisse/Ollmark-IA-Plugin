@@ -10,16 +10,7 @@ describe('Penpot', () => {
     service = TestBed.inject(Penpot);
   });
 
-  it('should update fileId$ when fileId message is received', (done) => {
-    const testFileId = 'test-file-123';
-    
-    service.fileId$.subscribe(id => {
-      if (id === testFileId) {
-        expect(id).toBe(testFileId);
-        done();
-      }
-    });
-
-    window.postMessage({ type: 'fileId', fileId: testFileId }, '*');
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 });

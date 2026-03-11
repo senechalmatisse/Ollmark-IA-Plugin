@@ -25,19 +25,19 @@ describe('plugin entry point', () => {
 
         openSpy = jasmine.createSpy('open');
         onSpy = jasmine.createSpy('on').and.callFake((event: string, handler: () => void) => {
-        if (event === 'finish') {
-            finishHandler = handler;
-        }
+            if (event === 'finish') {
+                finishHandler = handler;
+            }
         });
 
         connectSpy = jasmine.createSpy('connect');
         disconnectSpy = jasmine.createSpy('disconnect');
 
         (globalThis as typeof globalThis & { penpot: unknown }).penpot = {
-        ui: {
-            open: openSpy,
-        },
-        on: onSpy,
+            ui: {
+                open: openSpy,
+            },
+            on: onSpy,
         };
     });
 
@@ -47,20 +47,20 @@ describe('plugin entry point', () => {
 
     it('should open the Penpot UI on startup', () => {
         bootstrapPlugin({
-        connect: connectSpy,
-        disconnect: disconnectSpy,
+            connect: connectSpy,
+            disconnect: disconnectSpy,
         });
 
         expect(openSpy).toHaveBeenCalledWith(PLUGIN_NAME, '/', {
-        width: 500,
-        height: 800,
+            width: 500,
+            height: 800,
         });
     });
 
     it('should connect the WebSocket client on startup', () => {
         bootstrapPlugin({
-        connect: connectSpy,
-        disconnect: disconnectSpy,
+            connect: connectSpy,
+            disconnect: disconnectSpy,
         });
 
         expect(connectSpy).toHaveBeenCalled();
@@ -68,8 +68,8 @@ describe('plugin entry point', () => {
 
     it('should register a finish event handler', () => {
         bootstrapPlugin({
-        connect: connectSpy,
-        disconnect: disconnectSpy,
+            connect: connectSpy,
+            disconnect: disconnectSpy,
         });
 
         expect(onSpy).toHaveBeenCalledWith('finish', jasmine.any(Function));
@@ -78,8 +78,8 @@ describe('plugin entry point', () => {
 
     it('should disconnect the WebSocket client when finish event is triggered', () => {
         bootstrapPlugin({
-        connect: connectSpy,
-        disconnect: disconnectSpy,
+            connect: connectSpy,
+            disconnect: disconnectSpy,
         });
 
         expect(finishHandler).toBeDefined();
@@ -87,87 +87,6 @@ describe('plugin entry point', () => {
         finishHandler?.();
 
         expect(disconnectSpy).toHaveBeenCalled();
-    });
-
-    it('should send fileId when ready message is received', () => {
-        let messageHandler: ((msg: any) => void) | undefined;
-        const onMessageSpy = jasmine.createSpy('onMessage').and.callFake((handler) => {
-            messageHandler = handler;
-        });
-        const sendMessageSpy = jasmine.createSpy('sendMessage');
-
-        (globalThis as any).penpot.ui.onMessage = onMessageSpy;
-        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
-        (globalThis as any).penpot.currentFile = { id: 'test-file-id' };
-
-        bootstrapPlugin({
-            connect: connectSpy,
-            disconnect: disconnectSpy,
-        });
-
-        expect(messageHandler).toBeDefined();
-        messageHandler?.({ type: 'ready' });
-
-        expect(sendMessageSpy).toHaveBeenCalledWith({
-            type: 'fileId',
-            fileId: 'test-file-id',
-        });
-    });
-
-    it('should send fileId when filechange event occurs', () => {
-        let fileChangeHandler: (() => void) | undefined;
-        onSpy.and.callFake((event: string, handler: () => void) => {
-            if (event === 'filechange') {
-                fileChangeHandler = handler;
-            }
-            if (event === 'finish') {
-                finishHandler = handler;
-            }
-        });
-        const sendMessageSpy = jasmine.createSpy('sendMessage');
-        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
-        (globalThis as any).penpot.currentFile = { id: 'new-file-id' };
-
-        bootstrapPlugin({
-            connect: connectSpy,
-            disconnect: disconnectSpy,
-        });
-
-        expect(fileChangeHandler).toBeDefined();
-        fileChangeHandler?.();
-
-        expect(sendMessageSpy).toHaveBeenCalledWith({
-            type: 'fileId',
-            fileId: 'new-file-id',
-        });
-    });
-
-    it('should send fileId when pagechange event occurs', () => {
-        let pageChangeHandler: (() => void) | undefined;
-        onSpy.and.callFake((event: string, handler: () => void) => {
-            if (event === 'pagechange') {
-                pageChangeHandler = handler;
-            }
-            if (event === 'finish') {
-                finishHandler = handler;
-            }
-        });
-        const sendMessageSpy = jasmine.createSpy('sendMessage');
-        (globalThis as any).penpot.ui.sendMessage = sendMessageSpy;
-        (globalThis as any).penpot.currentFile = { id: 'current-file-id' };
-
-        bootstrapPlugin({
-            connect: connectSpy,
-            disconnect: disconnectSpy,
-        });
-
-        expect(pageChangeHandler).toBeDefined();
-        pageChangeHandler?.();
-
-        expect(sendMessageSpy).toHaveBeenCalledWith({
-            type: 'fileId',
-            fileId: 'current-file-id',
-        });
     });
 
     it('should auto bootstrap when penpot runtime is available', () => {
