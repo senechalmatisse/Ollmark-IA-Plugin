@@ -1,0 +1,14 @@
+{
+    "name": "Penpot AI Plugin",
+    "description": "Chat conversationnel IA pour Penpot",
+    "code": "plugin.js",
+    "icon": "/favicon.png",
+    "permissions": [
+        "content:read",
+        "content:write",
+        "library:read",
+        "library:write",
+        "comment:read",
+        "comment:write"
+    ]
+}
