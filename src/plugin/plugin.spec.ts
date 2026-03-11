@@ -33,9 +33,11 @@ describe('plugin entry point', () => {
         connectSpy = jasmine.createSpy('connect');
         disconnectSpy = jasmine.createSpy('disconnect');
 
-        (globalThis as typeof globalThis & { penpot: unknown }).penpot = {
+        (globalThis as any).penpot = {
             ui: {
                 open: openSpy,
+                onMessage: jasmine.createSpy('onMessage'),
+                sendMessage: jasmine.createSpy('sendMessage'),
             },
             on: onSpy,
         };
@@ -64,6 +66,28 @@ describe('plugin entry point', () => {
         });
 
         expect(connectSpy).toHaveBeenCalled();
+    });
+
+    it('should send fileId when ready message is received', () => {
+        let messageHandler: ((msg: any) => void) | undefined;
+        const penpot = (globalThis as any).penpot;
+        penpot.ui.onMessage.and.callFake((handler: any) => {
+            messageHandler = handler;
+        });
+        penpot.currentFile = { id: 'test-file-id' };
+
+        bootstrapPlugin({
+            connect: connectSpy,
+            disconnect: disconnectSpy,
+        });
+
+        expect(messageHandler).toBeDefined();
+        messageHandler?.({ type: 'ready' });
+
+        expect(penpot.ui.sendMessage).toHaveBeenCalledWith({
+            type: 'fileId',
+            fileId: 'test-file-id',
+        });
     });
 
     it('should register a finish event handler', () => {
