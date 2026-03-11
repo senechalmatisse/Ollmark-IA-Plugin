@@ -20,8 +20,18 @@ describe('plugin entry point', () => {
     let disconnectSpy: jasmine.Spy;
     let finishHandler: (() => void) | undefined;
 
+    interface MockPenpot {
+        ui: {
+            open: jasmine.Spy;
+            onMessage: jasmine.Spy;
+            sendMessage: jasmine.Spy;
+        };
+        on: jasmine.Spy;
+        currentFile?: { id: string };
+    }
+
     beforeEach(() => {
-        finishHandler = undefined;
+        finishHandler = undefined; // Keep this as it's part of the original test setup logic
 
         openSpy = jasmine.createSpy('open');
         onSpy = jasmine.createSpy('on').and.callFake((event: string, handler: () => void) => {
@@ -33,7 +43,7 @@ describe('plugin entry point', () => {
         connectSpy = jasmine.createSpy('connect');
         disconnectSpy = jasmine.createSpy('disconnect');
 
-        (globalThis as any).penpot = {
+        const mockPenpot: MockPenpot = {
             ui: {
                 open: openSpy,
                 onMessage: jasmine.createSpy('onMessage'),
@@ -41,10 +51,12 @@ describe('plugin entry point', () => {
             },
             on: onSpy,
         };
+
+        (globalThis as unknown as Record<string, unknown>)['penpot'] = mockPenpot;
     });
 
     afterEach(() => {
-        delete (globalThis as typeof globalThis & { penpot?: unknown }).penpot;
+        delete (globalThis as unknown as Record<string, unknown>)['penpot'];
     });
 
     it('should open the Penpot UI on startup', () => {
@@ -69,9 +81,9 @@ describe('plugin entry point', () => {
     });
 
     it('should send fileId when ready message is received', () => {
-        let messageHandler: ((msg: any) => void) | undefined;
-        const penpot = (globalThis as any).penpot;
-        penpot.ui.onMessage.and.callFake((handler: any) => {
+        let messageHandler: ((msg: Record<string, unknown>) => void) | undefined;
+        const penpot = (globalThis as unknown as Record<string, MockPenpot>)['penpot'];
+        penpot.ui.onMessage.and.callFake((handler: (msg: Record<string, unknown>) => void) => {
             messageHandler = handler;
         });
         penpot.currentFile = { id: 'test-file-id' };
@@ -130,7 +142,7 @@ describe('plugin entry point', () => {
     });
 
     it('should skip auto bootstrap when penpot runtime is missing', () => {
-        delete (globalThis as typeof globalThis & { penpot?: unknown }).penpot;
+        delete (globalThis as unknown as Record<string, unknown>)['penpot'];
 
         const createClient = jasmine.createSpy('createClient').and.returnValue({
             connect: connectSpy,
