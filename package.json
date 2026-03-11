@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "build-plugin": "npx esbuild src/plugin.ts --bundle --outfile=./public/plugin.js"
+    "build-plugin": "npx esbuild src/plugin/plugin.ts --bundle --outfile=./public/plugin.js"
   },
   "prettier": {
     "printWidth": 100,

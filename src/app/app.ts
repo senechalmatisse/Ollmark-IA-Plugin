@@ -1,21 +1,37 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
+
 import { ButtonComponent } from '../shared/components/button/button.component';
 import { MessageComponent, Message } from './message/message';
 import { AIMessage } from './message/ai-message';
 import { UserMessage } from './message/user-message';
+
+// Services et composants supplémentaires
 import { Penpot } from './core/services/penpot/penpot';
+import { ChatInput } from '../features/chat/components/chat-input';
+import { ChatService } from '../features/chat/services/chat.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ButtonComponent, MessageComponent, AsyncPipe],
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    ButtonComponent,
+    MessageComponent,
+    ChatInput,
+    CommonModule,
+    AsyncPipe
+  ],
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrls: ['./app.css'],
 })
 export class App {
-  public readonly title:string = 'Ollmark-plugin-ia';
+  public readonly title: string = 'Ollmark-plugin-ia';
+
+  // Injection des services
   public penpot = inject(Penpot);
+  public chatService = inject(ChatService);
 
   messages: Message[] = [
     new AIMessage('1', 'Bonjour ! Comment puis-je vous aider ?'),

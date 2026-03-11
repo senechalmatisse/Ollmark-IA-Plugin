@@ -1,5 +1,10 @@
 <div>
-  <h1>{{ title }}</h1>
-  <p>File ID: {{ penpot.fileId$ | async }}</p>
-
+<h1>{{ title }}</h1>
+ <p>File ID: {{ penpot.fileId$ | async }}</p>
+<div class="messages__container">
+  @for (msg of messages; track msg.timestamp) {
+    <app-message [message]="msg" />
+  }
+</div>
+<app-chat-input></app-chat-input>
 </div>

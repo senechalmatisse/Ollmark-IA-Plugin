@@ -5,7 +5,9 @@
     "content:read",
     "content:write",
     "library:read",
-    "library:write"
+    "library:write",
+    "comment:read",
+    "comment:write"
   ],
   "code": "/plugin.js",
   "icon": "",
