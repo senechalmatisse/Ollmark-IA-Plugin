@@ -1,0 +1,51 @@
+<!-- Conteneur principal du champ de saisie du chat -->
+<div class="chat-input-wrapper">
+  <!-- Conteneur interne -->
+    <!-- Ajoute la classe 'focused' quand le textarea est actif -->
+    <!-- Ajoute la classe 'loading' pendant l'envoi -->
+  <div
+    class="chat-input-inner"
+    [class.focused]="isFocused()" 
+    [class.loading]="isLoading()"
+  >
+    <!-- Zone de saisie du message utilisateur -->
+    <!-- - ngModel : liaison bidirectionnelle avec le signal currentValue -->
+    <!-- - (focus) / (blur) : gère l'état visuel du focus via isFocused -->
+    <!-- - (keydown) : permet l'envoi au clavier (ex: Entrée) -->
+    <!-- - (input) : redimensionne automatiquement le textarea selon le contenu -->
+    <!-- - [disabled] : désactive la saisie pendant le chargement -->
+    <textarea
+      #textarea
+      [ngModel]="currentValue()"
+      (ngModelChange)="currentValue.set($event)"
+      placeholder="Que voulez-vous générer ?"
+      (focus)="isFocused.set(true)"
+      (blur)="isFocused.set(false)"
+      (keydown)="handleKeyDown($event)"
+      (input)="autoResize($event)"
+      [disabled]="isLoading()"
+      rows="1"
+    ></textarea>
+    <!-- Bouton d'envoi du message -->
+    <!-- Désactivé si le champ est vide (après trim) ou si un envoi est en cours -->
+    <button
+      class="send-btn"
+      (click)="onSend()"
+      [disabled]="!currentValue().trim() || isLoading()"
+      aria-label="Envoyer"
+    >
+    <!-- Affiche l'icône flèche vers le haut quand aucun chargement n'est en cours -->
+      @if (!isLoading()) {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="19" x2="12" y2="5"/>
+          <polyline points="5 12 12 5 19 12"/>
+        </svg>
+      } @else {
+        <span class="loader-dots">
+          <span></span><span></span><span></span>
+        </span>
+      }
+    </button>
+  </div>
+</div>
