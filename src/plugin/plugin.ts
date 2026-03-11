@@ -11,20 +11,42 @@ import { WebSocketClient } from './websocket-client';
  * - fermer proprement la socket quand le plugin est fermé
  */
 
-const PLUGIN_NAME = 'OllMark';
-const WS_URL = 'ws://localhost:4401/plugin';
+export const PLUGIN_NAME = 'OllMark';
+export const WS_URL = 'ws://localhost:4401/plugin';
 
-console.log('[Plugin] Starting OllMark sandbox');
+/**
+ * Initialise la sandbox Penpot du plugin.
+ *
+ * Cette fonction est exportée pour faciliter les tests unitaires
+ * du point d'entrée sans dépendre uniquement des effets de bord
+ * au chargement du module.
+ *
+ * @param client Instance de WebSocketClient à utiliser
+ */
+export function bootstrapPlugin(client: Pick<WebSocketClient, 'connect' | 'disconnect'>): void {
+    console.log('[Plugin] Starting OllMark sandbox');
 
-penpot.ui.open(PLUGIN_NAME, '/', {
-    width: 500,
-    height: 800,
-});
+    penpot.ui.open(PLUGIN_NAME, '/', {
+        width: 500,
+        height: 800,
+    });
 
-const client = new WebSocketClient(WS_URL);
-client.connect();
+    client.connect();
 
-penpot.on('finish', () => {
-    console.log('[Plugin] Finishing OllMark sandbox');
-    client.disconnect();
-});
+    penpot.on('finish', () => {
+        console.log('[Plugin] Finishing OllMark sandbox');
+        client.disconnect();
+    });
+}
+
+function hasPenpotRuntime(): boolean {
+    return typeof (globalThis as typeof globalThis & { penpot?: unknown }).penpot !== 'undefined';
+}
+
+export function autoBootstrap(createClient: () => Pick<WebSocketClient, 'connect' | 'disconnect'>): void {
+    if (hasPenpotRuntime()) {
+        bootstrapPlugin(createClient());
+    }
+}
+
+autoBootstrap(() => new WebSocketClient(WS_URL));

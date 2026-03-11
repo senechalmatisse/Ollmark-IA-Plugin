@@ -94,6 +94,16 @@ describe('WebSocketClient', () => {
         expect(globalThis.WebSocket).toHaveBeenCalledWith('ws://localhost:4401/plugin');
     });
 
+    it('should not reconnect when connect is called while socket is already connecting/open', () => {
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+
+        client.connect();
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+
+        client.connect();
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+    });
+
     it('should execute a received task and send a success response', async () => {
         executeSpy.and.resolveTo({
         success: true,
@@ -210,6 +220,17 @@ describe('WebSocketClient', () => {
         expect(closeSpy).toHaveBeenCalled();
     });
 
+    it('should handle close errors during disconnect without throwing', () => {
+        closeSpy.and.callFake(() => {
+            throw new Error('close failed');
+        });
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        expect(() => client.disconnect()).not.toThrow();
+    });
+
     it('should schedule reconnection after close', () => {
         jasmine.clock().install();
 
@@ -262,6 +283,63 @@ describe('WebSocketClient', () => {
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
     });
 
+    it('should clear pending reconnect timer when disconnect is called', () => {
+        jasmine.clock().install();
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        mockSocket.onclose?.();
+        client.disconnect();
+
+        jasmine.clock().tick(1000);
+
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+    });
+
+    it('should schedule reconnect when websocket emits an error', () => {
+        jasmine.clock().install();
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        // Simule une socket déjà fermée: connect() peut alors recréer une nouvelle instance.
+        mockSocket.readyState = 3;
+        mockSocket.onerror?.({} as Event);
+        jasmine.clock().tick(1000);
+
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not schedule reconnect on error while socket is still connecting', () => {
+        jasmine.clock().install();
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        mockSocket.readyState = 0;
+        mockSocket.onerror?.({} as Event);
+        jasmine.clock().tick(30000);
+
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not schedule duplicate reconnect timers', () => {
+        jasmine.clock().install();
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        mockSocket.onclose?.();
+        mockSocket.onerror?.({} as Event);
+
+        jasmine.clock().tick(1000);
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+
+        jasmine.clock().tick(1000);
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    });
+
     it('should reset reconnect attempts on open', () => {
         jasmine.clock().install();
 
@@ -277,5 +355,84 @@ describe('WebSocketClient', () => {
         mockSocket.onclose?.();
         jasmine.clock().tick(1000);
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
+    });
+
+    it('should recover from websocket constructor failure by reconnecting later', () => {
+        jasmine.clock().install();
+
+        let attempts = 0;
+        mockWebSocketConstructor.and.callFake(() => {
+            attempts += 1;
+            if (attempts === 1) {
+                throw new Error('ctor failed');
+            }
+            return mockSocket;
+        });
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+
+        jasmine.clock().tick(1000);
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    });
+
+    it('should ignore non-object payloads', async () => {
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        await mockSocket.onmessage?.({
+            data: 'null',
+        } as MessageEvent<string>);
+
+        expect(executeSpy).not.toHaveBeenCalled();
+        expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not send responses while socket is not open', async () => {
+        executeSpy.and.resolveTo({
+            success: true,
+            data: 42,
+        });
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+        mockSocket.readyState = 0;
+
+        await mockSocket.onmessage?.({
+            data: JSON.stringify({
+                id: 'task-not-open',
+                task: 'executeCode',
+                params: { code: 'return 42;' },
+            }),
+        } as MessageEvent<string>);
+
+        expect(executeSpy).toHaveBeenCalled();
+        expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle JSON serialization failures when sending responses', async () => {
+        const circular: { self?: unknown } = {};
+        circular.self = circular;
+
+        executeSpy.and.resolveTo({
+            success: true,
+            data: circular,
+        });
+
+        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        client.connect();
+
+        await mockSocket.onmessage?.({
+            data: JSON.stringify({
+                id: 'task-circular',
+                task: 'executeCode',
+                params: { code: 'return 1;' },
+            }),
+        } as MessageEvent<string>);
+
+        expect(executeSpy).toHaveBeenCalled();
+        expect(sendSpy).not.toHaveBeenCalled();
     });
 });
