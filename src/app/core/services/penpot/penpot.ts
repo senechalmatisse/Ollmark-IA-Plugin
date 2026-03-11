@@ -1,5 +1,13 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+
+/**
+ * Basic interface for internal plugin messages.
+ */
+export interface PluginMessage {
+  type: string;
+  [key: string]: unknown;
+}
 
 /**
  * Service responsible for communication between the Angular application
@@ -9,12 +17,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class Penpot {
+  private ngZone = inject(NgZone);
+  
   /** Observable containing the current Penpot project (file) ID. */
   private fileIdSubject = new BehaviorSubject<string | null>(null);
   /** Stream of the current file ID. Subscribe to this to react to Penpot context changes. */
   public fileId$: Observable<string | null> = this.fileIdSubject.asObservable();
 
-  constructor(private ngZone: NgZone) {
+  constructor() {
     this.listenToPenpotMessages();
     this.sendReadyMessage();
   }
@@ -33,12 +43,12 @@ export class Penpot {
    */
   private listenToPenpotMessages(): void {
     window.addEventListener('message', (event) => {
-      const message = event.data;
+      const message = event.data as PluginMessage;
       
       if (message && message.type === 'fileId') {
         // We wrap in ngZone.run to ensure Angular change detection is triggered
         this.ngZone.run(() => {
-          this.fileIdSubject.next(message.fileId);
+          this.fileIdSubject.next(message['fileId'] as string);
         });
       }
     });
@@ -50,7 +60,7 @@ export class Penpot {
    * 
    * @param message The message object to send.
    */
-  public sendMessageToPlugin(message: any): void {
+  public sendMessageToPlugin(message: PluginMessage): void {
     parent.postMessage(message, '*');
   }
 }

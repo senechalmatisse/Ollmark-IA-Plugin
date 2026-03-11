@@ -26,7 +26,7 @@ const sendFileId = () => {
  * Listen for messages from the UI (Angular).
  * Handles the 'ready' handshake and 'cancel' actions.
  */
-penpot.ui.onMessage<any>((msg) => {
+penpot.ui.onMessage<{ type: string }>((msg) => {
   if (msg.type === 'ready') {
     sendFileId();
   }
