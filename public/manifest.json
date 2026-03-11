@@ -1,0 +1,13 @@
+{
+  "name": "Ollmark AI Plugin",
+  "description": "An AI generation plugin for Penpot",
+  "permissions": [
+    "content:read",
+    "content:write",
+    "library:read",
+    "library:write"
+  ],
+  "code": "/plugin.js",
+  "icon": "",
+  "theme": "any"
+}
