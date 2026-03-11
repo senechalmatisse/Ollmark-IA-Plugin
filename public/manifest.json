@@ -1,14 +1,15 @@
 {
-    "name": "Penpot AI Plugin",
-    "description": "Chat conversationnel IA pour Penpot",
-    "code": "plugin.js",
-    "icon": "/favicon.png",
-    "permissions": [
-        "content:read",
-        "content:write",
-        "library:read",
-        "library:write",
-        "comment:read",
-        "comment:write"
-    ]
+  "name": "Ollmark AI Plugin",
+  "description": "An AI generation plugin for Penpot",
+  "permissions": [
+    "content:read",
+    "content:write",
+    "library:read",
+    "library:write",
+    "comment:read",
+    "comment:write"
+  ],
+  "code": "/plugin.js",
+  "icon": "",
+  "theme": "any"
 }
