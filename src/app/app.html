@@ -1,6 +1,6 @@
 <div>
 <h1>{{ title }}</h1>
- <p>File ID: {{ penpot.fileId$ | async }}</p>
+  <p style="color: aliceblue;">Project ID: {{ penpot.fileId$ | async }}</p>
 <div class="messages__container">
   @for (msg of messages; track msg.timestamp) {
     <app-message [message]="msg" />
