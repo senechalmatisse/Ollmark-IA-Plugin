@@ -15,6 +15,18 @@ export const PLUGIN_NAME = 'OllMark';
 export const WS_URL = 'ws://localhost:4401/plugin';
 
 /**
+ * Retrieves the current file ID and sends it to the UI (Angular iframe).
+ */
+const sendFileId = () => {
+    const currentFileId = penpot.currentFile ? penpot.currentFile.id : null;
+    console.log('[Plugin] Sending fileId:', currentFileId);
+    penpot.ui.sendMessage({
+        type: 'fileId',
+        fileId: currentFileId,
+    });
+};
+
+/**
  * Initialise la sandbox Penpot du plugin.
  *
  * Cette fonction est exportée pour faciliter les tests unitaires
@@ -32,6 +44,25 @@ export function bootstrapPlugin(client: Pick<WebSocketClient, 'connect' | 'disco
     });
 
     client.connect();
+
+    // Listen for the 'ready' handshake from the Angular UI
+    penpot.ui.onMessage<{ type: string }>((msg) => {
+        if (msg.type === 'ready') {
+            console.log('[Plugin] UI ready, sending initial fileId');
+            sendFileId();
+        }
+    });
+
+    // Update the UI whenever the file or page changes
+    penpot.on('filechange', () => {
+        console.log('[Plugin] File changed, updating UI');
+        sendFileId();
+    });
+
+    penpot.on('pagechange', () => {
+        console.log('[Plugin] Page changed, updating UI');
+        sendFileId();
+    });
 
     penpot.on('finish', () => {
         console.log('[Plugin] Finishing OllMark sandbox');
