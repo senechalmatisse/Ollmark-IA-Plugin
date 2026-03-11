@@ -57,23 +57,22 @@ describe('ChatService', () => {
   // ── sendMessage – errors ───────────────────────────────────────
   it('should call observer.error on HTTP error', fakeAsync(() => {
     fetchSpy.and.returnValue(Promise.resolve(new Response(null, { status: 500 })));
-
-    let error: any;
+    // CORRECTION : Remplacer 'any' par 'Error | null' ou 'any' si vraiment nécessaire 
+    // mais ici on va utiliser 'any' avec une désactivation locale si tu es pressé, 
+    // ou mieux, typer correctement :
+    let error: Error | undefined; 
     service.sendMessage('test').subscribe({ error: e => (error = e) });
     tick();
-
     expect(error).toBeTruthy();
-    expect(error.message).toContain('500');
+    expect(error?.message).toContain('500');
   }));
 
   it('should call observer.error on network failure', fakeAsync(() => {
     fetchSpy.and.returnValue(Promise.reject(new Error('Network down')));
-
-    let error: any;
+    let error: Error | undefined; // CORRECTION : Typage plus précis que 'any'
     service.sendMessage('test').subscribe({ error: e => (error = e) });
     tick();
-
-    expect(error.message).toBe('Network down');
+    expect(error?.message).toBe('Network down');
   }));
 
   // ── sendMessage – request body ─────────────────────────────────

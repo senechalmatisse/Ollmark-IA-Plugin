@@ -1,7 +1,7 @@
 import { Injectable, signal, inject, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Message, MessageType } from '../../../app/message/message';
+import { Message } from '../../../app/message/message'; 
 import { AIMessage } from '../../../app/message/ai-message';
 import { UserMessage } from '../../../app/message/user-message';
 
@@ -10,7 +10,6 @@ export class ChatService {
   private readonly API_BASE = environment.apiUrl;
   private ngZone = inject(NgZone);
 
-  // Utilise les classes du projet pour la compatibilité UI
   messages = signal<Message[]>([]);
   conversationId = signal<string>('');
 
@@ -24,13 +23,16 @@ export class ChatService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({})
     })
-    .then(res => res.ok ? res.json() : Promise.reject(res))
-    .then(data => {
-      if (data?.conversationId) {
-        this.ngZone.run(() => this.conversationId.set(data.conversationId));
-      }
-    })
-    .catch(err => console.error('Erreur init conversation :', err));
+      .then(res => {
+        if (!res.ok) throw new Error(`Init failed: HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data?.conversationId) {
+          this.ngZone.run(() => this.conversationId.set(data.conversationId));
+        }
+      })
+      .catch(err => console.error('Erreur init conversation :', err));
   }
 
   sendMessage(text: string, userToken?: string): Observable<string> {
@@ -49,36 +51,41 @@ export class ChatService {
           ...(userToken ? { userToken } : {})
         })
       })
-      .then(async (response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const reader = response.body?.getReader();
-        if (!reader) throw new Error('Stream non supporté');
-        const decoder = new TextDecoder();
+        .then(async (response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            for (const line of chunk.split('\n')) {
-              if (!line.startsWith('data:')) continue;
-              const content = line.replace('data:', '').trim();
-              if (content === '[DONE]' || !content) continue;
+          const reader = response.body?.getReader();
+          if (!reader) throw new Error('ReadableStream non supporté');
 
-              this.ngZone.run(() => {
-                this.appendContent(content);
-                observer.next(content);
-              });
+          const decoder = new TextDecoder();
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              const chunk = decoder.decode(value, { stream: true });
+
+              for (const line of chunk.split('\n')) {
+                if (!line.startsWith('data:')) continue;
+
+                const content = line.replace('data:', '').trim();
+                if (content === '[DONE]' || !content) continue;
+
+                this.ngZone.run(() => {
+                  this.appendContent(content);
+                  observer.next(content);
+                });
+              }
             }
+          } catch (e) {
+            this.ngZone.run(() => observer.error(e));
+          } finally {
+            this.ngZone.run(() => observer.complete());
+            reader.releaseLock();
           }
-        } catch (e) {
-          this.ngZone.run(() => observer.error(e));
-        } finally {
-          this.ngZone.run(() => observer.complete());
-          reader.releaseLock();
-        }
-      })
-      .catch(err => this.ngZone.run(() => observer.error(err)));
+        })
+        .catch(err => this.ngZone.run(() => observer.error(err)));
     });
   }
 
@@ -87,7 +94,7 @@ export class ChatService {
       const updated = [...msgs];
       const last = updated[updated.length - 1];
       if (last instanceof AIMessage) {
-        // @ts-ignore - On force la mise à jour du contenu pour le stream
+        // @ts-expect-error - On force la mise à jour du contenu pour le stream
         last.content += content;
       }
       return updated;
