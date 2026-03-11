@@ -10,14 +10,21 @@ export class CodeExecutor {
     async execute(task: PluginTaskRequest): Promise<ExecutionResult> {
         const code = task.params.code;
 
-    if (typeof code !== 'string' || code.trim().length === 0) {
+        if (typeof code !== 'string' || code.trim().length === 0) {
         return {
             success: false,
             error: 'Missing or empty task.params.code',
         };
-    }
+        }
 
-    try {
+        try {
+        /**
+         * Le runtime Penpot expose `penpot` globalement dans la sandbox.
+         * Pour éviter une erreur TypeScript dans le contexte Angular/test,
+         * on le lit via `globalThis`.
+         */
+        const penpotApi = (globalThis as typeof globalThis & { penpot?: unknown }).penpot;
+
         const fn = new Function(
             'penpot',
             `
@@ -26,19 +33,19 @@ export class CodeExecutor {
             ${code}
             })();
             `
-        ) as (penpotApi: typeof penpot) => unknown;
+        ) as (penpotApi: unknown) => unknown;
 
-        const result = await Promise.resolve(fn(penpot));
+        const result = await Promise.resolve(fn(penpotApi));
 
         return {
             success: true,
             data: result,
         };
-    } catch (error: unknown) {
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : String(error),
-            };
+        } catch (error: unknown) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
         }
     }
-}
+    }
