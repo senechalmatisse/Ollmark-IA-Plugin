@@ -27,7 +27,7 @@ export class ConversationStateService {
     this.isStreaming.set(value);
   }
 
-  handleError(error: any): void {
+  handleError(error: unknown): void {
     console.error('[State] Erreur flux:', error);
     this.setStreaming(false);
   }

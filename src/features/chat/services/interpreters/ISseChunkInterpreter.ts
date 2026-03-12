@@ -5,7 +5,7 @@ export interface SseInterpretation {
     // 'text' pour le contenu de l'IA, 'actionPerformed' pour le signal Penpot, 'error' pour les soucis
     type: 'text' | 'actionPerformed' | 'error';
     // Le contenu brut ou les données extraites du chunk
-    payload?: any;
+    payload?: unknown;
   }
   
   /**

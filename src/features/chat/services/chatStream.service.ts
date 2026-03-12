@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { ConversationStateService } from './conversationState.service';
