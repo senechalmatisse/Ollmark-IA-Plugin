@@ -7,12 +7,16 @@ import { IConversationService } from './IConversation.service';
 import { IApiService } from './IApi.service';
 
 @Injectable({ providedIn: 'root' })
+/**
+ * High-level conversation facade used by UI components.
+ * Manages conversation bootstrap, outgoing messages, and reset behavior.
+ */
 export class ConversationService implements IConversationService {
   private apiService = inject(IApiService);
   private stateService = inject(ConversationStateService);
   private streamService = inject(ChatStreamService);
 
-  // Mapping sender → type pour satisfaire IMessage attendu par MessageComponent
+  /** UI-facing messages mapped to the `IMessage` contract. */
   public messages = computed<readonly IMessage[]>(() =>
     this.stateService.messages().map(msg => ({
       id: msg.id,
@@ -22,16 +26,17 @@ export class ConversationService implements IConversationService {
     }))
   );
 
+  /** Streaming state exposed to input/components. */
   public isStreaming = this.stateService.isStreaming;
 
+  /** Current backend conversation identifier. */
   private conversationId = '';
 
   constructor() {
-    this.apiService.initConversation()
-      .then(id => { this.conversationId = id; })
-      .catch(err => console.error('[Conversation] Init échouée :', err));
+    this.initializeConversation();
   }
 
+  /** Pushes user message + assistant placeholder, then starts streaming. */
   sendMessage(text: string): void {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -53,5 +58,18 @@ export class ConversationService implements IConversationService {
     this.stateService.addMessage(userMsg);
     this.stateService.addMessage(aiPlaceholder);
     this.streamService.streamResponse(trimmed, this.conversationId);
+  }
+
+  /** Clears local history and creates a new backend conversation. */
+  resetConversation(): void {
+    this.stateService.clearMessages();
+    this.initializeConversation();
+  }
+
+  /** Initializes conversation ID at startup and after reset. */
+  private initializeConversation(): void {
+    this.apiService.initConversation()
+      .then(id => { this.conversationId = id; })
+      .catch(err => console.error('[Conversation] Init échouée :', err));
   }
 }

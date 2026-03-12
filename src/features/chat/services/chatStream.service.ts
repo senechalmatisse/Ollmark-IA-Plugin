@@ -8,16 +8,26 @@ import { TextChunkInterpreter } from './interpreters/textChunkInterpreter';
 import { IApiService } from './IApi.service';
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Orchestrates streaming lifecycle:
+ * - opens API stream
+ * - interprets each chunk
+ * - updates conversation state
+ */
 export class ChatStreamService {
   private apiService = inject(IApiService);
   private stateService = inject(ConversationStateService);
 
-  // Ordre important : ActionSignal avant Text (Text est le fallback)
+  /** Interpreter order matters: action signals first, text fallback last. */
   private readonly interpreters: ISseChunkInterpreter[] = [
     new ActionSignalInterpreter(),
     new TextChunkInterpreter(),
   ];
 
+  /**
+   * Starts response streaming for a user message.
+   * Streaming flag is set before subscribing and cleared on finalize.
+   */
   public streamResponse(content: string, conversationId: string, userToken?: string): void {
     this.stateService.setStreaming(true);
 
@@ -30,6 +40,7 @@ export class ChatStreamService {
       });
   }
 
+  /** Resolves a chunk using the first interpreter that can handle it. */
   private processChunk(chunk: string): void {
     for (const interpreter of this.interpreters) {
       const interpretation = interpreter.interpret(chunk);
@@ -40,10 +51,11 @@ export class ChatStreamService {
     }
   }
 
+  /** Dispatches interpreted events to the proper state side-effect. */
   private dispatch(interpretation: SseInterpretation): void {
     switch (interpretation.type) {
       case 'text':
-        // On vérifie que le payload est bien une string avant de l'envoyer au state
+        // Runtime guard for dynamic payload coming from interpreters.
         if (typeof interpretation.payload === 'string') {
           this.stateService.updateLastAiMessage(interpretation.payload);
         }

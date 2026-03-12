@@ -1,18 +1,21 @@
 import { ISseChunkInterpreter, SseInterpretation } from './ISseChunkInterpreter';
 
+/**
+ * Interprets backend control signals indicating that an external action
+ * (for example in Penpot) has been completed.
+ */
 export class ActionSignalInterpreter implements ISseChunkInterpreter {
-    //signal spécifique envoyé par le backend indiquant qu'une action Penpot a été exécutée
+  /** Backend marker emitted when an action has been performed. */
   private readonly SIGNAL = '[ACTION_DONE]';
 
+  /** Returns an `actionPerformed` interpretation when the signal is matched. */
   interpret(chunk: string): SseInterpretation | null {
-    // Si le chunk contient exactement le signal
     if (chunk.trim() === this.SIGNAL) {
       return {
         type: 'actionPerformed'
       };
     }
 
-    // Sinon, on retourne null pour que le service teste l'interpréteur suivant
     return null;
   }
 }

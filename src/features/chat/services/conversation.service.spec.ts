@@ -6,28 +6,30 @@ import { ChatStreamService } from './chatStream.service';
 import { signal, WritableSignal } from '@angular/core';
 import { Message } from '../../../core/models/message.model';
 
+/** Unit tests for conversation facade behavior. */
 describe('ConversationService', () => {
   let service: ConversationService;
   let apiSpy: jasmine.SpyObj<IApiService>;
-  
-  // Correction ESLint : Remplacement de 'any' par une interface qui décrit le mock
+
+  /** State mock with explicit signal and spy types. */
   let stateSpy: {
     messages: WritableSignal<Message[]>;
     isStreaming: WritableSignal<boolean>;
     addMessage: jasmine.Spy;
+    clearMessages: jasmine.Spy;
   };
-  
+
   let streamSpy: jasmine.SpyObj<ChatStreamService>;
 
   beforeEach(() => {
     apiSpy = jasmine.createSpyObj('IApiService', ['initConversation']);
     streamSpy = jasmine.createSpyObj('ChatStreamService', ['streamResponse']);
-    
-    // Mock simple pour le signal de messages avec des types explicites
+
     stateSpy = {
       messages: signal<Message[]>([]),
       isStreaming: signal<boolean>(false),
-      addMessage: jasmine.createSpy('addMessage')
+      addMessage: jasmine.createSpy('addMessage'),
+      clearMessages: jasmine.createSpy('clearMessages')
     };
 
     apiSpy.initConversation.and.resolveTo('conv-123');
@@ -43,11 +45,13 @@ describe('ConversationService', () => {
     service = TestBed.inject(ConversationService);
   });
 
+  /** Initializes backend conversation ID during service construction. */
   it('should initialize conversation ID on start', fakeAsync(() => {
-    tick(); // Attend la résolution de initConversation
+    tick();
     expect(apiSpy.initConversation).toHaveBeenCalled();
   }));
 
+  /** Adds user + placeholder messages and starts stream request. */
   it('should add user message and AI placeholder then call stream', () => {
     service.sendMessage('Test message');
     
@@ -55,8 +59,18 @@ describe('ConversationService', () => {
     expect(streamSpy.streamResponse).toHaveBeenCalledWith('Test message', jasmine.any(String));
   });
 
+  /** Ignores blank input messages. */
   it('should not send empty messages', () => {
     service.sendMessage('   ');
     expect(stateSpy.addMessage).not.toHaveBeenCalled();
   });
+
+  /** Resets state and requests a new backend conversation. */
+  it('should clear messages and reinitialize conversation on reset', fakeAsync(() => {
+    service.resetConversation();
+    tick();
+
+    expect(stateSpy.clearMessages).toHaveBeenCalled();
+    expect(apiSpy.initConversation).toHaveBeenCalledTimes(2); // constructor + reset
+  }));
 });

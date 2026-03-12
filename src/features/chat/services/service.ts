@@ -7,6 +7,8 @@ import { ChatMessageMapper } from '../mappers/mapper';
 import { RawChatEntry, ChatHistoryError } from '../models/raw-message.model';
 import { Message } from '../../../core/models/message.model';
 import { environment } from '../../../environments/environment';
+
+/** Shape of normalized HTTP errors surfaced to consumers. */
 export interface ChatError {
   status: number;
   message: string;
@@ -16,6 +18,10 @@ export interface ChatError {
 @Injectable({
   providedIn: 'root',
 })
+/**
+ * HTTP service for retrieving persisted conversation messages/history.
+ * Maps backend entries into frontend `Message` objects.
+ */
 export class Service {
   private http = inject(HttpClient);
 
@@ -32,7 +38,7 @@ export class Service {
    *
    * GET /api/chat-memory/:conversationId
    */
-  getConversation(conversationID: string) : Observable<Message[]>{
+  getConversation(conversationID: string): Observable<Message[]> {
     return this.http.get<RawChatEntry>(`${this.baseUrl}/message/conversation/${conversationID}`)
       .pipe(
         map(ChatMessageMapper.toMessages),
@@ -47,8 +53,8 @@ export class Service {
    * @param conversationId -- UUID of the conversation
    * @param limit -- Number of messages to fetch (default: 20)
    */
-  getHistory(conversationId:string, limit = 20): Observable<Message[]>{
-    const params = new HttpParams().set('limit',limit );
+  getHistory(conversationId: string, limit = 20): Observable<Message[]> {
+    const params = new HttpParams().set('limit', limit);
     return this.http.get<RawChatEntry[]>(`${this.baseUrl}/message/conversation/${conversationId}/last`, { params })
       .pipe(
         map(ChatMessageMapper.toMessageList),
@@ -56,8 +62,11 @@ export class Service {
       );
   }
 
-// Error Handling
-       private handleError(error: HttpErrorResponse): Observable<never> {
+  /**
+   * Converts transport/HTTP errors into `ChatHistoryError`.
+   * Uses status `0` for network-level failures.
+   */
+  private handleError(error: HttpErrorResponse): Observable<never> {
     const chatError: ChatHistoryError =
       error.status === 0
         ? { status: 0, message: 'Network error: unable to reach the server.' }
@@ -69,4 +78,4 @@ export class Service {
     console.error('[ChatHistoryService]', chatError);
     return throwError(() => chatError);
   }
-  }
+}

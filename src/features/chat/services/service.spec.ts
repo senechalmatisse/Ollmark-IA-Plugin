@@ -10,14 +10,14 @@ import { ChatHistoryError, RawChatEntry } from '../models/raw-message.model';
 import { Message } from '../../../core/models/message.model';
 import { environment } from '../../../environments/environment';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+/** Test constants for deterministic URL and limit checks. */
 
 const CONVERSATION_ID = '11111111-1111-1111-1111-111111111111';
 const ENTRY_URL      = `${environment.apiUrl}/message/conversation/${CONVERSATION_ID}`;
 const HISTORY_URL    = `${environment.apiUrl}/message/conversation/${CONVERSATION_ID}/last`;
 const DEFAULT_LIMIT  = 20;
 
-// ─── Mock factory ─────────────────────────────────────────────────────────────
+/** Factory helper for creating backend entry fixtures. */
 
 const mockEntry = (overrides: Partial<RawChatEntry> = {}): RawChatEntry => ({
   id: 'aaaaaaaa-0000-0000-0000-000000000001',
@@ -29,8 +29,7 @@ const mockEntry = (overrides: Partial<RawChatEntry> = {}): RawChatEntry => ({
   ...overrides,
 });
 
-// ─── Suite ────────────────────────────────────────────────────────────────────
-
+/** Unit tests for conversation history HTTP service. */
 describe('Service', () => {
   let service: Service;
   let httpMock: HttpTestingController;
@@ -50,8 +49,7 @@ describe('Service', () => {
 
   afterEach(() => httpMock.verify());
 
-  // ── getConversation ────────────────────────────────────────────────────────
-
+  /** Tests for single-conversation entry retrieval. */
   describe('getConversation()', () => {
 
     it('should call GET on the correct entry URL', () => {
@@ -113,8 +111,7 @@ describe('Service', () => {
     });
   });
 
-  // ── getHistory ─────────────────────────────────────────────────────────────
-
+  /** Tests for paginated conversation history retrieval. */
   describe('getHistory()', () => {
 
     it(`should call GET with default limit=${DEFAULT_LIMIT}`, () => {
@@ -165,8 +162,7 @@ describe('Service', () => {
     });
   });
 
-  // ── Error handling ─────────────────────────────────────────────────────────
-
+  /** Tests for network and backend error mapping. */
   describe('Error handling', () => {
 
     it('should emit a ChatHistoryError with status 404', () => {
