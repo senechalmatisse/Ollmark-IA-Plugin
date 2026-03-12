@@ -1,4 +1,4 @@
-import { Injectable, Signal } from '@angular/core';
+import { inject, Injectable, Signal } from '@angular/core';
 import { IConversationService } from './i-conversation.service';
 import { ConversationStateService } from './conversation-state.service';
 import { IMessage } from '../../message/message';
@@ -18,20 +18,20 @@ import { UserMessage } from '../../message/user-message';
 })
 export class ConversationService implements IConversationService {
     /**
-    * @param conversationStateService service interne responsable des signaux
-    */
-    constructor(private readonly conversationStateService: ConversationStateService) {}
+     * Service interne responsable des signaux.
+     */
+    private readonly conversationStateService = inject(ConversationStateService);
 
     /**
-    * Expose l'historique réactif des messages.
-    */
+     * Expose l'historique réactif des messages.
+     */
     get messages(): Signal<IMessage[]> {
         return this.conversationStateService.messages;
     }
 
     /**
-    * Expose l'état de streaming.
-    */
+     * Expose l'état de streaming.
+     */
     get isStreaming(): Signal<boolean> {
         return this.conversationStateService.isStreaming;
     }
@@ -47,27 +47,27 @@ export class ConversationService implements IConversationService {
     sendMessage(content: string): void {
         const trimmedContent = content.trim();
 
-    if (!trimmedContent) {
-        return;
-    }
+        if (!trimmedContent) {
+            return;
+        }
 
-    this.conversationStateService.addMessage(
-        new UserMessage(this.generateMessageId(), trimmedContent)
-    );
+        this.conversationStateService.addMessage(
+            new UserMessage(this.generateMessageId(), trimmedContent)
+        );
     }
 
     /**
-    * Réinitialise complètement la conversation.
-    */
+     * Réinitialise complètement la conversation.
+     */
     resetConversation(): void {
         this.conversationStateService.reset();
     }
 
     /**
-    * Génère un identifiant simple de message local.
-    *
-    * @returns identifiant de message
-    */
+     * Génère un identifiant simple de message local.
+     *
+     * @returns identifiant de message
+     */
     private generateMessageId(): string {
         return Date.now().toString();
     }
