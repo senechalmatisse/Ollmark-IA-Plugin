@@ -7,28 +7,27 @@ import { BehaviorSubject } from 'rxjs';
 import { signal } from '@angular/core';
 
 describe('App', () => {
-  let penpotMock: any;
-  let conversationServiceMock: any;
+  // Remplacement de any par des types partiels ou spécifiques
+  let penpotMock: Partial<Penpot> & { fileIdSubject: BehaviorSubject<string | null> };
+  let conversationServiceMock: Partial<IConversationService>;
   let apiServiceMock: jasmine.SpyObj<IApiService>;
 
   beforeEach(async () => {
-    // Mock pour Penpot
+    // Mock pour Penpot avec des propriétés typées
     penpotMock = {
       fileIdSubject: new BehaviorSubject<string | null>(null),
       fileId$: new BehaviorSubject<string | null>(null).asObservable()
     };
     penpotMock.fileId$ = penpotMock.fileIdSubject.asObservable();
 
-    // Mock pour IConversationService (utilisé par le composant App)
+    // Mock pour IConversationService
     conversationServiceMock = {
       messages: signal([]),
       isStreaming: signal(false),
       sendMessage: jasmine.createSpy('sendMessage')
     };
 
-    // Mock pour IApiService (indispensable pour que ConversationService ne crash pas au constructeur)
     apiServiceMock = jasmine.createSpyObj('IApiService', ['initConversation', 'sendMessage']);
-    // On simule une promesse pour initConversation pour éviter l'erreur ".then"
     apiServiceMock.initConversation.and.returnValue(Promise.resolve('mock-conv-id'));
 
     await TestBed.configureTestingModule({
@@ -60,14 +59,12 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const testId = 'test-project-id-999';
 
-    // Simuler l'arrivée d'un ID de fichier Penpot
     penpotMock.fileIdSubject.next(testId);
 
     fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    // Vérifier que le texte est présent dans le paragraphe <p>
     expect(compiled.querySelector('p')?.textContent).toContain('Project ID: ' + testId);
   });
 });

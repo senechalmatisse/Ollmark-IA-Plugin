@@ -3,22 +3,30 @@ import { ConversationService } from './conversation.service';
 import { IApiService } from './IApi.service';
 import { ConversationStateService } from './conversationState.service';
 import { ChatStreamService } from './chatStream.service';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
+import { Message } from '../../../core/models/message.model';
 
 describe('ConversationService', () => {
   let service: ConversationService;
   let apiSpy: jasmine.SpyObj<IApiService>;
-  let stateSpy: any;
+  
+  // Correction ESLint : Remplacement de 'any' par une interface qui décrit le mock
+  let stateSpy: {
+    messages: WritableSignal<Message[]>;
+    isStreaming: WritableSignal<boolean>;
+    addMessage: jasmine.Spy;
+  };
+  
   let streamSpy: jasmine.SpyObj<ChatStreamService>;
 
   beforeEach(() => {
     apiSpy = jasmine.createSpyObj('IApiService', ['initConversation']);
     streamSpy = jasmine.createSpyObj('ChatStreamService', ['streamResponse']);
     
-    // Mock simple pour le signal de messages
+    // Mock simple pour le signal de messages avec des types explicites
     stateSpy = {
-      messages: signal([]),
-      isStreaming: signal(false),
+      messages: signal<Message[]>([]),
+      isStreaming: signal<boolean>(false),
       addMessage: jasmine.createSpy('addMessage')
     };
 
