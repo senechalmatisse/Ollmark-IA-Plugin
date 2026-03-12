@@ -1,42 +1,45 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
 import { App } from './app';
 import { Penpot } from '../core/services/penpot/penpot';
 import { IConversationService } from '../features/chat/services/IConversation.service';
-import { IApiService } from '../features/chat/services/IApi.service';
-import { BehaviorSubject } from 'rxjs';
-import { signal } from '@angular/core';
+import { Message } from '../features/message/message';
 
 describe('App', () => {
-  // Remplacement de any par des types partiels ou spécifiques
   let penpotMock: Partial<Penpot> & { fileIdSubject: BehaviorSubject<string | null> };
   let conversationServiceMock: Partial<IConversationService>;
-  let apiServiceMock: jasmine.SpyObj<IApiService>;
 
   beforeEach(async () => {
-    // Mock pour Penpot avec des propriétés typées
     penpotMock = {
       fileIdSubject: new BehaviorSubject<string | null>(null),
-      fileId$: new BehaviorSubject<string | null>(null).asObservable()
+      fileId$: new BehaviorSubject<string | null>(null).asObservable(),
     };
     penpotMock.fileId$ = penpotMock.fileIdSubject.asObservable();
 
-    // Mock pour IConversationService
-    conversationServiceMock = {
-      messages: signal([]),
-      isStreaming: signal(false),
-      sendMessage: jasmine.createSpy('sendMessage')
-    };
+    const mockMessages: readonly Message[] = [
+      {
+        id: '1',
+        content: "Je peux t'aider à modifier automatiquement ta page Penpot.",
+        type: 'ai',
+        timestamp: new Date('2026-03-12T11:02:00'),
+      },
+    ];
 
-    apiServiceMock = jasmine.createSpyObj('IApiService', ['initConversation', 'sendMessage']);
-    apiServiceMock.initConversation.and.returnValue(Promise.resolve('mock-conv-id'));
+    conversationServiceMock = {
+      messages: signal(mockMessages),
+      isStreaming: signal(false),
+      sendMessage: jasmine.createSpy('sendMessage'),
+      resetConversation: jasmine.createSpy('resetConversation'),
+    };
 
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
         { provide: Penpot, useValue: penpotMock },
         { provide: IConversationService, useValue: conversationServiceMock },
-        { provide: IApiService, useValue: apiServiceMock }
-      ]
+      ],
     }).compileComponents();
   });
 
@@ -46,16 +49,17 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the chat shell', async () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Ollmark-plugin-ia');
+    expect(compiled.querySelector('.phone-shell')).not.toBeNull();
+    expect(compiled.textContent).toContain("Je peux t'aider à modifier automatiquement ta page Penpot.");
   });
 
-  it('should render project ID when it is available', async () => {
+  it('should expose the Penpot project ID on the root container', async () => {
     const fixture = TestBed.createComponent(App);
     const testId = 'test-project-id-999';
 
@@ -65,6 +69,6 @@ describe('App', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('p')?.textContent).toContain('Project ID: ' + testId);
+    expect(compiled.querySelector('.app-root')?.getAttribute('data-file-id')).toBe(testId);
   });
 });

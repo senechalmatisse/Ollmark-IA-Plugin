@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.chat-history {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+.empty-state {
+  color: var(--muted);
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 14px;
+}
+
+.empty-state-card {
+  margin: auto 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.empty-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.empty-badge {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 228, 235, 0.95);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.empty-badge-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.empty-copy {
+  min-width: 0;
+}
+
+.empty-state-card h2 {
+  margin: 2px 0 6px;
+  font-size: 18px;
+  line-height: 1.15;
+  color: #47505d;
+}
+
+.empty-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #7a8392;
+}
+
+.empty-project {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8c95a2;
+}
+
+.suggestion-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.suggestion-chip {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(224, 228, 235, 0.95);
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #5d6674;
+}
+
+.chat-history::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+  background: #cfd4dc;
+  border-radius: 999px;
+}
+
+.chat-history::-webkit-scrollbar-thumb:hover {
+  background: #b8bec8;
+}
