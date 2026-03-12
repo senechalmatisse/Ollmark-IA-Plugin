@@ -1,4 +1,3 @@
-import { PreviewState } from './preview-state.enum';
 
 /**
  * Represents a single message within the chat system.
