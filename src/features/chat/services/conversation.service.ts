@@ -27,9 +27,7 @@ export class ConversationService implements IConversationService {
   private conversationId = '';
 
   constructor() {
-    this.apiService.initConversation()
-      .then(id => { this.conversationId = id; })
-      .catch(err => console.error('[Conversation] Init échouée :', err));
+    this.initializeConversation();
   }
 
   sendMessage(text: string): void {
@@ -53,5 +51,16 @@ export class ConversationService implements IConversationService {
     this.stateService.addMessage(userMsg);
     this.stateService.addMessage(aiPlaceholder);
     this.streamService.streamResponse(trimmed, this.conversationId);
+  }
+
+  resetConversation(): void {
+    this.stateService.clearMessages();
+    this.initializeConversation();
+  }
+
+  private initializeConversation(): void {
+    this.apiService.initConversation()
+      .then(id => { this.conversationId = id; })
+      .catch(err => console.error('[Conversation] Init échouée :', err));
   }
 }

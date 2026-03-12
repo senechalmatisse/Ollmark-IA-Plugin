@@ -15,6 +15,7 @@ describe('ConversationService', () => {
     messages: WritableSignal<Message[]>;
     isStreaming: WritableSignal<boolean>;
     addMessage: jasmine.Spy;
+    clearMessages: jasmine.Spy;
   };
   
   let streamSpy: jasmine.SpyObj<ChatStreamService>;
@@ -27,7 +28,8 @@ describe('ConversationService', () => {
     stateSpy = {
       messages: signal<Message[]>([]),
       isStreaming: signal<boolean>(false),
-      addMessage: jasmine.createSpy('addMessage')
+      addMessage: jasmine.createSpy('addMessage'),
+      clearMessages: jasmine.createSpy('clearMessages')
     };
 
     apiSpy.initConversation.and.resolveTo('conv-123');
@@ -59,4 +61,12 @@ describe('ConversationService', () => {
     service.sendMessage('   ');
     expect(stateSpy.addMessage).not.toHaveBeenCalled();
   });
+
+  it('should clear messages and reinitialize conversation on reset', fakeAsync(() => {
+    service.resetConversation();
+    tick();
+
+    expect(stateSpy.clearMessages).toHaveBeenCalled();
+    expect(apiSpy.initConversation).toHaveBeenCalledTimes(2); // constructor + reset
+  }));
 });

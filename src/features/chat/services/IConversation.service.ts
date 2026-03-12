@@ -5,4 +5,5 @@ export abstract class IConversationService {
     abstract messages: Signal<readonly Message[]>;
     abstract isStreaming: Signal<boolean>;
     abstract sendMessage(text: string): void;
+    abstract resetConversation(): void;
   }
