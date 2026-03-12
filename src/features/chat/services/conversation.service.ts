@@ -1,0 +1,57 @@
+import { Injectable, inject, computed } from '@angular/core';
+import { IMessage } from '../../message/message';
+import { Message } from '../../../core/models/message.model';
+import { ConversationStateService } from './conversationState.service';
+import { ChatStreamService } from './chatStream.service';
+import { IConversationService } from './IConversation.service';
+import { IApiService } from './IApi.service';
+
+@Injectable({ providedIn: 'root' })
+export class ConversationService implements IConversationService {
+  private apiService = inject(IApiService);
+  private stateService = inject(ConversationStateService);
+  private streamService = inject(ChatStreamService);
+
+  // Mapping sender → type pour satisfaire IMessage attendu par MessageComponent
+  public messages = computed<readonly IMessage[]>(() =>
+    this.stateService.messages().map(msg => ({
+      id: msg.id,
+      content: msg.content,
+      type: msg.sender as 'user' | 'ai',
+      timestamp: msg.timestamp,
+    }))
+  );
+
+  public isStreaming = this.stateService.isStreaming;
+
+  private conversationId = '';
+
+  constructor() {
+    this.apiService.initConversation()
+      .then(id => { this.conversationId = id; })
+      .catch(err => console.error('[Conversation] Init échouée :', err));
+  }
+
+  sendMessage(text: string): void {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      content: trimmed,
+      timestamp: new Date(),
+    };
+
+    const aiPlaceholder: Message = {
+      id: (Date.now() + 1).toString(),
+      sender: 'ai',
+      content: '',
+      timestamp: new Date(),
+    };
+
+    this.stateService.addMessage(userMsg);
+    this.stateService.addMessage(aiPlaceholder);
+    this.streamService.streamResponse(trimmed, this.conversationId);
+  }
+}
