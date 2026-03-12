@@ -4,6 +4,7 @@ import { IApiService } from './IApi.service';
 import { ConversationStateService } from './conversationState.service';
 import { of } from 'rxjs';
 
+/** Unit tests for chunk streaming orchestration. */
 describe('ChatStreamService', () => {
   let service: ChatStreamService;
   let apiSpy: jasmine.SpyObj<IApiService>;
@@ -23,6 +24,7 @@ describe('ChatStreamService', () => {
     service = TestBed.inject(ChatStreamService);
   });
 
+  /** Verifies that text chunks are forwarded to state updates. */
   it('should process text chunks through stateService', () => {
     apiSpy.sendMessage.and.returnValue(of('Hello'));
     service.streamResponse('hi', 'conv-id');
@@ -31,6 +33,7 @@ describe('ChatStreamService', () => {
     expect(stateSpy.updateLastAiMessage).toHaveBeenCalledWith('Hello');
   });
 
+  /** Verifies action control signals are handled without text update. */
   it('should detect special action signals', () => {
     apiSpy.sendMessage.and.returnValue(of('[ACTION_DONE]'));
     const consoleSpy = spyOn(console, 'log');

@@ -5,10 +5,17 @@ import { IApiService } from './IApi.service';
 
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Fetch-based API implementation for chat initialization and streaming.
+ * Converts SSE-style `data:` lines into an Observable<string> stream.
+ */
 export class ApiService extends IApiService {
+  /** API base URL configured from Angular environments. */
   private readonly API_BASE = environment.apiUrl;
+  /** Ensures Observable notifications run inside Angular zone. */
   private ngZone = inject(NgZone);
 
+  /** Creates a new chat conversation and returns its server-side ID. */
   async initConversation(): Promise<string> {
     const res = await fetch(`${this.API_BASE}/chat/new`, {
       method: 'POST',
@@ -20,6 +27,12 @@ export class ApiService extends IApiService {
     return data?.conversationId ?? '';
   }
 
+  /**
+   * Sends a user message and streams assistant chunks from backend response.
+   * @param content User message content.
+   * @param conversationId Current conversation identifier.
+   * @param userToken Optional user token forwarded to backend.
+   */
   sendMessage(content: string, conversationId: string, userToken?: string): Observable<string> {
     return new Observable<string>(observer => {
       fetch(`${this.API_BASE}/chat`, {

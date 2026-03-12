@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiService } from './api.service';
 
+/** Unit tests for fetch-based API chat service. */
 describe('ApiService', () => {
   let service: ApiService;
 
@@ -13,11 +14,14 @@ describe('ApiService', () => {
     spyOn(window, 'fetch');
   });
 
+  /** Verifies Angular injection setup. */
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
+  /** Covers conversation bootstrap endpoint behavior. */
   describe('initConversation', () => {
+    /** Returns backend-provided conversation ID when request succeeds. */
     it('should return conversationId on success', async () => {
       (window.fetch as jasmine.Spy).and.resolveTo({
         ok: true,
@@ -29,13 +33,16 @@ describe('ApiService', () => {
       expect(window.fetch).toHaveBeenCalledWith(jasmine.stringMatching('/chat/new'), jasmine.any(Object));
     });
 
+    /** Propagates an error when init endpoint returns non-2xx. */
     it('should throw error when response is not ok', async () => {
       (window.fetch as jasmine.Spy).and.resolveTo({ ok: false, status: 500 } as Response);
       await expectAsync(service.initConversation()).toBeRejectedWithError('Init failed: HTTP 500');
     });
   });
 
+  /** Covers SSE parsing and network error propagation. */
   describe('sendMessage', () => {
+    /** Parses `data:` lines and emits only meaningful chunks. */
     it('should parse SSE chunks correctly', (done) => {
       const mockStream = new ReadableStream({
         start(controller) {
@@ -59,6 +66,7 @@ describe('ApiService', () => {
       });
     });
 
+    /** Emits fetch errors through Observable error channel. */
     it('should handle fetch errors', (done) => {
       (window.fetch as jasmine.Spy).and.rejectWith(new Error('Network Error'));
       service.sendMessage('hello', 'conv-123').subscribe({
