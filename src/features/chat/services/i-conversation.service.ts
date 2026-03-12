@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { IMessage } from '../../../app/message/message';
+import { IMessage } from '../../message/message';
 
 /**
  * Contrat public de la feature chat injecté dans les composants smart.

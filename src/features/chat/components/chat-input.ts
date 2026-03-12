@@ -40,6 +40,11 @@ export class ChatInput {
   readonly isFocused = signal(false);
 
   /**
+   * Alias de compatibilité pour l'état de chargement utilisé par le template.
+   */
+  readonly isLoading = this.conversationService.isStreaming;
+
+  /**
    * Référence au textarea pour ajuster sa hauteur.
    */
   @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
@@ -50,7 +55,7 @@ export class ChatInput {
   onSend(): void {
     const content = this.currentValue().trim();
 
-    if (!content) {
+    if (!content || this.isLoading()) {
       return;
     }
 

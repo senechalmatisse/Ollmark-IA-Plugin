@@ -1,21 +1,32 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatInput } from './chat-input';
 import { FormsModule } from '@angular/forms';
-import { of, throwError, Subject } from 'rxjs';
-import { ChatService } from '../services/chat.service';
+import { CONVERSATION_SERVICE } from '../../../core/tokens/conversation-service.token';
+import { IConversationService } from '../services/i-conversation.service';
+import { IMessage } from '../../message/message';
 
 describe('ChatInput', () => {
   let component: ChatInput;
   let fixture: ComponentFixture<ChatInput>;
-  let chatServiceSpy: jasmine.SpyObj<ChatService>;
+  let conversationServiceMock: IConversationService;
+  let sendMessageSpy: jasmine.Spy;
+  let isStreaming: ReturnType<typeof signal<boolean>>;
 
   beforeEach(async () => {
-    chatServiceSpy = jasmine.createSpyObj('ChatService', ['sendMessage']);
-    chatServiceSpy.sendMessage.and.returnValue(of(''));
+    sendMessageSpy = jasmine.createSpy('sendMessage');
+    isStreaming = signal(false);
+
+    conversationServiceMock = {
+      messages: signal<IMessage[]>([]),
+      isStreaming,
+      sendMessage: sendMessageSpy,
+      resetConversation: jasmine.createSpy('resetConversation')
+    };
 
     await TestBed.configureTestingModule({
       imports: [ChatInput, FormsModule],
-      providers: [{ provide: ChatService, useValue: chatServiceSpy }]
+      providers: [{ provide: CONVERSATION_SERVICE, useValue: conversationServiceMock }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatInput);
@@ -46,53 +57,27 @@ describe('ChatInput', () => {
   it('should not send if message is empty', () => {
     component.currentValue.set('');
     component.onSend();
-    expect(chatServiceSpy.sendMessage).not.toHaveBeenCalled();
+    expect(sendMessageSpy).not.toHaveBeenCalled();
   });
 
   it('should not send if message is only whitespace', () => {
     component.currentValue.set('   ');
     component.onSend();
-    expect(chatServiceSpy.sendMessage).not.toHaveBeenCalled();
+    expect(sendMessageSpy).not.toHaveBeenCalled();
   });
 
   it('should not send if already loading', () => {
-    component.isLoading.set(true);
+    isStreaming.set(true);
     component.currentValue.set('hello');
     component.onSend();
-    expect(chatServiceSpy.sendMessage).not.toHaveBeenCalled();
+    expect(sendMessageSpy).not.toHaveBeenCalled();
   });
 
   it('should call sendMessage with trimmed text', () => {
     component.currentValue.set('  hello  ');
     component.onSend();
-    expect(chatServiceSpy.sendMessage).toHaveBeenCalledWith('hello');
+    expect(sendMessageSpy).toHaveBeenCalledWith('hello');
   });
-
-  it('should set isLoading to true during send', () => {
-    const subject = new Subject<string>();
-    chatServiceSpy.sendMessage.and.returnValue(subject.asObservable());
-    component.currentValue.set('hello');
-    component.onSend();
-    expect(component.isLoading()).toBeTrue();
-    subject.complete();
-  });
-
-  it('should reset isLoading to false on complete', fakeAsync(() => {
-    chatServiceSpy.sendMessage.and.returnValue(of('chunk'));
-    component.currentValue.set('hello');
-    component.onSend();
-    tick();
-    expect(component.isLoading()).toBeFalse();
-  }));
-
-  it('should reset isLoading to false on error', fakeAsync(() => {
-    chatServiceSpy.sendMessage.and.returnValue(throwError(() => new Error('fail')));
-    spyOn(console, 'error');
-    component.currentValue.set('hello');
-    component.onSend();
-    tick();
-    expect(component.isLoading()).toBeFalse();
-  }));
 
   it('should clear currentValue after send', () => {
     component.currentValue.set('hello');
@@ -167,7 +152,7 @@ describe('ChatInput', () => {
 
   it('should enable send button when currentValue is not empty and not loading', () => {
     component.currentValue.set('hello');
-    component.isLoading.set(false);
+    isStreaming.set(false);
     fixture.detectChanges();
     const btn = fixture.nativeElement.querySelector('.send-btn');
     expect(btn.disabled).toBeFalse();

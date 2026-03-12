@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { IMessage } from '../../../app/message/message';
+import { IMessage } from '../../message/message';
 
 /**
  * Service responsable de l'état réactif de l'interface de conversation.

@@ -1,8 +1,8 @@
 import { Injectable, Signal } from '@angular/core';
 import { IConversationService } from './i-conversation.service';
 import { ConversationStateService } from './conversation-state.service';
-import { IMessage } from '../../../app/message/message';
-import { UserMessage } from '../../../app/message/user-message';
+import { IMessage } from '../../message/message';
+import { UserMessage } from '../../message/user-message';
 
 /**
  * Façade publique de la feature chat.
