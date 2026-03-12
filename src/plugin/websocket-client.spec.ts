@@ -53,7 +53,9 @@ describe('WebSocketClient', () => {
 
         mockWebSocketConstructor = jasmine
         .createSpy('WebSocket')
-        .and.returnValue(mockSocket);
+        .and.callFake(function() {
+            return mockSocket;
+        });
 
         /**
          * On reproduit explicitement les constantes statiques natives

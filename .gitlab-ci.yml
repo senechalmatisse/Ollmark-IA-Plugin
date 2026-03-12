@@ -96,14 +96,20 @@ front-unit-test:
     - export CHROME_BIN=/usr/bin/chromium-browser
     - npm ci
   script:
+    # Karma s'arrêtera avec un code d'erreur si coverage < 70% grâce au karma.conf.js
     - npm test -- --no-watch --browsers=ChromeHeadlessCI --code-coverage
   coverage: '/Statements\s*:\s*(\d+\.?\d*)%/'
+  allow_failure: false  # Empêche la suite de la pipeline en cas d'échec
   artifacts:
     when: always
     paths:
       - coverage/
     reports:
       junit: coverage/junit.xml
+      # Ajout du rapport Cobertura pour l'intégration visuelle dans GitLab
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH =~ /^(feat|feature)\/.*/
@@ -112,6 +118,7 @@ front-unit-test:
     - if: $CI_COMMIT_BRANCH == "main"
   needs:
     - job: build-frontend
+
 
 # -----------------------------------------------------------------------------
 # STAGE BUILD IMAGE
