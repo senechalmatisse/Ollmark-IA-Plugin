@@ -13,8 +13,8 @@ import { environment } from '../../../environments/environment';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CONVERSATION_ID = '11111111-1111-1111-1111-111111111111';
-const ENTRY_URL      = `${environment.apiURL}/conversation/${CONVERSATION_ID}`;
-const HISTORY_URL    = `${environment.apiURL}/conversation/${CONVERSATION_ID}/last`;
+const ENTRY_URL      = `${environment.apiUrl}/message/conversation/${CONVERSATION_ID}`;
+const HISTORY_URL    = `${environment.apiUrl}/message/conversation/${CONVERSATION_ID}/last`;
 const DEFAULT_LIMIT  = 20;
 
 // ─── Mock factory ─────────────────────────────────────────────────────────────

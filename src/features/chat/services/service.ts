@@ -24,7 +24,7 @@ export class Service {
    * Override via environment files in real projects:
    *   `private readonly baseUrl = environment.apiUrl`
    */
-  private readonly baseUrl = environment.apiURL;
+  private readonly baseUrl = environment.apiUrl;
 
   /**
    * Fetches the **single entry** for a given conversation ID
@@ -33,7 +33,7 @@ export class Service {
    * GET /api/chat-memory/:conversationId
    */
   getConversation(conversationID: string) : Observable<Message[]>{
-    return this.http.get<RawChatEntry>(`${this.baseUrl}/conversation/${conversationID}`)
+    return this.http.get<RawChatEntry>(`${this.baseUrl}/message/conversation/${conversationID}`)
       .pipe(
         map(ChatMessageMapper.toMessages),
         catchError(this.handleError),
@@ -49,7 +49,7 @@ export class Service {
    */
   getHistory(conversationId:string, limit = 20): Observable<Message[]>{
     const params = new HttpParams().set('limit',limit );
-    return this.http.get<RawChatEntry[]>(`${this.baseUrl}/conversation/${conversationId}/last`, { params })
+    return this.http.get<RawChatEntry[]>(`${this.baseUrl}/message/conversation/${conversationId}/last`, { params })
       .pipe(
         map(ChatMessageMapper.toMessageList),
         catchError(this.handleError),
