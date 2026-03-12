@@ -33,7 +33,7 @@ export class Service {
    * GET /api/chat-memory/:conversationId
    */
   getConversation(conversationID: string) : Observable<Message[]>{
-    return this.http.get<RawChatEntry>(`${this.baseUrl}/api/chat-memory/${conversationID}`)
+    return this.http.get<RawChatEntry>(`${this.baseUrl}/conversation/${conversationID}`)
       .pipe(
         map(ChatMessageMapper.toMessages),
         catchError(this.handleError),
@@ -47,9 +47,9 @@ export class Service {
    * @param conversationId -- UUID of the conversation
    * @param limit -- Number of messages to fetch (default: 20)
    */
-  getHistory(conversationId:string, limit = 25): Observable<Message[]>{
+  getHistory(conversationId:string, limit = 20): Observable<Message[]>{
     const params = new HttpParams().set('limit',limit );
-    return this.http.get<RawChatEntry[]>(`${this.baseUrl}/api/conversations/${conversationId}/messages`, { params })
+    return this.http.get<RawChatEntry[]>(`${this.baseUrl}/conversation/${conversationId}/last`, { params })
       .pipe(
         map(ChatMessageMapper.toMessageList),
         catchError(this.handleError),

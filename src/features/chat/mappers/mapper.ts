@@ -27,7 +27,7 @@ export class ChatMessageMapper {
         const messages: Message[] = [];
         if (entry.content_user) {
             messages.push({
-                id: `${entry.id}-user`,
+                id: `${entry.id}_user`,
                 sender: 'user',
                 content: entry.content_user,
                 timestamp,
@@ -35,7 +35,7 @@ export class ChatMessageMapper {
         }
         if (entry.content_ai) {
             messages.push({
-                id: `${entry.id}-ai`,
+                id: `${entry.id}_ai`,
                 sender: 'ai',
                 content: entry.content_ai,
                 timestamp,
