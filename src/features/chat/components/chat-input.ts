@@ -1,21 +1,9 @@
-import {
-  Component,
-  signal,
-  inject,
-  ElementRef,
-  ViewChild
-} from '@angular/core';
+import { Component, signal, inject, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CONVERSATION_SERVICE } from '../../../core/tokens/conversation-service.token';
-import { IConversationService } from '../services/i-conversation.service';
+import { IConversationService } from '../services/IConversation.service';
 
-/**
- * Composant de saisie du chat.
- *
- * Ce composant dépend uniquement du contrat public IConversationService.
- * Il n'a aucune connaissance des classes concrètes de la feature.
- */
+
 @Component({
   selector: 'app-chat-input',
   standalone: true,
@@ -24,50 +12,24 @@ import { IConversationService } from '../services/i-conversation.service';
   styleUrls: ['./chat-input.css']
 })
 export class ChatInput {
-  /**
-   * Service de conversation injecté via son abstraction publique.
-   */
-  private readonly conversationService: IConversationService = inject(CONVERSATION_SERVICE);
+  private conversationService = inject(IConversationService);
 
-  /**
-   * Valeur courante du champ de saisie.
-   */
-  readonly currentValue = signal('');
+  currentValue = signal('');
+  isFocused    = signal(false);
 
-  /**
-   * Indique si le champ est focalisé.
-   */
-  readonly isFocused = signal(false);
+  // isLoading est dérivé directement du service — plus de signal local dupliqué
+  isLoading = this.conversationService.isStreaming;
 
-  /**
-   * Alias de compatibilité pour l'état de chargement utilisé par le template.
-   */
-  readonly isLoading = this.conversationService.isStreaming;
-
-  /**
-   * Référence au textarea pour ajuster sa hauteur.
-   */
   @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
 
-  /**
-   * Envoie le message actuellement saisi.
-   */
   onSend(): void {
-    const content = this.currentValue().trim();
+    const message = this.currentValue().trim();
+    if (!message || this.isLoading()) return;
 
-    if (!content || this.isLoading()) {
-      return;
-    }
-
-    this.conversationService.sendMessage(content);
+    this.conversationService.sendMessage(message);
     this.resetInput();
   }
 
-  /**
-   * Gère le raccourci Enter pour l'envoi.
-   *
-   * @param event événement clavier
-   */
   handleKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -75,20 +37,12 @@ export class ChatInput {
     }
   }
 
-  /**
-   * Ajuste automatiquement la hauteur du textarea.
-   *
-   * @param event événement d'entrée
-   */
   autoResize(event: Event): void {
     const element = event.target as HTMLTextAreaElement;
     element.style.height = 'auto';
     element.style.height = `${element.scrollHeight}px`;
   }
 
-  /**
-   * Réinitialise le champ après envoi.
-   */
   private resetInput(): void {
     this.currentValue.set('');
 
