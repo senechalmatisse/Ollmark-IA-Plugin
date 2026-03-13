@@ -89,15 +89,15 @@ describe('WebSocketClient', () => {
     });
 
     it('should open a websocket connection on connect', () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
 
         client.connect();
 
-        expect(globalThis.WebSocket).toHaveBeenCalledWith('ws://localhost:4401/plugin');
+        expect(globalThis.WebSocket).toHaveBeenCalledWith('ws://localhost:50050/plugin');
     });
 
     it('should not reconnect when connect is called while socket is already connecting/open', () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
 
         client.connect();
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
@@ -112,7 +112,7 @@ describe('WebSocketClient', () => {
         data: 42,
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
@@ -139,7 +139,7 @@ describe('WebSocketClient', () => {
         error: 'boom',
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
@@ -161,7 +161,7 @@ describe('WebSocketClient', () => {
     });
 
     it('should ignore invalid json payloads without throwing', async () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await expectAsync(
@@ -177,7 +177,7 @@ describe('WebSocketClient', () => {
     });
 
     it('should send an error response when task payload is invalid but id is present', async () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
@@ -199,7 +199,7 @@ describe('WebSocketClient', () => {
     });
 
     it('should not send anything when task payload is invalid and id is missing', async () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
@@ -214,7 +214,7 @@ describe('WebSocketClient', () => {
     });
 
     it('should close websocket on disconnect', () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         client.disconnect();
@@ -227,7 +227,7 @@ describe('WebSocketClient', () => {
             throw new Error('close failed');
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         expect(() => client.disconnect()).not.toThrow();
@@ -236,7 +236,7 @@ describe('WebSocketClient', () => {
     it('should schedule reconnection after close', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
@@ -251,7 +251,7 @@ describe('WebSocketClient', () => {
     it('should use exponential backoff for reconnection attempts', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
@@ -274,7 +274,7 @@ describe('WebSocketClient', () => {
     it('should not reconnect after a manual disconnect', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         client.disconnect();
@@ -288,7 +288,7 @@ describe('WebSocketClient', () => {
     it('should clear pending reconnect timer when disconnect is called', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         mockSocket.onclose?.();
@@ -302,7 +302,7 @@ describe('WebSocketClient', () => {
     it('should schedule reconnect when websocket emits an error', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         // Simule une socket déjà fermée: connect() peut alors recréer une nouvelle instance.
@@ -316,7 +316,7 @@ describe('WebSocketClient', () => {
     it('should not schedule reconnect on error while socket is still connecting', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         mockSocket.readyState = 0;
@@ -329,7 +329,7 @@ describe('WebSocketClient', () => {
     it('should not schedule duplicate reconnect timers', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         mockSocket.onclose?.();
@@ -345,7 +345,7 @@ describe('WebSocketClient', () => {
     it('should reset reconnect attempts on open', () => {
         jasmine.clock().install();
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         mockSocket.onclose?.();
@@ -371,7 +371,7 @@ describe('WebSocketClient', () => {
             return mockSocket;
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
@@ -381,7 +381,7 @@ describe('WebSocketClient', () => {
     });
 
     it('should ignore non-object payloads', async () => {
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
@@ -398,7 +398,7 @@ describe('WebSocketClient', () => {
             data: 42,
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
         mockSocket.readyState = 0;
 
@@ -423,7 +423,7 @@ describe('WebSocketClient', () => {
             data: circular,
         });
 
-        const client = new WebSocketClient('ws://localhost:4401/plugin');
+        const client = new WebSocketClient('ws://localhost:50050/plugin');
         client.connect();
 
         await mockSocket.onmessage?.({
