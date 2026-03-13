@@ -1,0 +1,129 @@
+// ── BubbleMessageComponent — Styles ───────────────────────────────────────────
+//
+// Structure CSS :
+//   .wrapper             — conteneur pleine largeur, aligne la bulle H
+//   └── .bubble          — bulle de message (max 86% de largeur)
+//       └── .main        — disposition interne (block ou flex selon le rôle)
+//           ├── .avatar  — icône IA (visible uniquement pour l'assistant)
+//           └── .body    — contenu + horodatage
+//               ├── .dots  — animation 3 points (isLoading)
+//               ├── .text  — texte résolu
+//               └── .time  — horodatage
+@use '../../../../../styles/mixins' as *;
+
+// ── .wrapper — Alignement horizontal ──────────────────────────────────────────
+// Flex row pleine largeur. Les modificateurs BEM positionnent la bulle
+// à droite (user) ou à gauche (assistant).
+.wrapper {
+    display: flex;
+    width:   100%;
+    padding: 2px 0;
+
+    &--user      { justify-content: flex-end; }   // bulle ancrée à droite
+    &--assistant { justify-content: flex-start; } // bulle ancrée à gauche
+}
+
+// ── .bubble — Bulle de message ─────────────────────────────────────────────────
+// max-width: 86% évite que les messages très longs n'occupent toute la ligne.
+// border-bottom-*-radius: 3px simule la "queue" de la bulle côté auteur.
+.bubble {
+    max-width:     86%;
+    border-radius: 12px;
+    padding:       8px 11px;
+    border:        1px solid transparent;
+
+    // Bulle utilisateur — fond légèrement opaque, queue en bas à droite
+    &--user {
+        background:                 rgba(255, 255, 255, 0.07);
+        border-color:               rgba(255, 255, 255, 0.09);
+        border-bottom-right-radius: 3px;
+    }
+
+    // Bulle assistant — fond plus subtil, queue en bas à gauche
+    &--assistant {
+        background:                rgba(255, 255, 255, 0.04);
+        border-color:              rgba(255, 255, 255, 0.07);
+        border-bottom-left-radius: 3px;
+    }
+
+    // État d'erreur — teinte rouge destructive sur la bordure et le fond
+    // .text en rouge pour distinguer visuellement le message d'erreur
+    &--error {
+        border-color: rgba(200, 8, 87, 0.40);
+        background:   rgba(200, 8, 87, 0.06);
+
+        .text { color: var(--button-destructive-hover); }
+    }
+}
+
+// ── .main — Disposition interne de la bulle ────────────────────────────────────
+// Par défaut : block (messages utilisateur, pas d'avatar).
+// main--ai : flex row pour aligner l'avatar et le corps côte à côte.
+.main {
+    display: block;
+
+    &--ai {
+        display:     flex;
+        align-items: flex-start;
+        gap:         7px;
+    }
+}
+
+// ── .avatar — Icône de l'assistant ─────────────────────────────────────────────
+// Petit carré arrondi avec fond turquoise translucide.
+// flex-shrink: 0 empêche l'avatar de se comprimer si le texte est long.
+// margin-top: 1px aligne visuellement l'icône avec la première ligne du texte.
+.avatar {
+    width:           19px;
+    height:          19px;
+    min-width:       19px;
+    border-radius:   5px;
+    background:      rgba(126, 255, 245, 0.09);
+    border:          1px solid rgba(126, 255, 245, 0.15);
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    color:           var(--button-primary);
+    margin-top:      1px;
+    flex-shrink:     0;
+}
+
+// ── .body — Corps du message ────────────────────────────────────────────────────
+// flex: 1 + min-width: 0 permet au corps de s'étirer sans dépasser le conteneur.
+// min-width: 0 est critique : sans lui, le texte long peut forcer le débordement
+// de la bulle au-delà de max-width: 86%.
+.body {
+    flex:      1;
+    min-width: 0;
+}
+
+// ── .text — Contenu textuel résolu ─────────────────────────────────────────────
+// white-space: pre-wrap préserve les sauts de ligne des réponses IA multi-paragraphes.
+// word-break: break-word évite le débordement sur les URLs ou mots très longs.
+.text {
+    margin:       0;
+    font-size:    13px;
+    line-height:  1.55;
+    color:        var(--text-main);
+    white-space:  pre-wrap;
+    word-break:   break-word;
+}
+
+// ── .time — Horodatage ─────────────────────────────────────────────────────────
+// Aligné à droite, petite taille et opacité réduite pour une présence discrète.
+.time {
+    display:    block;
+    margin-top: 4px;
+    font-size:  10px;
+    color:      var(--text-sub);
+    text-align: right;
+    opacity:    0.5;
+}
+
+// ── .dots — Animation de chargement ────────────────────────────────────────────
+// Utilise le mixin loading-dots défini dans _mixins.scss.
+// Les paramètres correspondent à la taille des points dans une bulle assistant.
+.dots {
+    @include loading-dots($size: 5px, $color: var(--button-primary), $gap: 4px);
+    padding: 3px 0 1px;
+}

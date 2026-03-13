@@ -1,29 +1,81 @@
 :root {
-  --bg: #eef0f4;
-  --text: #5b6472;
-  --muted: #9ca3af;
-  --border: #e0e4eb;
+  --background: #18181a;
+  --widget-surface: #000000;
+  --widget-selected: #2e3434;
+
+  --text-main: #ffffff;
+  --text-sub: #8f9da3;
+  --text-disabled: #ffffff80;
+
+  --button-main: #212426;
+  --button-main-hover: #7efff5; /* FOR TEXT ONLY*/
+  --button-main-active: #2e3434;
+  --button-main-disabled: transparent;
+
+  --button-primary: #7efff5;
+  --button-primary-hover: #00d1b8;
+  --button-primary-active: #00C7AF;
+  --button-primary-disabled: #426158FF;
+
+  --button-destructive: #c80857;
+  --button-destructive-hover: #ff3277;
+  --button-destructive-active: #DD2B67;
+  --button-destructive-disabled: #500124;
+
+  --button-ghost: transparent;
+  --button-ghost-hover: #212426;
+  --button-ghost-active: #2e3434;
+  --button-ghost-disabled: #00000020;
+}
+
+:root[data-theme="light"] {
+  --background: #f4f4f5;
+  --widget-surface: #ffffff;
+  --widget-selected: #e0f7f5;
+  --text-main: #0f1417;
+  --text-sub: #5a6672;
+  --text-disabled: #0f141780;
+  --button-main: #e8e9ea;
+  --button-main-hover: #00a896;
+  --button-main-active: #d0d2d4;
+  --button-main-disabled: transparent;
+  --button-primary: #009688;
+  --button-primary-hover: #00796b;
+  --button-primary-active: #00695c;
+  --button-primary-disabled: #b2dfdb;
+  --button-destructive: #c80857;
+  --button-destructive-hover: #e91e63;
+  --button-destructive-active: #ad1457;
+  --button-destructive-disabled: #f8bbd0;
+  --button-ghost: transparent;
+  --button-ghost-hover: #e8e9ea;
+  --button-ghost-active: #d0d2d4;
+  --button-ghost-disabled: #00000010;
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
+  width: 100vw;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  width: 100%;
   height: 100%;
-  margin: 0;
-}
-
-body {
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top, #f7f8fb 0%, #eef0f4 52%, #e7eaf0 100%);
-}
-
-button,
-input,
-textarea {
-  font: inherit;
+  background: var(--background);
 }

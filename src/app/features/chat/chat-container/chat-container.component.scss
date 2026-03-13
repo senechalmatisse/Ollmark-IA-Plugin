@@ -1,0 +1,72 @@
+// ── ChatContainerComponent — Styles ───────────────────────────────────────────
+//
+// Ce fichier gère exclusivement la mise en page du conteneur.
+// Aucun style visuel (couleur, typographie, bordure) n'est défini ici :
+// ces responsabilités appartiennent aux composants enfants.
+//
+// ── Chaîne flex pour le scroll ────────────────────────────────────────────────
+// Pour que app-chat-history soit scrollable, chaque ancêtre jusqu'à la
+// racine doit avoir une hauteur explicite et les intermédiaires flex
+// doivent avoir min-height: 0 (la valeur par défaut `auto` bloque la compression).
+//
+// Chaîne complète :
+//   html, body               height: 100vh · overflow: hidden
+//     app-root               display: flex · height: 100%
+//       app-chat-container ← :host (ce fichier) → flex: 1 · min-height: 0
+//         .shell             height: 100%
+//           .history         flex: 1 · min-height: 0
+//             :host (chat-history) → overflow-y: auto  ← scroll ici
+
+// ── :host ──────────────────────────────────────────────────────────────────────
+// Maillon critique de la chaîne flex : sans flex: 1 et min-height: 0,
+// .shell hérite d'une hauteur nulle et le scroll ne s'active jamais.
+:host {
+    display:        flex;
+    flex-direction: column;
+    flex:           1;        // occupe tout l'espace alloué par app-root
+    min-height:     0;        // autorise la compression flex (critique pour le scroll)
+}
+
+// ── .shell — Conteneur principal ──────────────────────────────────────────────
+// Empile verticalement les trois zones : top-actions (absolue), history, input.
+// overflow: hidden évite tout débordement visuel hors du cadre de l'iframe.
+.shell {
+    position:        relative;  // contexte de positionnement pour .top-actions (absolute)
+    display:         flex;
+    flex-direction:  column;
+    width:           100%;
+    height:          100%;      // hérite de :host qui a maintenant une hauteur réelle
+    overflow:        hidden;
+}
+
+// ── .top-actions — Barre d'actions flottante ──────────────────────────────────
+// Positionnée en absolu pour ne pas réduire la hauteur disponible pour
+// app-chat-history. Centrée horizontalement via left: 50% + translateX(-50%).
+// z-index: 10 garantit son affichage au-dessus de la liste des messages.
+.top-actions {
+    position:  absolute;
+    top:       8px;
+    left:      50%;
+    transform: translateX(-50%);
+    display:   flex;
+    gap:       8px;
+    z-index:   10;
+}
+
+// ── .history — Zone des messages scrollable ────────────────────────────────────
+// flex: 1 lui permet d'occuper tout l'espace entre le haut du shell et l'input.
+// min-height: 0 autorise sa compression par flex (sans quoi overflow ne fonctionne pas).
+// overflow: hidden délègue le scroll à l'intérieur de ChatHistoryComponent
+// (sur son élément .chat-history).
+.history {
+    flex:       1;
+    min-height: 0;
+    overflow:   hidden;
+}
+
+// ── .input — Zone de saisie de hauteur fixe ────────────────────────────────────
+// flex-shrink: 0 empêche Angular de comprimer l'input quand la liste de messages
+// grossit. Sa hauteur est déterminée par son contenu interne (textarea + bouton).
+.input {
+    flex-shrink: 0;
+}

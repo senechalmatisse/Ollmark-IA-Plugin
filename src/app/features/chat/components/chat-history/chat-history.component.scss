@@ -1,0 +1,71 @@
+// Structure CSS :
+//   :host          → maillon de la chaîne flex scroll (flex: 1 · min-height: 0)
+//   └── .chat-history → zone scrollable (overflow-y: auto)
+//       └── .message-list → liste des bulles (flex column · gap: 6px)
+//
+// ── Chaîne flex pour le scroll ────────────────────────────────────────────────
+// Règle fondamentale : pour qu'un enfant flex soit scrollable, chaque ancêtre
+// jusqu'à la racine doit avoir une hauteur explicite ET min-height: 0.
+// Sans min-height: 0, la valeur par défaut `auto` empêche la compression flex
+// et le conteneur grossit au lieu de scroller.
+//
+// Chaîne complète :
+//   html, body               height: 100vh · overflow: hidden
+//     app-root               display: flex · height: 100%
+//       app-chat-container   flex: 1 · min-height: 0
+//         .shell             height: 100%
+//           .history (slot)  flex: 1 · min-height: 0 · overflow: hidden
+//             :host ←        flex: 1 · min-height: 0 · overflow: hidden
+//               .chat-history → overflow-y: auto ← SCROLL ICI
+
+// ── :host — Maillon de la chaîne flex ─────────────────────────────────────────
+// flex: 1      → occupe tout l'espace vertical disponible entre .history et .input
+// min-height: 0 → autorise la compression flex (CRITIQUE pour le scroll)
+// overflow: hidden → clip les débordements ; le scroll est géré par .chat-history
+:host {
+    display:        flex;
+    flex-direction: column;
+    flex:           1;
+    min-height:     0;
+    overflow:       hidden;
+}
+
+// ── .chat-history — Zone scrollable ───────────────────────────────────────────
+// overflow-y: auto active la scrollbar verticale uniquement quand le contenu
+// dépasse la hauteur disponible.
+// scroll-behavior: smooth adoucit le scroll programmatique de scrollToBottom().
+.chat-history {
+    flex:             1;
+    min-height:       0;
+    overflow-y:       auto;
+    overflow-x:       hidden;  // empêche le scroll horizontal non désiré
+    padding:          10px 10px 6px;
+    display:          flex;
+    flex-direction:   column;
+    scroll-behavior:  smooth;
+}
+
+// ── Scrollbar personnalisée (Webkit — Chrome, Edge, Safari) ───────────────────
+// Scrollbar fine (3px) pour ne pas empiéter sur le contenu dans l'iframe étroite.
+// Firefox utilise scrollbar-width: thin défini sur .chat-history si besoin.
+.chat-history::-webkit-scrollbar       { width: 3px; }
+.chat-history::-webkit-scrollbar-track { background: transparent; }
+.chat-history::-webkit-scrollbar-thumb {
+    background:    rgba(255, 255, 255, 0.10);
+    border-radius: 999px; // pilule (radius ≥ moitié de la largeur)
+
+    &:hover { background: rgba(255, 255, 255, 0.18); }
+}
+
+// ── .message-list — Colonne de bulles ─────────────────────────────────────────
+// padding-top: 32px réserve l'espace sous le bouton « Réinitialiser » flottant
+// (positionné en absolute dans ChatContainerComponent à top: 8px).
+// Sans ce padding, le premier message serait partiellement masqué par le bouton.
+.message-list {
+    list-style:      none;
+    margin:          0;
+    padding:         32px 0 0; // espace pour le bouton « Réinitialiser » flottant
+    display:         flex;
+    flex-direction:  column;
+    gap:             6px;
+}

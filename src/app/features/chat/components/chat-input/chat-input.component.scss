@@ -1,0 +1,138 @@
+// Structure CSS :
+//   .input-wrapper  → bande inférieure de l'UI (background fixe, border-top)
+//   └── .input-inner → conteneur arrondi avec anneau de focus
+//       ├── textarea  → champ de saisie transparent et auto-redimensionnable
+//       └── .send-btn → bouton d'envoi circulaire (icône SVG ou dots)
+//
+// Utilitaires globaux définis dans ce fichier :
+//   .sr-only → masque visuellement un élément tout en le gardant accessible
+@use '../../../../../styles/mixins' as *;
+
+// ── .sr-only — Texte accessible masqué visuellement ──────────────────────────
+// Technique WCAG standard pour fournir un label aux lecteurs d'écran et aux
+// logiciels de commande vocale sans afficher de texte dans l'interface.
+.sr-only {
+    position:   absolute;
+    width:      1px;
+    height:     1px;
+    padding:    0;
+    margin:     -1px;
+    overflow:   hidden;
+    clip:       rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border:     0;
+}
+
+// ── .input-wrapper — Bande inférieure ────────────────────────────────────────
+// flex-shrink: 0 empêche la compression par le flex parent (ChatContainerComponent).
+// background correspond à la couleur de fond globale de l'application pour
+// créer une séparation nette avec la zone de messages.
+.input-wrapper {
+    padding:     6px 8px 8px;
+    background:  var(--background);
+    border-top:  1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+// ── .input-inner — Conteneur arrondi ─────────────────────────────────────────
+// flex row : textarea à gauche (flex: 1), bouton à droite (taille fixe).
+// align-items: flex-end aligne le bouton sur la dernière ligne du textarea
+// quand celui-ci s'étend sur plusieurs lignes.
+// La classe .focused est ajoutée par Angular via [class.focused]="isFocused()".
+.input-inner {
+    display:       flex;
+    align-items:   flex-end;
+    gap:           8px;
+    padding:       9px 9px 9px 13px;
+    background:    rgba(255, 255, 255, 0.04);
+    border:        1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    transition:    border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+    // État focus : anneau turquoise discret (box-shadow de 3px)
+    &.focused {
+        border-color: rgba(126, 255, 245, 0.28);
+        background:   rgba(255, 255, 255, 0.055);
+        box-shadow:   0 0 0 3px rgba(126, 255, 245, 0.07);
+    }
+}
+
+// ── textarea — Champ de saisie ─────────────────────────────────────────────────
+// resize: none désactive le redimensionnement natif (géré par autoResize()).
+// max-height: 130px limite l'expansion ; overflow-y: auto active le scroll interne.
+// La fonte est redéfinie explicitement pour ne pas hériter de la police système
+// qui peut différer dans un environnement iframe Penpot.
+textarea {
+    flex:        1;
+    min-height:  22px;
+    max-height:  130px;
+    resize:      none;
+    border:      none;
+    background:  transparent;
+    outline:     none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size:   13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color:       var(--text-main);
+    padding:     2px 0;
+    overflow-y:  auto;
+
+    // Scrollbar fine pour Firefox
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+
+    &::placeholder {
+        color:     var(--text-disabled);
+        font-size: 13px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor:  not-allowed;
+    }
+}
+
+// ── .send-btn — Bouton d'envoi ─────────────────────────────────────────────────
+// Bouton circulaire de taille fixe (32×32 px), ancré en bas à droite du textarea.
+// flex-shrink: 0 empêche sa compression si le textarea occupe tout l'espace.
+.send-btn {
+    width:         32px;
+    height:        32px;
+    min-width:     32px;
+    border-radius: 50%;
+    border:        none;
+    background:    rgba(255, 255, 255, 0.10);
+    color:         var(--text-main);
+    cursor:        pointer;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    flex-shrink:   0;
+    transition:    background 0.18s ease, color 0.18s ease,
+                   transform 0.1s ease, box-shadow 0.18s ease;
+
+    // État actif : fond turquoise, icône sombre, halo lumineux
+    &--active {
+        background: var(--button-primary);
+        color:      #071412;
+        box-shadow: 0 0 10px rgba(126, 255, 245, 0.22);
+
+        &:hover  { background: var(--button-primary-hover);  box-shadow: 0 0 16px rgba(126, 255, 245, 0.32); }
+        &:active { transform:  scale(0.92); background: var(--button-primary-active); }
+    }
+
+    // État désactivé hors mode actif : opacité réduite, curseur interdit
+    &:disabled:not(&--active) {
+        opacity: 0.35;
+        cursor:  not-allowed;
+    }
+}
+
+// ── .dots — Animation de chargement dans le bouton ────────────────────────────
+// Couleur sombre (#071412) pour contraster avec le fond turquoise du bouton actif.
+// Points plus petits (4px) que dans BubbleMessageComponent (5px) car l'espace
+// disponible dans le bouton est contraint (32×32 px).
+.dots {
+    @include loading-dots($size: 4px, $color: #071412, $gap: 3px);
+}

@@ -1,0 +1,22 @@
+<section
+    class="chat-history"
+    #scrollContainer
+    aria-label="Historique de conversation"
+    aria-live="polite"
+>
+
+    <!--
+        Liste des messages - visible uniquement si hasMessages = true.
+        track msg.id garantit des mises à jour DOM minimales : Angular ne recrée
+        que les éléments dont l'id a changé, pas l'intégralité de la liste.
+    -->
+    @if (hasMessages) {
+        <ul class="message-list">
+            @for (msg of messages; track msg.id) {
+                <li>
+                    <app-bubble-message [message]="msg" />
+                </li>
+            }
+        </ul>
+    }
+</section>

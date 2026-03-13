@@ -1,0 +1,85 @@
+// Structure CSS :
+//   :host   → display: contents (le composant est transparent dans le layout)
+//   button  → élément interactif avec variantes BEM-like
+//             └── .btn-icon  → icône SVG décorative
+//                 .btn-label → libellé texte
+
+// ── :host — Transparence dans le layout ───────────────────────────────────────
+// display: contents supprime la boîte générée par l'élément hôte Angular.
+// Le <button> enfant participe directement au flux de mise en page du parent,
+// comme s'il était inséré directement (sans wrapper intermédiaire).
+// Cela évite les conflits de flex/grid quand le bouton est enfant d'un conteneur.
+:host { display: contents; }
+
+// ── button — Styles de base ────────────────────────────────────────────────────
+// inline-flex pour aligner icône et texte sur la même ligne de base.
+// white-space: nowrap empêche le libellé de passer à la ligne dans un conteneur étroit.
+// user-select: none évite la sélection accidentelle du texte au double-clic.
+button {
+    display:         inline-flex;
+    align-items:     center;
+    justify-content: center;
+    gap:             6px;
+    border:          none;
+    border-radius:   8px;
+    cursor:          pointer;
+    font-family:     var(--font-body, 'DM Sans', sans-serif);
+    font-size:       13px;
+    font-weight:     500;
+    line-height:     1;
+    padding:         8px 14px;
+    transition:      background 0.15s ease, opacity 0.15s ease;
+    white-space:     nowrap;
+    user-select:     none;
+
+    // Bouton icône seule : padding carré pour un résultat circulaire/carré
+    &.icon-only { padding: 8px; }
+
+    // ── Variante primary — Action principale ─────────────────────────────────
+    // Fond turquoise de la charte OllMark, texte sombre pour le contraste.
+    &.primary {
+        background: var(--button-primary);
+        color:      #0a1a18;
+
+        &:hover:not(:disabled)  { background: var(--button-primary-hover);  }
+        &:active:not(:disabled) { background: var(--button-primary-active); }
+    }
+
+    // ── Variante ghost — Action secondaire ────────────────────────────────────
+    // Fond transparent avec bordure subtile. Texte secondaire au repos,
+    // texte principal au hover pour signaler l'interactivité.
+    &.ghost {
+        background: var(--button-ghost);
+        color:      var(--text-sub);
+        border:     1px solid rgba(255, 255, 255, 0.08);
+
+        &:hover:not(:disabled)  { background: var(--button-ghost-hover);  color: var(--text-main); }
+        &:active:not(:disabled) { background: var(--button-ghost-active); }
+    }
+
+    // ── Variante danger — Action destructive ──────────────────────────────────
+    // Fond transparent au repos pour ne pas attirer l'œil en permanence.
+    // Fond rouge translucide au hover pour signaler le caractère irréversible.
+    &.danger {
+        background: transparent;
+        color:      var(--button-destructive-hover);
+        border:     1px solid rgba(200, 8, 87, 0.35);
+
+        &:hover:not(:disabled)  { background: rgba(200, 8, 87, 0.08);  border-color: rgba(200, 8, 87, 0.55); }
+        &:active:not(:disabled) { background: rgba(200, 8, 87, 0.14); }
+    }
+
+    // ── État désactivé ────────────────────────────────────────────────────────
+    // :not(:disabled) sur les états hover/active empêche les styles interactifs
+    // de s'appliquer quand le bouton est désactivé, sans avoir à les redéfinir.
+    &:disabled {
+        opacity: 0.38;
+        cursor:  not-allowed;
+    }
+}
+
+// ── .btn-icon / .btn-label — Éléments enfants ────────────────────────────────
+// flex-shrink: 0 garantit que ni l'icône ni le texte ne se compriment
+// dans un conteneur flex parent de largeur contrainte.
+.btn-icon,
+.btn-label { flex-shrink: 0; }

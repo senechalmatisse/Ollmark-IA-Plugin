@@ -1,0 +1,1 @@
+export { GenericButtonComponent } from './generic-button/generic-button.component';

@@ -1,0 +1,67 @@
+<!--
+    .wrapper — Alignement horizontal de la bulle dans la ligne.
+    wrapper--user      → justify-content: flex-end  (bulle à droite)
+    wrapper--assistant → justify-content: flex-start (bulle à gauche)
+-->
+<div
+    class="wrapper"
+    [class.wrapper--user]="isUser"
+    [class.wrapper--assistant]="isAssistant"
+>
+
+    <article
+        class="bubble"
+        [class.bubble--user]="isUser"
+        [class.bubble--assistant]="isAssistant"
+        [class.bubble--error]="message.isError"
+        [attr.aria-label]="senderLabel + ' · ' + formattedTime"
+    >
+        <!--
+            .main — Disposition interne de la bulle.
+            main--ai active le flex row (avatar à gauche + corps à droite)
+            uniquement pour les messages de l'assistant.
+        -->
+        <div class="main" [class.main--ai]="isAssistant">
+
+            @if (isAssistant) {
+                <div class="avatar" aria-hidden="true">
+                    <img src="/ai-icon.svg" alt="" class="ai-icon" aria-hidden="true" />
+                </div>
+            }
+
+            <!-- .body — Contient soit l'animation de chargement, soit le texte final. -->
+            <div class="body">
+
+                <!--
+                    État de chargement : animation 3 points.
+                    aria-label explicite pour les lecteurs d'écran (le contenu est vide).
+                    Le mixin SCSS loading-dots gère l'animation bounce.
+                -->
+                @if (message.isLoading) {
+                    <div class="dots" aria-label="En cours de génération…">
+                        <span></span><span></span><span></span>
+                    </div>
+                } @else {
+                    <!--
+                        Contenu résolu — white-space: pre-wrap préserve les sauts de ligne
+                        dans les réponses IA multi-paragraphes.
+                    -->
+                    <p class="text">{{ message.content }}</p>
+                }
+
+                <!--
+                    Horodatage sémantique.
+                    [dateTime] = ISO 8601 pour les machines et les lecteurs d'écran.
+                    {{ formattedTime }} = HH:MM pour l'affichage visuel.
+                -->
+                <time
+                    class="time"
+                    [dateTime]="message.timestamp.toISOString()"
+                >
+                    {{ formattedTime }}
+                </time>
+            </div>
+
+        </div>
+    </article>
+</div>
