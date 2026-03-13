@@ -1,0 +1,51 @@
+<div class="app-stage">
+  <section class="phone-shell">
+    <div class="top-hover-zone">
+      <button
+        class="reset-btn"
+        type="button"
+        (click)="resetConversation()"
+        aria-label="Réinitialiser la conversation"
+      >
+        Réinitialiser
+      </button>
+    </div>
+
+    <div class="chat-main">
+      <header class="chat-header">
+        <div class="brand-row">
+          <div class="brand-pill">
+            <div class="brand-icon-shell">
+              <img class="brand-icon" src="/ai-icon.svg" alt="OllMark IA" />
+            </div>
+
+            <div class="brand-copy">
+              <p class="brand-name">OllMark IA</p>
+              <p class="brand-subtitle">Assistant Penpot</p>
+            </div>
+          </div>
+
+          <div class="brand-meta">
+            <span class="status-dot" aria-hidden="true"></span>
+            @if (penpot.fileId$ | async) {
+              <span>Projet connecte</span>
+            } @else {
+              <span>Pret</span>
+            }
+          </div>
+        </div>
+      </header>
+
+      @if (isLoadingHistory()) {
+        <div class="loading-banner">Chargement de l'historique...</div>
+      }
+
+      <app-chat-history
+        [messages]="messages()"
+        [projectId]="penpot.fileId$ | async"
+      ></app-chat-history>
+    </div>
+
+    <app-chat-input></app-chat-input>
+  </section>
+</div>

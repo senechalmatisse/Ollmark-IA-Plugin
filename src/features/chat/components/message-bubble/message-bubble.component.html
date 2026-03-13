@@ -1,0 +1,14 @@
+<div class="bubble-wrapper" [class.user]="isUser" [class.ai]="!isUser">
+  <div class="bubble">
+    <div class="bubble-main" [class.ai-main]="!isUser">
+      @if (!isUser) {
+        <img class="ai-inline-icon" src="/ai-icon.svg" alt="OllMark IA" />
+      }
+
+      <div class="bubble-text">
+        <p class="content">{{ message.content }}</p>
+        <span class="timestamp">{{ message.timestamp | timestampFormat }}</span>
+      </div>
+    </div>
+  </div>
+</div>

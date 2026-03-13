@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #eef0f4;
+  --text: #5b6472;
+  --muted: #9ca3af;
+  --border: #e0e4eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, #f7f8fb 0%, #eef0f4 52%, #e7eaf0 100%);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}

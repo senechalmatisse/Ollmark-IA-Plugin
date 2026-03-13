@@ -1,0 +1,29 @@
+<div #historyContainer class="chat-history">
+  @for (message of messages; track message.id) {
+    <app-message-bubble [message]="message"></app-message-bubble>
+  } @empty {
+    <section class="empty-state-card" aria-label="Bienvenue sur OllMark IA">
+      <div class="empty-intro">
+        <div class="empty-badge">
+          <img class="empty-badge-icon" src="/ai-icon.svg" alt="" />
+        </div>
+
+        <div class="empty-copy">
+          <h2>Bienvenue</h2>
+          <p class="empty-description">
+            Decris ce que tu veux generer, ajuster ou explorer dans ta maquette Penpot.
+          </p>
+          @if (projectId) {
+            <p class="empty-project">Projet connecte : {{ projectId }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="suggestion-list">
+        <div class="suggestion-chip">"Propose-moi une palette moderne pour cette page"</div>
+        <div class="suggestion-chip">"Aide-moi a revoir la hierarchie visuelle"</div>
+        <div class="suggestion-chip">"Donne-moi 3 pistes de redesign"</div>
+      </div>
+    </section>
+  }
+</div>
