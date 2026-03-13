@@ -19,7 +19,6 @@ import { MessageBubbleComponent } from '../message-bubble/message-bubble.compone
 })
 export class ChatHistoryComponent implements AfterViewChecked {
   @Input({ required: true }) messages: readonly Message[] = [];
-  @Input() projectId: string | null = null;
 
   @ViewChild('historyContainer')
   private historyContainer?: ElementRef<HTMLDivElement>;

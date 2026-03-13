@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 
 import { Message } from '../../../../core/models/message.model';
-import { Penpot } from '../../../../core/services/penpot/penpot';
 import { ChatInput } from '../chat-input';
 import { ChatHistoryComponent } from '../chat-history/chat-history.component';
 import { IConversationService } from '../../services/IConversation.service';
@@ -16,7 +15,6 @@ import { IConversationService } from '../../services/IConversation.service';
 })
 export class ChatComponent {
   private readonly conversationService = inject(IConversationService);
-  protected readonly penpot = inject(Penpot);
 
   readonly messages = computed<readonly Message[]>(() =>
     this.conversationService.messages().map((message) => ({

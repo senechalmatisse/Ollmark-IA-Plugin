@@ -1,32 +1,32 @@
 :host {
   display: block;
   height: 100%;
+  width: 100%;
+  min-height: 100dvh;
 }
 
 .app-stage {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  display: block;
+  padding: 0;
   background: var(--bg);
 }
 
 .phone-shell {
   position: relative;
-  width: 390px;
-  height: 844px;
-  max-width: calc(100vw - 24px);
-  max-height: calc(100vh - 24px);
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   background: var(--bg);
   color: var(--text);
-  border: 1px solid #d9dde5;
-  border-radius: 28px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.16),
-    0 8px 20px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
 }
 
 .top-hover-zone {
@@ -136,28 +136,6 @@
   color: #8b93a1;
 }
 
-.brand-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(224, 228, 235, 0.95);
-  background: rgba(255, 255, 255, 0.68);
-  color: #6c7480;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
-  flex-shrink: 0;
-}
-
 .loading-banner {
   margin: 8px 12px 0;
   padding: 10px 12px;
@@ -172,11 +150,5 @@
   .chat-header {
     padding-right: 14px;
     padding-left: 14px;
-  }
-
-  .brand-meta {
-    padding-right: 8px;
-    padding-left: 8px;
-    font-size: 11px;
   }
 }

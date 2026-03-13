@@ -24,15 +24,6 @@
               <p class="brand-subtitle">Assistant Penpot</p>
             </div>
           </div>
-
-          <div class="brand-meta">
-            <span class="status-dot" aria-hidden="true"></span>
-            @if (penpot.fileId$ | async) {
-              <span>Projet connecte</span>
-            } @else {
-              <span>Pret</span>
-            }
-          </div>
         </div>
       </header>
 
@@ -42,7 +33,6 @@
 
       <app-chat-history
         [messages]="messages()"
-        [projectId]="penpot.fileId$ | async"
       ></app-chat-history>
     </div>
 
