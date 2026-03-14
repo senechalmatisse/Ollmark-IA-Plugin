@@ -12,7 +12,7 @@ import { WebSocketClient } from './websocket-client';
  */
 
 export const PLUGIN_NAME = 'OllMark';
-export const WS_URL = 'ws://localhost:50050/plugin';
+export const WS_URL = 'ws://10.130.163.57:50050/plugin';
 
 /**
  * Retrieves the current file ID and sends it to the UI (Angular iframe).
