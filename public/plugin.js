@@ -222,7 +222,7 @@
 
   // src/plugin/plugin.ts
   var PLUGIN_NAME = "OllMark";
-  var WS_URL = "ws://localhost:4401/plugin";
+  var WS_URL = "ws://10.130.163.57:50050/plugin";
   var sendFileId = () => {
     const currentFileId = penpot.currentFile ? penpot.currentFile.id : null;
     console.log("[Plugin] Sending fileId:", currentFileId);
