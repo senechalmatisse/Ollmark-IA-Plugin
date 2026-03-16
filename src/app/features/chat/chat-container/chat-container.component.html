@@ -1,0 +1,46 @@
+<div class="app-stage">
+    <section class="phone-shell">
+      <div class="chat-main">
+        
+        <header class="chat-header">
+          <div class="brand-row">
+            <div class="brand-pill">
+              <div class="brand-icon-shell">
+                <img class="brand-icon" src="/ai-icon.svg" alt="OllMark IA"/>
+              </div>
+              <div class="brand-copy">
+                <p class="brand-name">OllMark IA</p>
+                <p class="brand-subtitle">Assistant Penpot</p>
+              </div>
+            </div>
+  
+            @if (facade.hasMessages()) {
+              <app-generic-button
+                variant="danger"
+                text="Réinitialiser"
+                [disabled]="facade.isLoading()"
+                (clicked)="onConversationCleared()"
+              />
+            }
+          </div>
+        </header>
+  
+        @if (facade.isLoading()) {
+          <div class="loading-banner">Chargement de l'historique...</div>
+        }
+  
+        <app-chat-history
+          class="history"
+          [messages]="facade.messages()"
+        ></app-chat-history>
+      </div>
+  
+      <app-chat-input
+        class="input"
+        [isLoading]="facade.isLoading()"
+        [enabled]="!!facade.projectId()"
+        (messageSent)="onMessageSent($event)"
+      ></app-chat-input>
+      
+    </section>
+  </div>

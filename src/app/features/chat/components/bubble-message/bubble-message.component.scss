@@ -1,0 +1,95 @@
+@use '../../../../../styles/mixins' as *;
+
+/* ─────────────────────────────────────────
+   CONTENEUR D'ALIGNEMENT
+───────────────────────────────────────── */
+.bubble-wrapper {
+  display: flex;
+  width: 100%;
+  padding: 4px 0; // Léger espacement entre les messages
+
+  &.user { justify-content: flex-end; }
+  &.ai { justify-content: flex-start; }
+}
+
+/* ─────────────────────────────────────────
+   LA BULLE (Le style demandé)
+───────────────────────────────────────── */
+.bubble {
+  max-width: 82%;
+  border-radius: 40px; // Arrondi prononcé du style cible
+  padding: 16px 32px;  // Padding large du style cible
+  transition: background 0.2s ease;
+
+  // Couleurs selon l'auteur
+  .user & {
+    background: var(--widget-surface);
+  }
+
+  .ai & {
+    background: var(--button-main);
+  }
+
+  // État d'erreur
+  &--error {
+    border: 1px solid rgba(200, 8, 87, 0.40);
+    background: rgba(200, 8, 87, 0.1) !important;
+    .content { color: #ff4d4d; }
+  }
+}
+
+/* ─────────────────────────────────────────
+   DISPOSITION INTERNE
+───────────────────────────────────────── */
+.bubble-main {
+  display: block;
+
+  &.ai-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.ai-inline-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-top: 5px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.bubble-text {
+  min-width: 0;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   TEXTE ET TIMESTAMP
+───────────────────────────────────────── */
+.content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.timestamp {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: right;
+}
+
+/* ─────────────────────────────────────────
+   CHARGEMENT (Adapté au nouveau style)
+───────────────────────────────────────── */
+.dots {
+  // On utilise ton mixin existant mais avec les couleurs du nouveau style
+  @include loading-dots($size: 5px, $color: var(--text-main), $gap: 4px);
+  padding: 8px 0;
+}

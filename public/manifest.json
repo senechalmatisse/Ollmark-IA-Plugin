@@ -1,6 +1,8 @@
 {
-  "name": "Ollmark AI Plugin",
-  "description": "An AI generation plugin for Penpot",
+  "name": "Assistant IA",
+  "description": "Générateur de contenu marketing IA pour Penpot",
+  "code": "/plugin.js",
+  "icon": "/icon.png",
   "permissions": [
     "content:read",
     "content:write",
@@ -9,7 +11,5 @@
     "comment:read",
     "comment:write"
   ],
-  "code": "/plugin.js",
-  "icon": "",
   "theme": "any"
 }
