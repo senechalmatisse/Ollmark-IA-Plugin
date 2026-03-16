@@ -7,9 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:coverage": "ng test --code-coverage",
     "lint": "ng lint",
     "build-plugin": "npx esbuild src/plugin.ts --bundle --outfile=./public/plugin.js",
-    "docs": "npx compodoc -p tsconfig.json -s -o"
+    "docs": "npx compodoc -p tsconfig.json"
   },
   "prettier": {
     "printWidth": 100,
