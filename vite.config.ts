@@ -3,10 +3,10 @@ import livePreview from "vite-live-preview";
 
 // Récupération des variables (Docker injecte celles-ci)
 const serverAddress = process.env.PENPOT_SERVER_ADDRESS || "localhost";
-const websocketPort = process.env.PENPOT_WEBSOCKET_PORT || "50050";
+const websocketPort = process.env.PENPOT_WEBSOCKET_PORT || "8080";
 const websocketUrl = `ws://${serverAddress}:${websocketPort}/plugin`;
 
-const previewPort = parseInt(process.env.PENPOT_PLUGIN_SERVER_PORT || "4200", 10);
+const previewPort = Number.parseInt(process.env.PENPOT_PLUGIN_SERVER_PORT || "4200", 10);
 
 export default defineConfig({
     plugins: [

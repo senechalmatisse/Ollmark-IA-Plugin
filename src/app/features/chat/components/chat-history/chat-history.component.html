@@ -1,0 +1,24 @@
+<section
+    class="chat-history"
+    #scrollContainer
+    aria-label="Historique de conversation"
+>
+    @for (msg of messages; track msg.id) {
+        <app-bubble-message [message]="msg" />
+    } @empty {
+        <section class="empty-state-card" aria-label="Bienvenue sur OllMark IA">
+            <div class="empty-intro">
+                <div class="empty-badge">
+                    <img class="empty-badge-icon" src="/ai-icon.svg" alt="" />
+                </div>
+
+                <div class="empty-copy">
+                    <h2>Bienvenue</h2>
+                    <p class="empty-description">
+                        Bienvenue, je suis l'assistant IA d'Ollca
+                    </p>
+                </div>
+            </div>
+        </section>
+    }
+</section>

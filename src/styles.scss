@@ -1,0 +1,54 @@
+:root {
+  --background: #18181a;
+  --widget-surface: #000000;
+  --widget-selected: #2e3434;
+
+  --text-main: #ffffff;
+  --text-sub: #8f9da3;
+  --text-disabled: #ffffff80;
+
+  --button-main: #212426;
+  --button-main-hover: #7efff5; /* FOR TEXT ONLY*/
+  --button-main-active: #2e3434;
+  --button-main-disabled: transparent;
+
+  --button-primary: #7efff5;
+  --button-primary-hover: #00d1b8;
+  --button-primary-active: #00C7AF;
+  --button-primary-disabled: #426158FF;
+
+  --button-destructive: #c80857;
+  --button-destructive-hover: #ff3277;
+  --button-destructive-active: #DD2B67;
+  --button-destructive-disabled: #500124;
+
+  --button-ghost: transparent;
+  --button-ghost-hover: #212426;
+  --button-ghost-active: #2e3434;
+  --button-ghost-disabled: #00000020;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  background: var(--background);
+}

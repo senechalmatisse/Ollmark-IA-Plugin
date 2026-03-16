@@ -1,0 +1,105 @@
+/* ─────────────────────────────────────────
+   HÔTE ET CONTENEUR (LOGIQUE SCROLL)
+───────────────────────────────────────── */
+:host {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.chat-history {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; // Gap du style cible
+    background: var(--background);
+    scroll-behavior: smooth;
+}
+
+/* ─────────────────────────────────────────
+   EMPTY STATE (LE STYLE EXACT)
+───────────────────────────────────────── */
+.empty-state-card {
+    margin: auto 0; // Centre verticalement dans l'espace vide
+    padding: 8px;
+}
+
+.empty-intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.empty-badge {
+    width: 128px;
+    height: 128px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 50% 50% 12px 50%; // Forme asymétrique spécifique
+    background: #ffffff;
+}
+
+.empty-badge-icon {
+    width: 96px;
+    height: 96px;
+}
+
+.empty-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+}
+
+.empty-state-card h2 {
+    margin: 2px 0 6px;
+    font-size: 32px;
+    line-height: 1.15;
+    color: var(--button-primary);
+}
+
+.empty-description {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-sub);
+    text-align: center;
+}
+
+/* ─────────────────────────────────────────
+   SCROLLBAR (STYLE CIBLE)
+───────────────────────────────────────── */
+.chat-history::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+    background: var(--text-sub);
+    border-radius: 999px;
+}
+
+.chat-history::-webkit-scrollbar-thumb:hover {
+    background: var(--button-primary);
+}
+
+/* ─────────────────────────────────────────
+   LISTE DE MESSAGES
+───────────────────────────────────────── */
+// Suppression du <ul> pour simplifier le rendu et coller au modèle @for
+app-bubble-message {
+    display: block;
+    width: 100%;
+}
