@@ -103,7 +103,7 @@ describe('SessionStore', () => {
     describe('sessionId (readonly signal)', () => {
 
         it('should_reflect_current_value_reactively_given_set_then_clear_cycle', () => {
-            const values: Array<string | null> = [];
+            const values: (string | null)[] = [];
 
             // Lecture synchrone à chaque étape — les signaux Angular sont synchrones
             values.push(store.sessionId());   // null
