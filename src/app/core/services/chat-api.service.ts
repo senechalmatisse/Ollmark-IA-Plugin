@@ -166,9 +166,9 @@ export class ChatApiService {
     getChatHistory(
         projectId: string,
         limit = 20
-    ): Observable<Array<{ role: string; content: string }>> {
+    ): Observable<{ role: string; content: string }[]> {
         return this._http
-            .get<Array<{ role: string; content: string }>>(
+            .get<{ role: string; content: string }[]>(
                 `${this._baseUrl}/api/ai/chat/${projectId}/history`,
                 { params: { limit: limit.toString() } }
             )

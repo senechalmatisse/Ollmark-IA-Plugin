@@ -211,7 +211,7 @@ export class ChatStateService {
      * @public
      * @see {@link HistoryLoaderService} Service qui appelle cette méthode au démarrage.
      */
-    hydrateHistory(items: Array<{ role: string; content: string }>): void {
+    hydrateHistory(items: { role: string; content: string }[]): void {
         if (this._messages().length > 0) return;
         if (!items?.length) return;
 
