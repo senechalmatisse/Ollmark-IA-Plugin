@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { ChatStateService } from './chat-state.service';
-import { ChatMessage } from '../models';
 
 /**
  * Tests unitaires de {@link ChatStateService}.
