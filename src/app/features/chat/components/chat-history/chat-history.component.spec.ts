@@ -40,23 +40,23 @@ describe('ChatHistoryComponent — état vide', () => {
         expect(f.debugElement.query(By.css('section.chat-history'))).not.toBeNull();
     });
 
-    it("n'affiche pas la liste <ul> si messages est vide", () => {
+    it("affiche la carte empty-state-card si messages est vide", () => {
         const f = setup([]);
-        expect(f.debugElement.query(By.css('ul.message-list'))).toBeNull();
+        expect(f.debugElement.query(By.css('.empty-state-card'))).not.toBeNull();
     });
-
-   
 
     it('la section porte aria-label "Historique de conversation"', () => {
         const f = setup([]);
-        const section = f.debugElement.query(By.css('section'));
+        const section = f.debugElement.query(By.css('section.chat-history'));
         expect(section.nativeElement.getAttribute('aria-label')).toBe('Historique de conversation');
     });
 
-    it('la section porte aria-live="polite"', () => {
+    it('la section ne porte pas aria-live="polite" (déplacé ou supprimé)', () => {
         const f = setup([]);
-        const section = f.debugElement.query(By.css('section'));
-        expect(section.nativeElement.getAttribute('aria-live')).toBe('polite');
+        const section = f.debugElement.query(By.css('section.chat-history'));
+        // Note: Dans ton nouveau HTML, aria-live n'est plus présent sur la section.
+        // Si tu en as besoin pour l'accessibilité, ajoute-le sur <section class="chat-history">
+        expect(section.nativeElement.getAttribute('aria-live')).toBeNull();
     });
 });
 
@@ -67,18 +67,9 @@ describe('ChatHistoryComponent — état vide', () => {
 describe('ChatHistoryComponent — rendu des messages', () => {
     afterEach(() => TestBed.resetTestingModule());
 
-    it('affiche la <ul> quand messages contient au moins un élément', () => {
+    it('cache la carte empty-state quand messages contient au moins un élément', () => {
         const f = setup([makeMessage()]);
-        expect(f.debugElement.query(By.css('ul.message-list'))).not.toBeNull();
-    });
-
-   
-
-    it('rend autant de <li> que de messages', () => {
-        const msgs = [makeMessage(), makeMessage(), makeMessage()];
-        const f = setup(msgs);
-        const items = f.debugElement.queryAll(By.css('li'));
-        expect(items.length).toBe(3);
+        expect(f.debugElement.query(By.css('.empty-state-card'))).toBeNull();
     });
 
     it('rend un <app-bubble-message> par message', () => {
@@ -104,11 +95,6 @@ describe('ChatHistoryComponent — rendu des messages', () => {
 // ---------------------------------------------------------------------------
 // Mise à jour dynamique des messages
 // ---------------------------------------------------------------------------
-// ChatHistoryComponent utilise ChangeDetectionStrategy.OnPush.
-// L'assignation directe sur componentInstance.messages ne déclenche pas
-// la détection de changements — il faut passer par setInput() qui simule
-// correctement un changement d'@Input côté Angular.
-// ---------------------------------------------------------------------------
 
 describe('ChatHistoryComponent — mise à jour dynamique', () => {
     afterEach(() => TestBed.resetTestingModule());
@@ -117,20 +103,24 @@ describe('ChatHistoryComponent — mise à jour dynamique', () => {
         const initial = makeMessage({ content: 'Initial' });
         const f = setup([initial]);
 
+        // On vérifie qu'on a bien 1 bulle au départ
+        expect(f.debugElement.queryAll(By.css('app-bubble-message')).length).toBe(1);
+
         f.componentRef.setInput('messages', [initial, makeMessage({ content: 'Nouveau' })]);
         f.detectChanges();
 
-        const items = f.debugElement.queryAll(By.css('li'));
-        expect(items.length).toBe(2);
+        const bubbles = f.debugElement.queryAll(By.css('app-bubble-message'));
+        expect(bubbles.length).toBe(2);
     });
 
-    it("cache la liste quand messages repasse à vide", () => {
+    it("réaffiche la carte empty-state quand messages repasse à vide", () => {
         const f = setup([makeMessage()]);
 
         f.componentRef.setInput('messages', []);
         f.detectChanges();
 
-        expect(f.debugElement.query(By.css('ul.message-list'))).toBeNull();
+        expect(f.debugElement.query(By.css('.empty-state-card'))).not.toBeNull();
+        expect(f.debugElement.query(By.css('app-bubble-message'))).toBeNull();
     });
 
     it("met à jour le contenu d'un message existant (résolution placeholder)", () => {
@@ -150,21 +140,13 @@ describe('ChatHistoryComponent — mise à jour dynamique', () => {
 // ---------------------------------------------------------------------------
 // Scroll automatique
 // ---------------------------------------------------------------------------
-// Dans Chrome Headless, scrollHeight a une valeur réelle (le DOM est rendu)
-// mais scrollTop reste à 0 car l'élément ne déborde pas (pas de hauteur CSS
-// fixée). Le setter scrollTop est ignoré sans overflow.
-//
-// Stratégie : on espionne le setter scrollTop via Object.defineProperty pour
-// capturer la valeur que scrollToBottom() tente d'assigner, sans dépendre
-// du moteur de layout.
-// ---------------------------------------------------------------------------
 
 describe('ChatHistoryComponent — scroll automatique', () => {
     afterEach(() => TestBed.resetTestingModule());
 
     it('assigne scrollTop = scrollHeight après detectChanges', () => {
         const f = setup([makeMessage()]);
-        const section: HTMLElement = f.debugElement.query(By.css('section')).nativeElement;
+        const section: HTMLElement = f.debugElement.query(By.css('section.chat-history')).nativeElement;
 
         let capturedScrollTop: number | undefined;
         const currentScrollHeight = section.scrollHeight;
@@ -182,7 +164,7 @@ describe('ChatHistoryComponent — scroll automatique', () => {
 
     it('assigne scrollTop = scrollHeight après un ajout de message', () => {
         const f = setup([makeMessage()]);
-        const section: HTMLElement = f.debugElement.query(By.css('section')).nativeElement;
+        const section: HTMLElement = f.debugElement.query(By.css('section.chat-history')).nativeElement;
 
         let capturedScrollTop: number | undefined;
 
@@ -213,7 +195,8 @@ describe('ChatHistoryComponent — référence ViewChild #scrollContainer', () =
 
     it('la section porte la variable de template #scrollContainer', () => {
         const f = setup([]);
-        // On vérifie que ngAfterViewChecked ne lève pas d'erreur (pas de null ref)
-        expect(() => f.detectChanges()).not.toThrow();
+        // On vérifie que le ViewChild est bien lié à l'élément section
+        expect(f.componentInstance['_scrollContainer']).toBeDefined();
+        expect(f.componentInstance['_scrollContainer'].nativeElement.classList.contains('chat-history')).toBeTrue();
     });
 });
