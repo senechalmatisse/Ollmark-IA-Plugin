@@ -2,21 +2,23 @@
     class="chat-history"
     #scrollContainer
     aria-label="Historique de conversation"
-    aria-live="polite"
 >
+    @for (msg of messages; track msg.id) {
+        <app-bubble-message [message]="msg" />
+    } @empty {
+        <section class="empty-state-card" aria-label="Bienvenue sur OllMark IA">
+            <div class="empty-intro">
+                <div class="empty-badge">
+                    <img class="empty-badge-icon" src="/ai-icon.svg" alt="" />
+                </div>
 
-    <!--
-        Liste des messages - visible uniquement si hasMessages = true.
-        track msg.id garantit des mises à jour DOM minimales : Angular ne recrée
-        que les éléments dont l'id a changé, pas l'intégralité de la liste.
-    -->
-    @if (hasMessages) {
-        <ul class="message-list">
-            @for (msg of messages; track msg.id) {
-                <li>
-                    <app-bubble-message [message]="msg" />
-                </li>
-            }
-        </ul>
+                <div class="empty-copy">
+                    <h2>Bienvenue</h2>
+                    <p class="empty-description">
+                        Bienvenue, je suis l'assistant IA d'Ollca
+                    </p>
+                </div>
+            </div>
+        </section>
     }
 </section>
