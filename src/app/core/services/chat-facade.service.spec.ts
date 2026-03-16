@@ -68,41 +68,50 @@ describe('ChatFacadeService', () => {
             'startNewConversation',
         ]);
 
-        stateSpy = jasmine.createSpyObj<ChatStateService>('ChatStateService', [
-            'addUserMessage',
-            'addLoadingMessage',
-            'resolveMessage',
-            'markMessageAsError',
-            'clearMessages',
-            'setLoading',
-        ], {
-            messages:    signal([]) as any,
-            isLoading:   signal(false) as any,
-            hasMessages: signal(false) as any,
-        });
+        stateSpy = jasmine.createSpyObj<ChatStateService>(
+    'ChatStateService',
+    [
+        'addUserMessage',
+        'addLoadingMessage',
+        'resolveMessage',
+        'markMessageAsError',
+        'clearMessages',
+        'setLoading',
+    ],
+    {
+        messages: signal<ChatResponse[]>([]) as unknown as ChatStateService['messages'],
+        isLoading: signal(false) as unknown as ChatStateService['isLoading'],
+        hasMessages: signal(false) as unknown as ChatStateService['hasMessages'],
+    }
+);
 
         // jasmine.createSpyObj attend des WritableSignal pour les propriétés typées.
         // On passe les signaux writables directement (sans .asReadonly()) —
         // à l'exécution un WritableSignal satisfait parfaitement l'interface Signal,
         // et le cast `as any` évite l'erreur TS due à l'incompatibilité structurelle.
-        bridgeSpy = jasmine.createSpyObj<PluginBridgeService>('PluginBridgeService', [
-            'send',
-            'setConnectionStatus',
-        ], {
-            projectId:        projectIdSignal as any,
-            connectionStatus: signal<any>('disconnected') as any,
-            theme:            signal<any>('dark') as any,
-            taskResult$:      jasmine.createSpyObj('Subject', ['subscribe', 'complete']),
-        });
+        bridgeSpy = jasmine.createSpyObj<PluginBridgeService>(
+    'PluginBridgeService',
+    ['send', 'setConnectionStatus'],
+    {
+        projectId: projectIdSignal as unknown as PluginBridgeService['projectId'],
+        connectionStatus: signal('disconnected') as unknown as PluginBridgeService['connectionStatus'],
+        theme: signal('dark') as unknown as PluginBridgeService['theme'],
+        taskResult$: jasmine.createSpyObj('Subject', ['subscribe', 'complete']) as unknown as PluginBridgeService['taskResult$'],
+    }
+);
 
         loaderSpy = jasmine.createSpyObj<HistoryLoaderService>('HistoryLoaderService', [
             'loadHistory',
         ]);
         loaderSpy.loadHistory.and.returnValue(Promise.resolve());
 
-        sessionSpy = jasmine.createSpyObj<SessionStore>('SessionStore', [], {
-            sessionId: sessionIdSignal as any,
-        });
+        sessionSpy = jasmine.createSpyObj<SessionStore>(
+    'SessionStore',
+    [],
+    {
+        sessionId: sessionIdSignal as unknown as SessionStore['sessionId'],
+    }
+);
 
         stateSpy.addUserMessage.and.returnValue('user-msg-id');
         stateSpy.addLoadingMessage.and.returnValue(LOADING_ID);

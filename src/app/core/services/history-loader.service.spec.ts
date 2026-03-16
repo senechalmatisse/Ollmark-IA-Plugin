@@ -257,7 +257,7 @@ describe('HistoryLoaderService', () => {
 
     describe('loadHistory() — never rejects invariant', () => {
 
-        const errorCases: Array<{ label: string; error: unknown }> = [
+        const errorCases: { label: string; error: unknown }[] = [
             { label: 'Error instance',   error: new Error('boom') },
             { label: 'TypeError',        error: new TypeError('type mismatch') },
             { label: 'plain object',     error: { code: 500 } },
