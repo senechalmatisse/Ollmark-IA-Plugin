@@ -144,7 +144,9 @@ export const PENPOT_ORIGIN = new InjectionToken<string>('PENPOT_ORIGIN', {
         if (document.referrer) {
             try {
                 return new URL(document.referrer).origin;
-            } catch {}
+            } catch {
+                // Ignore invalid URL errors; fallthrough to error below
+            }
         }
 
         throw new Error("Impossible de déterminer l'origine parente.");

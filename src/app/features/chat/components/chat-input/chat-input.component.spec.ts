@@ -208,7 +208,7 @@ describe('ChatInputComponent — envoi via clic bouton', () => {
 
     it('vide le draft après envoi', () => {
         const f = setup({ enabled: true, isLoading: false });
-        f.componentInstance.messageSent.subscribe(() => {});
+        f.componentInstance.messageSent.subscribe(() => { /* intentionally empty */ });
         typeInto(f, 'Hello');
         getButton(f).click();
         f.detectChanges();
@@ -305,7 +305,7 @@ describe('ChatInputComponent — submit() branche early return', () => {
         f.componentInstance.messageSent.subscribe((v: string) => emitted.push(v));
 
         // draft vide → !text est true → return immédiat
-        (f.componentInstance as any).submit();
+        f.componentInstance['submit']();
 
         expect(emitted.length).toBe(0);
     });
@@ -316,7 +316,7 @@ describe('ChatInputComponent — submit() branche early return', () => {
         f.componentInstance.messageSent.subscribe((v: string) => emitted.push(v));
 
         typeInto(f, 'Hello');
-        (f.componentInstance as any).submit();
+        f.componentInstance['submit']();
 
         expect(emitted.length).toBe(0);
     });
@@ -327,7 +327,7 @@ describe('ChatInputComponent — submit() branche early return', () => {
         f.componentInstance.messageSent.subscribe((v: string) => emitted.push(v));
 
         typeInto(f, 'Hello');
-        (f.componentInstance as any).submit();
+        f.componentInstance['submit']();
 
         expect(emitted.length).toBe(0);
     });
@@ -338,7 +338,7 @@ describe('ChatInputComponent — submit() branche early return', () => {
         f.componentInstance.messageSent.subscribe((v: string) => emitted.push(v));
 
         typeInto(f, 'Bonjour');
-        (f.componentInstance as any).submit();
+        f.componentInstance['submit']();
         f.detectChanges();
 
         expect(emitted).toEqual(['Bonjour']);

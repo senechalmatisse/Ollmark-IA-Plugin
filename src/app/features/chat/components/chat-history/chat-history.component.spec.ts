@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Component } from '@angular/core';
 import { ChatHistoryComponent } from './chat-history.component';
 import { BubbleMessageComponent } from '../bubble-message/bubble-message.component';
 import { ChatMessage } from '../../../../core/models';

@@ -6,7 +6,7 @@ import { signal, WritableSignal } from '@angular/core';
 
 class MockChatFacadeService {
 
-  messages: WritableSignal<any[]> = signal([]);
+  messages: WritableSignal<unknown[]> = signal([]);
   isLoading: WritableSignal<boolean> = signal(false);
   projectId: WritableSignal<string | null> = signal('project-1');
   hasMessages: WritableSignal<boolean> = signal(false);
