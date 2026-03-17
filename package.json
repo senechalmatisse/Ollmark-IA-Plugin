@@ -1,10 +1,16 @@
 {
   "name": "front",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:development": "ng serve --configuration development",
+    "start:preprod": "ng serve --configuration preprod",
+    "start:prod": "ng serve --configuration production",
     "build": "ng build",
+    "build:development": "ng build --configuration development",
+    "build:preprod": "ng build --configuration preprod",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:coverage": "ng test --code-coverage",

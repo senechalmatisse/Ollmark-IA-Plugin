@@ -1,55 +1,62 @@
-import { defineConfig } from "vite";
-import livePreview from "vite-live-preview";
+import { defineConfig } from 'vite';
+import livePreview from 'vite-live-preview';
 
-// Récupération des variables (Docker injecte celles-ci)
-const serverAddress = process.env.PENPOT_SERVER_ADDRESS || "localhost";
-const websocketPort = process.env.PENPOT_WEBSOCKET_PORT || "8080";
-const websocketUrl = `ws://${serverAddress}:${websocketPort}/plugin`;
+const backendTarget = process.env['BACKEND_TARGET'] ?? 'http://10.130.163.57:8080';
+const wsBackendTarget = backendTarget.replace(/^http/, 'ws');
 
-const previewPort = Number.parseInt(process.env.PENPOT_PLUGIN_SERVER_PORT || "4200", 10);
+console.log(`[Vite] Proxy backend → ${backendTarget}`);
 
 export default defineConfig({
     plugins: [
         livePreview({
             reload: true,
-            config: {
-                build: { sourcemap: true },
-            },
+            config: { build: { sourcemap: true } },
         }),
     ],
+
     build: {
-        outDir: "dist",
-        sourcemap: true,
-        target: "es2022",
-        minify: "esbuild",
+        outDir: 'dist',
+        sourcemap:  true,
+        target: 'es2022',
+        minify: 'esbuild',
         rollupOptions: {
             input: {
-                plugin: "src/plugin.ts",
-                index: "./index.html",
+                plugin: 'src/plugin.ts',
+                index: './index.html',
             },
             output: {
-                entryFileNames: "[name].js",
+                entryFileNames: '[name].js',
             },
         },
         emptyOutDir: true,
     },
-    // IMPORTANT pour Docker : host doit être "0.0.0.0"
-    preview: {
-        port: previewPort,
-        cors: true,
-        strictPort: true,
-        host: "0.0.0.0", 
-    },
+
     server: {
-        port: previewPort,
+        port: 4200,
         cors: true,
-        host: "0.0.0.0",
+        host: '0.0.0.0',
         strictPort: true,
+        proxy: {
+            '/api': {
+                target: backendTarget,
+                changeOrigin: true,
+            },
+            '/plugin': {
+                target: wsBackendTarget,
+                ws: true,
+                changeOrigin: true,
+            },
+        },
     },
-    define: {
-        PENPOT_WEBSOCKET_URL: JSON.stringify(websocketUrl),
+
+    preview: {
+        port: 4200,
+        cors: true,
+        strictPort: true,
+        host: '0.0.0.0',
     },
+
     resolve: {
-        alias: { "@": "/src" },
+        alias: { '@': '/src' },
     },
 });
