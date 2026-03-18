@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
+import { environment } from '../environments/environment';
+import { API_BASE_URL, WEBSOCKET_URL } from './core/tokens/api.tokens';
 /**
  * Configuration de l'application Angular (standalone API).
  *
@@ -58,8 +59,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(withInterceptorsFromDi()),
 
         // ── Surcharges d'environnement ───────────
-        // { provide: API_BASE_URL, useValue: 'https://ollmark.company.io' },
-        // { provide: WEBSOCKET_URL, useValue: 'wss://ollmark.company.io/plugin' },
-        // { provide: PENPOT_ORIGIN, useValue: 'https://penpot.app' },
+        { provide: API_BASE_URL, useValue: environment.apiBaseUrl },
+        { provide: WEBSOCKET_URL, useValue: environment.websocketUrl },
     ],
 };
