@@ -374,7 +374,7 @@ describe('ChatFacadeService', () => {
             await service.sendMessage('Message');
 
             expect(console.warn).toHaveBeenCalledWith(
-                '[OllMark Facade] chat unexpected error:',
+                '[OllMark Facade] sendMessage error:',
                 'Timeout'
             );
         });
@@ -542,3 +542,4 @@ describe('ChatFacadeService', () => {
         });
     });
 });
+

@@ -45,3 +45,5 @@ __screenshots__/
 Thumbs.db
 .env
 documentation/
+
+public/plugin.js

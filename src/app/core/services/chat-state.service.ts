@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { ChatMessage } from '../models';
+import { ChatMessage, PreviewStatus, BufferPreviewPayload } from '../models';
 
 /**
  * Store d'état pur de la conversation (pattern State Store).
@@ -133,8 +133,8 @@ export class ChatStateService {
      */
     resolveMessage(id: string, content: string): void {
         this._messages.update((msgs) =>
-            msgs.map((m) => (m.id === id ? { ...m, content, isLoading: false } : m))
-        );
+            msgs.map((m) => (m.id === id ? { ...m, content, isLoading: false } : m)),
+    );
     }
 
     /**
@@ -158,7 +158,7 @@ export class ChatStateService {
     markMessageAsError(id: string, error: string): void {
         this._messages.update((msgs) =>
             msgs.map((m) =>
-                m.id === id ? { ...m, content: error, isLoading: false, isError: true } : m
+                m.id === id ? { ...m, content: error, isLoading: false, isError: true } : m,
             )
         );
     }
@@ -233,4 +233,70 @@ export class ChatStateService {
 
         this._messages.set(messages);
     }
+
+
+  // ── OLM-preview-buffer ───────────────────────────────────────────────────
+
+  addPreviewMessage(payload: BufferPreviewPayload): void {
+    const msgs = this._messages();
+    const existingIndex = msgs.findIndex(
+      (m) => m.bufferPageId === payload.bufferPageId && m.previewStatus === 'pending',
+    );
+
+    if (existingIndex !== -1) {
+      const existing = msgs[existingIndex];
+      const updated: ChatMessage = {
+        ...existing,
+        previewPngUrl: payload.pngDataUrl,
+        previewStatus: 'pending',
+        previewCode: payload.code,
+        timestamp: new Date(),
+      };
+      const newMsgs = [...msgs];
+      newMsgs[existingIndex] = updated;
+      this._messages.set(newMsgs);
+      console.log('[OllMark State] Updated preview message:', payload.bufferPageId);
+      return;
+    }
+
+    const id = crypto.randomUUID();
+    console.log('[OllMark State] Inserting preview message:', id, 'PNG:', !!payload.pngDataUrl);
+    this._messages.update((current) => [
+      ...current,
+      {
+        id,
+        role: 'assistant' as const,
+        content: '',
+        timestamp: new Date(),
+        previewPngUrl: payload.pngDataUrl,
+        bufferPageId: payload.bufferPageId,
+        originalPageId: payload.originalPageId,
+        previewStatus: 'pending' as PreviewStatus,
+        previewCode: payload.code,
+      },
+    ]);
+  }
+
+  updatePreviewPng(bufferPageId: string, pngDataUrl: string): void {
+    this._messages.update((msgs) =>
+      msgs.map((m) => (m.bufferPageId === bufferPageId ? { ...m, previewPngUrl: pngDataUrl } : m)),
+    );
+  }
+
+  setPreviewStatus(bufferPageId: string, status: PreviewStatus): void {
+    this._messages.update((msgs) =>
+      msgs.map((m) => (m.bufferPageId === bufferPageId ? { ...m, previewStatus: status } : m)),
+    );
+  }
+
+  /**
+   * Supprime les previews encore en statut 'pending'.
+   * Appelé avant chaque nouveau prompt pour nettoyer le staging précédent
+   * si l'utilisateur n'a pas cliqué accepter/rejeter.
+   */
+  removePendingPreviews(): void {
+    this._messages.update((msgs) =>
+      msgs.filter((m) => !m.bufferPageId || m.previewStatus !== 'pending'),
+    );
+  }
 }
