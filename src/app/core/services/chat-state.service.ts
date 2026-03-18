@@ -64,7 +64,7 @@ export class ChatStateService {
      * @public
      */
     addUserMessage(content: string): string {
-        const id = crypto.randomUUID();
+        const id = this.generateId();
         this._messages.update((msgs) => [
             ...msgs,
             { id, role: 'user', content, timestamp: new Date() },
@@ -97,12 +97,24 @@ export class ChatStateService {
      * @see {@link markMessageAsError} Résolution du placeholder en cas d'erreur.
      */
     addLoadingMessage(): string {
-        const id = crypto.randomUUID();
+        const id = this.generateId();
         this._messages.update((msgs) => [
             ...msgs,
             { id, role: 'assistant', content: '', timestamp: new Date(), isLoading: true },
         ]);
         return id;
+    }
+    private generateId(): string {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+
+        // fallback propre
+        return 'xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 
     /**
@@ -216,7 +228,7 @@ export class ChatStateService {
         if (!items?.length) return;
 
         const messages: ChatMessage[] = items.map((item) => ({
-            id: crypto.randomUUID(),
+            id: this.generateId(),
             role: item.role === 'user' ? 'user' : 'assistant',
             content: item.content,
             timestamp: new Date(),
