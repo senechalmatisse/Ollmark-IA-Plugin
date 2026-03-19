@@ -138,7 +138,7 @@ describe('WebSocketService', () => {
         });
 
         it('should_create_WebSocket_with_correct_url_given_WEBSOCKET_URL_token', () => {
-            expect(MockWebSocket.lastInstance!.url).toBe(WS_URL);
+            expect(MockWebSocket.lastInstance!.url).toBe(WS_URL+'?userToken=83c9840b85ed5660d321a1be634b4bb9ac780febcf0b64d66ff83356eeef3fe1');
         });
 
         it('should_set_status_connected_given_onopen_fires', () => {
