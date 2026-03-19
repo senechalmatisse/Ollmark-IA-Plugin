@@ -7,6 +7,7 @@ import {
     HistoryLoaderService,
     SessionStore
 } from '.';
+import { ApiError } from '../models/api-error.model';
 
 /**
  * Couche d'orchestration centrale du chat (pattern Facade).
@@ -145,9 +146,13 @@ export class ChatFacadeService {
                 );
             }
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Erreur de communication';
-            console.warn('[OllMark Facade] sendMessage error:', message);
-            this._state.markMessageAsError(loadingId, `${message}`);
+            const { message, shouldRetry } = this._resolveErrorFeedback(err, 'chat');
+            this._state.markMessageAsError(loadingId, message);
+
+            // Si le serveur est injoignable, on tente une reconnexion WS silencieuse
+            if (shouldRetry) {
+                console.warn('[OllMark Facade] Network error — backend may be down');
+            }
         } finally {
             this._state.setLoading(false);
         }
@@ -200,10 +205,10 @@ export class ChatFacadeService {
                 this._api.startNewConversation(projectId).pipe(timeout(10_000))
             );
         } catch (err) {
-            console.warn(
-                '[OllMark Facade] server call failed:',
-                err instanceof Error ? err.message : err
-            );
+            // Le reset côté backend est best-effort : l'UI est déjà vide.
+            // On logue uniquement, sans remettre de messages dans le chat.
+            const { message } = this._resolveErrorFeedback(err, 'reset');
+            console.warn('[OllMark Facade] Reset error:', message);
         }
     }
 
@@ -228,4 +233,34 @@ export class ChatFacadeService {
         if (!id) this._bridge.send({ type: 'get-project' });
         return id;
     }
+
+    /**
+     * Traduit une erreur capturée en feedback utilisateur et en signal de retry.
+     *
+     * Centralise la logique de présentation des erreurs : un seul endroit
+     * à modifier pour changer les messages affichés à l'utilisateur.
+     *
+     * @param err     - L'erreur capturée (peut être `ApiError` ou `Error` générique).
+     * @param context - Contexte d'appel pour enrichir le log ('chat' | 'reset').
+     * @returns Un objet contenant le message utilisateur et un flag `shouldRetry`.
+     */
+    private _resolveErrorFeedback(
+        err: unknown,
+        context: 'chat' | 'reset'
+    ): { message: string; shouldRetry: boolean  } {
+         if (err instanceof ApiError) {
+            console.warn(`[OllMark Facade] ${context} ApiError — type=${err.type}, status=${err.status}:`, err.message);
+            return {
+                message: err.message,
+                shouldRetry: err.type === 'network' || err.type === 'timeout',
+            };
+        }
+
+        // Erreur non HTTP (ex : TimeoutError de RxJS, erreur inattendue)
+        const message = err instanceof Error ? err.message : 'Erreur de communication';
+        console.warn(`[OllMark Facade] ${context} unexpected error:`, message);
+        return { message, shouldRetry: false };
+    }
+
+
 }

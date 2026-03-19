@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../tokens/api.tokens';
 import { ChatRequest, ChatResponse } from '../models';
-
+import { ApiError, ApiErrorType, API_ERROR_MESSAGES } from '../models/api-error.model';
 /**
  * Gateway HTTP unique entre l'UI Angular et le backend Spring Boot.
  *
@@ -189,8 +189,22 @@ export class ChatApiService {
      * @private
      */
     private _handleError(err: HttpErrorResponse): Observable<never> {
-        const message =
-            err.error?.error ?? err.message ?? 'Une erreur réseau est survenue';
-        return throwError(() => new Error(message));
+        const type = this._classifyError(err);
+
+        const backendMessage: string | undefined = err.error?.error ?? err.error?.message;
+        const userMessage = (type === 'server' || type === 'client') && backendMessage ? backendMessage : API_ERROR_MESSAGES[type];
+
+        return throwError(() => new ApiError(userMessage, type, err.status));
+
+    }
+    /**
+     * Détermine la catégorie d'une erreur HTTP à partir de son code de statut.
+     */
+    private _classifyError(err: HttpErrorResponse): ApiErrorType {
+        if (err.status === 0)  return 'network';
+        if (err.status >= 500) return 'server';
+        if (err.status >= 400 && err.status < 500) return 'client';
+        if (err.status === 408 || err.status === 504) return 'timeout';
+        return 'unknown';
     }
 }
