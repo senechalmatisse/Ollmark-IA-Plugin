@@ -3,6 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { PluginTaskRequest, TaskResponseEnvelope } from '../models';
 import { PluginBridgeService, SessionStore, ReconnectionManager } from '.';
 import { WEBSOCKET_URL } from '../tokens/api.tokens';
+import { environment } from '../../../environments/environment';
 
 /**
  * Service de transport WebSocket entre l'UI Angular et le backend Spring Boot.
@@ -151,53 +152,63 @@ export class WebSocketService implements OnDestroy {
      * @private
      */
     private _connect(): void {
-        if (this._ws && this._ws.readyState <= WebSocket.OPEN) return;
-        this._bridge.setConnectionStatus('connecting');
+    if (this._ws && this._ws.readyState <= WebSocket.OPEN) return;
+    this._bridge.setConnectionStatus('connecting');
 
+    // Construction de l'URL avec le token d'authentification
+    const token = encodeURIComponent(environment.wsAuthToken);
+    const authenticatedUrl = `${this._wsUrl}?userToken=${token}`;
+
+    try {
+        this._ws = new WebSocket(authenticatedUrl); // ← était : new WebSocket(this._wsUrl)
+    } catch (err) {
+        console.error('[OllMark WS] Failed to create WebSocket:', err);
+        this._bridge.setConnectionStatus('disconnected');
+        return;
+    }
+
+    this._ws.onopen = () => {
+        console.log('[OllMark WS] Connected and authenticated');
+        this.reconnection.reset();
+        this._bridge.setConnectionStatus('connected');
+    };
+
+    this._ws.onmessage = ({ data }: MessageEvent) => {
         try {
-            this._ws = new WebSocket(this._wsUrl);
+            const payload = JSON.parse(data as string);
+            if (payload.type === 'session-id') {
+                this._session.set(payload.sessionId);
+                console.log('[OllMark WS] Session ID stored:', payload.sessionId);
+                return;
+            }
+            this._handleBackendMessage(payload as PluginTaskRequest);
         } catch (err) {
-            console.error('[OllMark WS] Failed to create WebSocket:', err);
-            this._bridge.setConnectionStatus('disconnected');
-            return;
+            console.error('[OllMark WS] Failed to parse message:', err);
+        }
+    };
+
+    this._ws.onclose = ({ code, reason }: CloseEvent) => {
+        // Code 1008 = POLICY_VIOLATION = token rejeté par le backend
+        // Inutile de reconnecter : le token ne va pas se corriger tout seul
+        if (code === 1008) {
+            console.error('[OllMark WS] Authentication rejected by backend (code 1008)');
+            this._bridge.setConnectionStatus('error');
+            return; // ← pas de reconnexion
         }
 
-        this._ws.onopen = () => {
-            console.log('[OllMark WS] Connected to', this._wsUrl);
-            this.reconnection.reset();
-            this._bridge.setConnectionStatus('connected');
-        };
+        console.warn('[OllMark WS] Closed', code, reason);
+        this._session.clear();
+        this._bridge.setConnectionStatus('disconnected');
+        if (!this.reconnection.schedule()) {
+            console.error('[OllMark WS] Max reconnect attempts reached');
+        }
+    };
 
-        this._ws.onmessage = ({ data }: MessageEvent) => {
-            try {
-                const payload = JSON.parse(data as string);
-
-                if (payload.type === 'session-id') {
-                    this._session.set(payload.sessionId);
-                    console.log('[OllMark WS] Session ID stored:', payload.sessionId);
-                    return;
-                }
-
-                this._handleBackendMessage(payload as PluginTaskRequest);
-            } catch (err) {
-                console.error('[OllMark WS] Failed to parse message:', err);
-            }
-        };
-
-        this._ws.onclose = ({ code, reason }: CloseEvent) => {
-            console.warn('[OllMark WS] Closed', code, reason);
-            this._session.clear();
-            this._bridge.setConnectionStatus('disconnected');
-            if (!this.reconnection.schedule()) {
-                console.error('[OllMark WS] Max reconnect attempts reached');
-            }
-        };
-
-        this._ws.onerror = () => {
-            console.error('[OllMark WS] Error');
-            this._bridge.setConnectionStatus('error');
-        };
-    }
+    this._ws.onerror = () => {
+        console.error('[OllMark WS] Error');
+        this._bridge.setConnectionStatus('error');
+    };
+}
 
     /**
      * Route un message reçu du backend Spring Boot vers `plugin.ts`.
