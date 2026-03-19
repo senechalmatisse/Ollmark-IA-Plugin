@@ -374,7 +374,7 @@ describe('ChatFacadeService', () => {
             await service.sendMessage('Message');
 
             expect(console.warn).toHaveBeenCalledWith(
-                '[OllMark Facade] sendMessage error:',
+                '[OllMark Facade] chat unexpected error:',
                 'Timeout'
             );
         });
@@ -484,20 +484,20 @@ describe('ChatFacadeService', () => {
             await service.resetConversation();
 
             expect(console.warn).toHaveBeenCalledWith(
-                '[OllMark Facade] server call failed:',
+                '[OllMark Facade] reset unexpected error:',
                 'Server down'
             );
         });
 
         it('should_warn_with_raw_error_given_non_Error_thrown', async () => {
             spyOn(console, 'warn');
-            const rawError = { code: 500 };
+            const rawError = 'Erreur de communication';
             apiSpy.clearConversation.and.returnValue(throwError(() => rawError));
 
             await service.resetConversation();
 
             expect(console.warn).toHaveBeenCalledWith(
-                '[OllMark Facade] server call failed:',
+                '[OllMark Facade] reset unexpected error:',
                 rawError
             );
         });

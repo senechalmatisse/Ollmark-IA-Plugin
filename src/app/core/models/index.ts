@@ -5,3 +5,4 @@ export type {
     TaskResponseEnvelope,
     PluginMessage,
 } from './task.model';
+export { ApiError, API_ERROR_MESSAGES } from './api-error.model';
