@@ -75,9 +75,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
@@ -90,6 +95,9 @@
             },
             "development": {
               "buildTarget": "Front:build:development"
+            },
+            "local": {
+              "buildTarget": "Front:build:local"
             }
           },
           "defaultConfiguration": "development"
@@ -113,7 +121,7 @@
               }
             ],
             "styles": [
-              "src/styles.scss" 
+              "src/styles.scss"
             ],
             "browsers": "ChromeHeadless",
             "watch": false
