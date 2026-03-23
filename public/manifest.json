@@ -9,7 +9,8 @@
     "library:read",
     "library:write",
     "comment:read",
-    "comment:write"
+    "comment:write",
+    "user:read"
   ],
   "theme": "any"
 }
