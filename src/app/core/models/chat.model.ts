@@ -1,3 +1,5 @@
+import { PreviewStatus } from './preview.model';
+
 /**
  * Message affiché dans la conversation entre l'utilisateur et l'assistant IA.
  *
@@ -35,39 +37,56 @@
  * @see {@link ChatStateService} Service qui gère la liste des messages.
  */
 export interface ChatMessage {
-    /** Identifiant unique du message, généré via `crypto.randomUUID()`. */
-    id: string;
+  /** Identifiant unique du message, généré via `crypto.randomUUID()`. */
+  id: string;
 
-    /** Auteur du message : `'user'` pour l'humain, `'assistant'` pour l'IA. */
-    role: 'user' | 'assistant';
+  /** Auteur du message : `'user'` pour l'humain, `'assistant'` pour l'IA. */
+  role: 'user' | 'assistant';
 
-    /**
-     * Contenu textuel du message.
-     * Vide (`''`) tant que `isLoading` est `true`.
-     * Contient le message d'erreur si `isError` est `true`.
-     */
-    content: string;
+  /**
+   * Contenu textuel du message.
+   * Vide (`''`) tant que `isLoading` est `true`.
+   * Contient le message d'erreur si `isError` est `true`.
+   */
+  content: string;
 
-    /** Date et heure de création du message, utilisée pour l'affichage horodaté. */
-    timestamp: Date;
+  /** Date et heure de création du message, utilisée pour l'affichage horodaté. */
+  timestamp: Date;
 
-    /**
-     * Indique que l'assistant est en cours de génération.
-     * Lorsque `true`, le composant `BubbleMessageComponent` affiche
-     * l'animation de chargement à la place de `content`.
-     *
-     * @defaultValue `undefined` (falsy)
-     */
-    isLoading?: boolean;
+  /**
+   * Indique que l'assistant est en cours de génération.
+   * Lorsque `true`, le composant `BubbleMessageComponent` affiche
+   * l'animation de chargement à la place de `content`.
+   *
+   * @defaultValue `undefined` (falsy)
+   */
+  isLoading?: boolean;
 
-    /**
-     * Indique que la requête a échoué.
-     * Lorsque `true`, `content` contient le message d'erreur et le composant
-     * applique le style destructif (`bubble--error`).
-     *
-     * @defaultValue `undefined` (falsy)
-     */
-    isError?: boolean;
+  /**
+   * Indique que la requête a échoué.
+   * Lorsque `true`, `content` contient le message d'erreur et le composant
+   * applique le style destructif (`bubble--error`).
+   *
+   * @defaultValue `undefined` (falsy)
+   */
+  isError?: boolean;
+
+  // ── OLM-preview-buffer : champs de prévisualisation ──────────────────
+
+  /** Data URL PNG du contenu généré sur la page buffer. */
+  previewPngUrl?: string;
+
+  /** ID de la page buffer temporaire contenant le contenu généré. */
+  bufferPageId?: string;
+
+  /** ID de la page originale de l'utilisateur. */
+  originalPageId?: string;
+
+  /** État courant de la prévisualisation. */
+  previewStatus?: PreviewStatus;
+
+  /** Code JS Penpot original, stocké pour re-exécution lors de l'accept. */
+  previewCode?: string;
 }
 
 /**
@@ -95,17 +114,17 @@ export interface ChatMessage {
  * @see {@link ChatApiService.sendMessage} Méthode qui consomme ce type.
  */
 export interface ChatRequest {
-    /** Identifiant de la page Penpot active, utilisé comme clé de conversation. */
-    projectId: string;
+  /** Identifiant de la page Penpot active, utilisé comme clé de conversation. */
+  projectId: string;
 
-    /** Message saisi par l'utilisateur, envoyé tel quel au modèle IA. */
-    message: string;
+  /** Message saisi par l'utilisateur, envoyé tel quel au modèle IA. */
+  message: string;
 
-    /**
-     * Identifiant de la session WebSocket courante.
-     * Optionnel : absent lors des tests ou si la connexion WS n'est pas encore établie.
-     */
-    sessionId?: string;
+  /**
+   * Identifiant de la session WebSocket courante.
+   * Optionnel : absent lors des tests ou si la connexion WS n'est pas encore établie.
+   */
+  sessionId?: string;
 }
 
 /**
@@ -138,20 +157,20 @@ export interface ChatRequest {
  * @see {@link ChatFacadeService.sendMessage} Méthode qui consomme ce type.
  */
 export interface ChatResponse {
-    /** `true` si le backend a traité la requête sans erreur. */
-    success: boolean;
+  /** `true` si le backend a traité la requête sans erreur. */
+  success: boolean;
 
-    /** Identifiant du projet Penpot concerné, renvoyé tel quel par le backend. */
-    projectId: string;
+  /** Identifiant du projet Penpot concerné, renvoyé tel quel par le backend. */
+  projectId: string;
 
-    /** Réponse textuelle générée par le modèle IA. Vide en cas d'erreur. */
-    response: string;
+  /** Réponse textuelle générée par le modèle IA. Vide en cas d'erreur. */
+  response: string;
 
-    /**
-     * Message d'erreur fourni par le backend.
-     * Présent uniquement si `success` est `false`.
-     */
-    error?: string;
+  /**
+   * Message d'erreur fourni par le backend.
+   * Présent uniquement si `success` est `false`.
+   */
+  error?: string;
 }
 
 /**
