@@ -7,28 +7,43 @@ penpot.ui.open('OllMark - Assistant IA', `?theme=${penpot.theme}`, {
 
 // ── Architecture : Same-Page Staging avec shape.clone() ───────────────────────
 //
+// Multi-user : chaque utilisateur a un offset unique sur la diagonale
+// (BASE_OFFSET + slot * SLOT_SIZE) pour éviter les collisions.
+//
 // CREATE :
 //   1. Mémorise les originaux (IDs). Pas de clone.
-//   2. IA crée via proxy → shapes atterrissent à +50 000 (traduites)
+//   2. IA crée via proxy → shapes atterrissent à +userOffset (traduites)
 //   3. IA ne voit PAS les originaux (masqués dans le proxy)
-//   4. Accept → supprime originaux du centre + ramène shapes IA (−50 000)
+//   4. Accept → supprime originaux du centre + ramène shapes IA (−userOffset)
 //   5. Reject → supprime shapes stagées, originaux intacts
 //
 // ADD / MODIFY / DELETE :
-//   1. shape.clone() chaque racine visible → clone à +50 000
+//   1. shape.clone() chaque racine visible → clone à +userOffset
 //   2. IA ne voit que les clones (originaux masqués)
 //   3. Proxy traduit coords des clones : IA pense travailler au centre
-//   4. Accept → supprime originaux, ramène clones au centre (−50 000)
+//   4. Accept → supprime originaux, ramène clones au centre (−userOffset)
 //   5. Reject → supprime clones, originaux intacts
 
-const OFFSET = 50000;
+const BASE_OFFSET = 50000;
+const SLOT_SIZE = 50000;
 const HALF_OFFSET = 25000;
 const MAX_STRUCTURE = 150;
+
+/** Hash simple pour attribuer un slot unique par userId */
+function computeUserOffset(uid: string): number {
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) {
+    hash = ((hash << 5) - hash + uid.charCodeAt(i)) | 0;
+  }
+  const slot = Math.abs(hash) % 200;
+  return BASE_OFFSET + slot * SLOT_SIZE;
+}
 
 // ── Session ───────────────────────────────────────────────────────────────────
 
 interface UserSession {
   userId: string;
+  userOffset: number; // offset unique pour cet utilisateur
   originalPageId: string | null;
   opType: 'create' | 'add' | 'modify' | 'delete';
   previewSent: boolean;
@@ -49,6 +64,7 @@ function getSession(uid: string): UserSession {
   if (!s) {
     s = {
       userId: uid,
+      userOffset: computeUserOffset(uid),
       originalPageId: null,
       opType: 'add',
       previewSent: false,
@@ -78,6 +94,7 @@ function resetSession(s: UserSession): void {
   s.stagedAllIds = new Set();
   s.stagingId = null;
   s.mode = 'create';
+  // userOffset est conservé
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -196,13 +213,14 @@ async function cloneAllToStaging(session: UserSession): Promise<void> {
   const roots = getVisibleRoots();
   if (!roots.length) return;
   const before = allIds();
+  const uo = session.userOffset;
 
   let cloned = 0;
   for (const shape of roots) {
     try {
       const clone = (shape as unknown as { clone: () => AnyShape }).clone();
-      clone.x += OFFSET;
-      clone.y += OFFSET;
+      clone.x += uo;
+      clone.y += uo;
       cloned++;
     } catch (err) {
       sendToUi({
@@ -237,8 +255,9 @@ function registerClones(session: UserSession, before: Set<string>): void {
   }
   if (newIds.size === 0) return;
 
+  const uo = session.userOffset;
   const directNew = getDirectChildren().filter(
-    (s) => newIds.has(s.id) && (s.x >= HALF_OFFSET || s.y >= HALF_OFFSET),
+    (s) => newIds.has(s.id) && Math.abs(s.x - uo) < SLOT_SIZE && Math.abs(s.y - uo) < SLOT_SIZE,
   );
 
   for (const s of directNew) {
@@ -266,10 +285,10 @@ async function deleteByIds(ids: Set<string>): Promise<void> {
   await wait(300);
 }
 
-function unstage(shapes: AnyShape[]): void {
+function unstage(shapes: AnyShape[], offset: number): void {
   for (const s of shapes) {
-    s.x -= OFFSET;
-    s.y -= OFFSET;
+    s.x -= offset;
+    s.y -= offset;
   }
 }
 
@@ -282,10 +301,11 @@ async function cleanupStaging(session: UserSession): Promise<void> {
 
 let _hideIds = new Set<string>();
 let _translate = false;
+let _currentOffset = BASE_OFFSET; // sera remplacé par le offset de l'utilisateur courant
 let _stagingReady: Promise<void> | null = null;
 let _cleanupDone: Promise<void> | null = null;
 
-// ── Sanitizers (corrige les valeurs invalides générées par l'IA) ──────────────
+// ── Sanitizers (inchangés) ────────────────────────────────────────────────────
 
 const FONT_WEIGHT_MAP: Record<string, string> = {
   bold: '700',
@@ -299,7 +319,6 @@ const FONT_WEIGHT_MAP: Record<string, string> = {
   black: '900',
 };
 
-/** Convertit rgba(r,g,b,a) → #RRGGBB. Penpot n'accepte pas rgba en fillColor. */
 function rgbaToHex(rgba: string): string {
   const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(rgba);
   if (!m) return rgba;
@@ -307,14 +326,12 @@ function rgbaToHex(rgba: string): string {
   return `#${hex(Number(m[1]))}${hex(Number(m[2]))}${hex(Number(m[3]))}`;
 }
 
-/** Sanitize une seule entrée fill */
 function sanitizeFillEntry(f: Record<string, unknown>): Record<string, unknown> {
   const color = (f['fillColor'] ?? f['color']) as string | undefined;
   if (color?.startsWith('rgb')) {
     f['fillColor'] = rgbaToHex(color);
     delete f['color'];
   }
-  // Extraire l'opacité du rgba si présente
   if (color) {
     const am = /rgba?\([^)]*,\s*([\d.]+)\s*\)/i.exec(color);
     if (am && f['fillOpacity'] === undefined) {
@@ -324,7 +341,6 @@ function sanitizeFillEntry(f: Record<string, unknown>): Record<string, unknown> 
   return f;
 }
 
-/** Sanitize la prop avant de la passer à Penpot */
 function sanitizeValue(key: string, value: unknown): unknown {
   if (key === 'fontWeight' && typeof value === 'string') {
     return FONT_WEIGHT_MAP[value.toLowerCase()] ?? value;
@@ -359,8 +375,8 @@ function wrapShapeTr(shape: AnyShape, rm: { id: string }[]): AnyShape {
         return () => {
           rm.push({ id: target.id });
         };
-      if (_translate && prop === 'x' && isInStaging(target)) return target.x - OFFSET;
-      if (_translate && prop === 'y' && isInStaging(target)) return target.y - OFFSET;
+      if (_translate && prop === 'x' && isInStaging(target)) return target.x - _currentOffset;
+      if (_translate && prop === 'y' && isInStaging(target)) return target.y - _currentOffset;
       const v = (target as unknown as Record<string | symbol, unknown>)?.[prop];
       return typeof v === 'function' ? (v as AnyFn).bind(target) : v;
     },
@@ -368,7 +384,7 @@ function wrapShapeTr(shape: AnyShape, rm: { id: string }[]): AnyShape {
       const key = prop as string;
       const shouldTranslate = _translate && (key === 'x' || key === 'y');
       const sanitized = sanitizeValue(key, value);
-      const actual = shouldTranslate ? (sanitized as number) + OFFSET : sanitized;
+      const actual = shouldTranslate ? (sanitized as number) + _currentOffset : sanitized;
       (target as unknown as Record<string | symbol, unknown>)[prop] = actual;
       return true;
     },
@@ -396,15 +412,9 @@ function wrapPageTr(page: AnyPage, rm: { id: string }[]): AnyPage {
   });
 }
 
-// ★ FIX Sonar S6571 — retourne AnyFn | null au lieu de unknown | null
-/**
- * Intercepte les create* pour déplacer la shape à +OFFSET immédiatement.
- * Sans ça, une shape créée à (0,0) reste au centre si l'IA ne set pas x/y.
- * Le GET proxy lira x-OFFSET → l'IA pense que la shape est à (0,0).
- */
 function offsetNewShape(s: AnyShape): AnyShape {
-  s.x += OFFSET;
-  s.y += OFFSET;
+  s.x += _currentOffset;
+  s.y += _currentOffset;
   return s;
 }
 
@@ -638,7 +648,6 @@ function shapeToSvg(s: ShapeData): string {
   }
   const isContainer =
     s.type === 'frame' || s.type === 'board' || s.type === 'group' || s.type === 'bool';
-  // Frames/boards sans fill → blanc + bordure fine pour être visibles dans la preview
   const fill = s.fill === 'none' ? (isContainer ? '#FFFFFF' : 'transparent') : s.fill;
   const defaultBorder =
     isContainer && s.stroke === 'none' ? ' stroke="#E0E0E0" stroke-width="0.5"' : '';
@@ -724,22 +733,21 @@ async function buildPreview(session: UserSession): Promise<string> {
   const staged = getStagedRoots(session);
   if (staged.length === 0) return '';
 
-  // Essayer d'exporter chaque racine en PNG
+  const uo = session.userOffset;
   const pngs: { url: string; x: number; y: number; w: number; h: number }[] = [];
   for (const shape of staged) {
     const png = await exportRootPng(shape);
     if (png) {
       pngs.push({
         url: png,
-        x: shape.x - OFFSET,
-        y: shape.y - OFFSET,
+        x: shape.x - uo,
+        y: shape.y - uo,
         w: shape.width,
         h: shape.height,
       });
     }
   }
 
-  // Si au moins un PNG a réussi → assembler en SVG avec <image>
   if (pngs.length > 0) {
     let x0 = pngs[0].x,
       y0 = pngs[0].y;
@@ -764,7 +772,7 @@ async function buildPreview(session: UserSession): Promise<string> {
     );
   }
 
-  // Fallback SVG primitif (si tous les exports ont échoué)
+  // Fallback SVG primitif
   const page = penpot.currentPage;
   if (!page) return '';
   const allShapes = page.findShapes();
@@ -773,8 +781,8 @@ async function buildPreview(session: UserSession): Promise<string> {
     if (s.x >= HALF_OFFSET || s.y >= HALF_OFFSET) {
       if (session.origAllIds.has(s.id)) continue;
       const d = toShapeData(s);
-      d.x -= OFFSET;
-      d.y -= OFFSET;
+      d.x -= uo;
+      d.y -= uo;
       results.push(d);
     }
   }
@@ -783,11 +791,6 @@ async function buildPreview(session: UserSession): Promise<string> {
 
 // ── Emit preview ──────────────────────────────────────────────────────────────
 
-/**
- * Envoie une preview vide pour faire apparaître la card immédiatement.
- * pngDataUrl = '' → Angular garde isLoading=true → barres animées affichées.
- * Quand la vraie preview arrive via buffer-preview-update, l'image remplace le loading.
- */
 function emitLoadingPreview(s: UserSession, tid: string, uid: string): void {
   if (s.previewSent || !s.stagingId || !s.originalPageId) return;
   s.previewSent = true;
@@ -806,7 +809,6 @@ function emitLoadingPreview(s: UserSession, tid: string, uid: string): void {
 
 function emitRealPreview(s: UserSession, uid: string, url: string): void {
   if (!s.stagingId || !url) return;
-  // Capturer le zoom/centre du viewport Penpot pour que la preview matche
   let viewportZoom = 1;
   let viewportCenterX = 0;
   let viewportCenterY = 0;
@@ -848,7 +850,10 @@ function initCycle(s: UserSession, uid: string): void {
 
 function trackNewShapes(session: UserSession, newIds: string[]): void {
   const newIdSet = new Set(newIds);
-  const newRoots = getDirectChildren().filter((s) => newIdSet.has(s.id));
+  const uo = session.userOffset;
+  const newRoots = getDirectChildren().filter(
+    (s) => newIdSet.has(s.id) && Math.abs(s.x - uo) < SLOT_SIZE && Math.abs(s.y - uo) < SLOT_SIZE,
+  );
   for (const r of newRoots) {
     session.stagedRootIds.add(r.id);
     for (const id of descIds(r)) session.stagedAllIds.add(id);
@@ -858,6 +863,11 @@ function trackNewShapes(session: UserSession, newIds: string[]): void {
 
 function buildHideIds(session: UserSession): Set<string> {
   const hide = new Set(session.origAllIds);
+  // Masquer les staging des autres utilisateurs
+  for (const [, other] of sessions) {
+    if (other.userId === session.userId) continue;
+    for (const id of other.stagedAllIds) hide.add(id);
+  }
   if (session.mode === 'create') {
     for (const id of session.stagedAllIds) hide.add(id);
   }
@@ -877,7 +887,6 @@ async function handleExec(
     return;
   }
 
-  // ★ Attendre que le staging soit prêt (cloneAllToStaging lancé dans set-operation-type)
   if (_stagingReady !== null) {
     await _stagingReady;
     _stagingReady = null;
@@ -888,7 +897,6 @@ async function handleExec(
   const needsStaging = isCreation(code);
   const isCloneOp = session.opType !== 'create';
 
-  // ── Code d'inspection pur en mode CREATE (pas de staging nécessaire) ──
   if (!needsStaging && !isCloneOp && !session.originalPageId) {
     try {
       const r = await runCode(code, logs);
@@ -900,16 +908,14 @@ async function handleExec(
   }
 
   try {
-    // Init cycle pour mode create si pas encore fait (clone ops sont déjà initialisés)
     if (!session.originalPageId) {
       initCycle(session, uid);
     }
 
     emitLoadingPreview(session, tid, uid);
-
     const snap = allIds();
 
-    // Activer le proxy : masquer originaux + traduire coords
+    _currentOffset = session.userOffset;
     _hideIds = buildHideIds(session);
     _translate = true;
 
@@ -918,13 +924,25 @@ async function handleExec(
 
     _hideIds = new Set();
     _translate = false;
+    _currentOffset = BASE_OFFSET;
 
     sendResult(tid, true, { result: result ?? null, log: logs.join('\n') });
 
-    // Détecter les nouvelles shapes
-    await wait(500);
-    const newIds = [...allIds()].filter((id) => !snap.has(id));
-    if (newIds.length > 0) trackNewShapes(session, newIds);
+    // Attendre que les nouvelles formes apparaissent (max 5 tentatives, 500ms chacune)
+    let newIds: string[] = [];
+    const maxAttempts = 5;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await wait(500);
+      const candidate = [...allIds()].filter((id) => !snap.has(id));
+      if (candidate.length > 0) {
+        newIds = candidate;
+        break;
+      }
+    }
+
+    if (newIds.length > 0) {
+      trackNewShapes(session, newIds);
+    }
 
     sendToUi({
       type: 'debug',
@@ -934,17 +952,19 @@ async function handleExec(
       staged: session.stagedRootIds.size,
     });
 
-    // Mettre à jour la preview
     await wait(300);
-    emitRealPreview(session, uid, await buildPreview(session));
+    const previewUrl = await buildPreview(session);
+    await wait(100);
+    emitRealPreview(session, uid, previewUrl);
   } catch (e: unknown) {
     _hideIds = new Set();
     _translate = false;
+    _currentOffset = BASE_OFFSET;
     sendResult(tid, false, null, errStr(e));
   }
 }
 
-// ── Accept : supprime originaux + ramène staging au centre ────────────────────
+// ── Accept ────────────────────────────────────────────────────────────────────
 
 async function handleAccept(uid: string): Promise<void> {
   const s = getSession(uid);
@@ -954,7 +974,7 @@ async function handleAccept(uid: string): Promise<void> {
     const sid = s.stagingId;
     if (s.origRootIds.size > 0) await deleteByIds(s.origRootIds);
     const staged = getStagedRoots(s);
-    unstage(staged);
+    unstage(staged, s.userOffset);
     sendToUi({ type: 'debug', step: 'accept', userId: uid, moved: staged.length });
     await wait(300);
     resetSession(s);
@@ -972,7 +992,7 @@ async function handleAccept(uid: string): Promise<void> {
   }
 }
 
-// ── Reject : supprime staging, originaux intacts ──────────────────────────────
+// ── Reject ────────────────────────────────────────────────────────────────────
 
 async function handleReject(uid: string): Promise<void> {
   const s = getSession(uid);
@@ -1004,7 +1024,6 @@ async function handleResetStaging(uid: string): Promise<void> {
   if (s.stagedRootIds.size > 0) {
     const sid = s.stagingId;
     await cleanupStaging(s);
-    // ★ Émettre buffer-rejected pour que Angular mette à jour le status de la preview
     if (sid) sendToUi({ type: 'buffer-rejected', bufferPageId: sid, userId: uid });
     sendToUi({ type: 'staging-cleared', userId: uid });
   } else {
@@ -1012,28 +1031,15 @@ async function handleResetStaging(uid: string): Promise<void> {
   }
 }
 
-// ── Finalize preview (appelé par Angular après la réponse HTTP complète) ──────
-//
-// Clone ops (add/modify/delete) :
-//   - aiCode vide = IA n'a rien modifié → auto-reject (supprime clones, ferme preview)
-//   - aiCode non-vide = modifications faites → preview déjà visible, rien à faire
-//
-// Create :
-//   A. IA a créé des shapes → preview déjà affichée → rien à faire
-//   B. IA a envoyé du code d'inspection mais 0 shapes → fermer le loading
-//   C. IA n'a envoyé aucun code (réponse texte) → fermer le loading (pas de clone safety)
+// ── Finalize preview ──────────────────────────────────────────────────────────
 
 async function handleFinalizePreview(uid: string, opType?: string): Promise<void> {
   const s = getSession(uid);
   const isCloneOp = opType === 'add' || opType === 'modify' || opType === 'delete';
 
-  // ── Clone ops : auto-reject si aucune modification n'a été faite ──
   if (isCloneOp) {
-    // Des mutations ont eu lieu → preview visible avec les changements, rien à faire
     if (s.aiCode.length > 0) return;
-    // Aucune mutation → rejeter automatiquement (supprime clones, originaux intacts)
     if (s.stagedRootIds.size > 0) {
-      // Attendre que le staging soit prêt (il est async dans set-operation-type)
       if (_stagingReady !== null) {
         await _stagingReady;
         _stagingReady = null;
@@ -1047,12 +1053,8 @@ async function handleFinalizePreview(uid: string, opType?: string): Promise<void
     return;
   }
 
-  // ── Create mode ──
-
-  // Cas A : des shapes ont été créées → preview déjà visible, rien à faire
   if (s.stagedRootIds.size > 0) return;
 
-  // Cas B+C : loading émis ou pas, mais 0 shapes → fermer le loading
   if (s.previewSent) {
     const sid = s.stagingId;
     resetSession(s);
@@ -1061,7 +1063,6 @@ async function handleFinalizePreview(uid: string, opType?: string): Promise<void
     return;
   }
 
-  // Cas C bis : aucun executeCode → pas de preview émise → rien à fermer
   resetSession(s);
   sendToUi({ type: 'debug', step: 'finalize-no-preview', userId: uid });
 }
@@ -1150,7 +1151,6 @@ penpot.ui.onMessage<{ type: string; userId?: string; [key: string]: unknown }>((
       const s = getSession(uid);
       const op = msg['operationType'] as string | undefined;
 
-      // ★ Nettoyer le staging précédent (synchrone reset + async delete avec promesse traçable)
       if (s.stagedRootIds.size > 0) {
         const oldSid = s.stagingId;
         const oldIds = new Set(s.stagedRootIds);
@@ -1166,9 +1166,6 @@ penpot.ui.onMessage<{ type: string; userId?: string; [key: string]: unknown }>((
       s.opType = op === 'create' || op === 'add' || op === 'modify' || op === 'delete' ? op : 'add';
       sendToUi({ type: 'debug', step: 'set-op', userId: uid, opType: s.opType });
 
-      // ★ Pour clone ops (add/modify/delete) : démarrer le staging IMMÉDIATEMENT.
-      // Même si l'IA ne génère aucun code (réponse texte), la preview apparaîtra
-      // avec le design cloné → l'utilisateur peut toujours accepter/rejeter.
       if (s.opType === 'create') {
         _stagingReady = null;
       } else {
@@ -1187,7 +1184,6 @@ penpot.ui.onMessage<{ type: string; userId?: string; [key: string]: unknown }>((
           emitRealPreview(s, uid, url);
         })();
       }
-
       break;
     }
     case 'execute-task':
@@ -1207,6 +1203,31 @@ penpot.ui.onMessage<{ type: string; userId?: string; [key: string]: unknown }>((
       break;
     default:
       break;
+  }
+});
+
+penpot.on('finish', () => {
+  // Récupérer l'identifiant de l'utilisateur courant
+  let currentUserId = 'unknown';
+  try {
+    const name = penpot.currentUser?.name ?? 'unknown';
+    const uid = penpot.currentUser?.id ?? 'unknown';
+    currentUserId = `${name}_${uid}`;
+  } catch {
+    // fallback
+  }
+
+  const session = sessions.get(currentUserId);
+  if (session && session.stagedRootIds.size > 0) {
+    const targets = getDirectChildren().filter((sh) => session.stagedRootIds.has(sh.id));
+    for (const t of targets) {
+      try {
+        t.remove();
+      } catch {
+        /* noop */
+      }
+    }
+    sessions.delete(currentUserId);
   }
 });
 
