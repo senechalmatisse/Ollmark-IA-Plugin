@@ -26,7 +26,6 @@ export class PreviewCardComponent implements AfterViewInit, OnChanges {
   @Input() status: PreviewStatus = 'pending';
   @Input() hasImage = true;
   @Input() isAiLoading = false;
-  @Input() isReadonly = false;
   @Output() accepted = new EventEmitter<void>();
   @Output() rejected = new EventEmitter<void>();
 

@@ -38,120 +38,115 @@ import { environment } from '../../../environments/environment';
  */
 @Injectable({ providedIn: 'root' })
 export class WebSocketService implements OnDestroy {
+  // ── Dépendances ───────────────────────────────────────────────────────────
 
-    // ── Dépendances ───────────────────────────────────────────────────────────
+  /** URL WebSocket résolue au build depuis les variables d'environnement. */
+  private readonly _wsUrl = inject(WEBSOCKET_URL);
 
-    /** URL WebSocket résolue au build depuis les variables d'environnement. */
-    private readonly _wsUrl = inject(WEBSOCKET_URL);
+  /** Bridge postMessage - reçoit les mises à jour de statut et les tâches à relayer. */
+  private readonly _bridge = inject(PluginBridgeService);
 
-    /** Bridge postMessage - reçoit les mises à jour de statut et les tâches à relayer. */
-    private readonly _bridge = inject(PluginBridgeService);
+  /** Store partagé du sessionId WebSocket, lu par ChatFacadeService pour les requêtes HTTP. */
+  private readonly _session = inject(SessionStore);
 
-    /** Store partagé du sessionId WebSocket, lu par ChatFacadeService pour les requêtes HTTP. */
-    private readonly _session = inject(SessionStore);
+  // ── État interne ──────────────────────────────────────────────────────────
 
-    // ── État interne ──────────────────────────────────────────────────────────
+  /** Instance WebSocket native courante. `null` avant la première connexion. */
+  private _ws: WebSocket | null = null;
 
-    /** Instance WebSocket native courante. `null` avant la première connexion. */
-    private _ws: WebSocket | null = null;
+  /** Subject de destruction, complété dans `ngOnDestroy` pour terminer les Observables internes. */
+  private readonly destroy$ = new Subject<void>();
 
-    /** Subject de destruction, complété dans `ngOnDestroy` pour terminer les Observables internes. */
-    private readonly destroy$ = new Subject<void>();
+  /**
+   * Gestionnaire de reconnexion avec backoff exponentiel.
+   *
+   * Configuré avec :
+   * - 10 tentatives maximum
+   * - Délai de base de 1 000 ms (doublé à chaque tentative, plafonné à 30 s)
+   * - Callback qui appelle {@link connect} à chaque tentative
+   */
+  private readonly reconnection = new ReconnectionManager(10, 1_000, (attempt) => {
+    console.log(`[OllMark WS] Reconnect attempt ${attempt}/10`);
+    this._connect();
+  });
 
-    /**
-     * Gestionnaire de reconnexion avec backoff exponentiel.
-     *
-     * Configuré avec :
-     * - 10 tentatives maximum
-     * - Délai de base de 1 000 ms (doublé à chaque tentative, plafonné à 30 s)
-     * - Callback qui appelle {@link connect} à chaque tentative
-     */
-    private readonly reconnection = new ReconnectionManager(
-        10,
-        1_000,
-        (attempt) => {
-            console.log(`[OllMark WS] Reconnect attempt ${attempt}/10`);
-            this._connect();
-        }
-    );
+  // ── Cycle de vie ──────────────────────────────────────────────────────────
 
-    // ── Cycle de vie ──────────────────────────────────────────────────────────
+  /**
+   * Ouvre la connexion WebSocket et démarre l'écoute des résultats de tâches.
+   *
+   * L'initialisation est volontairement effectuée dans le constructeur
+   * (et non dans `ngOnInit`) car `WebSocketService` est `providedIn: 'root'`
+   * et doit établir la connexion dès son instanciation, avant même qu'un
+   * composant ne soit rendu.
+   */
+  constructor() {
+    this._connect();
+    this._listenForTaskResults();
+  }
 
-    /**
-     * Ouvre la connexion WebSocket et démarre l'écoute des résultats de tâches.
-     *
-     * L'initialisation est volontairement effectuée dans le constructeur
-     * (et non dans `ngOnInit`) car `WebSocketService` est `providedIn: 'root'`
-     * et doit établir la connexion dès son instanciation, avant même qu'un
-     * composant ne soit rendu.
-     */
-    constructor() {
-        this._connect();
-        this._listenForTaskResults();
+  /**
+   * Libère toutes les ressources à la destruction du service.
+   *
+   * - Complète `destroy$` pour terminer le `takeUntil` de `listenForTaskResults`.
+   * - Ferme le WebSocket natif proprement.
+   * - Annule le timer de reconnexion en cours s'il existe.
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this._ws?.close();
+    this.reconnection.destroy();
+  }
+
+  // ── API publique ──────────────────────────────────────────────────────────
+
+  /**
+   * Sérialise et envoie un objet JSON au backend Spring Boot via WebSocket.
+   *
+   * Si le WebSocket n'est pas dans l'état `OPEN`, le message est abandonné
+   * et un avertissement est loggué. Cette méthode ne lève jamais d'exception.
+   *
+   * @param msg - Objet à sérialiser et envoyer. Doit être sérialisable en JSON.
+   *
+   * @example
+   * ```typescript
+   * // Envoi d'une TaskResponseEnvelope
+   * this.send({
+   *   type: 'task-response',
+   *   response: { id: '...', success: true, data: { result: null, log: '' } },
+   * });
+   * ```
+   *
+   * @public
+   */
+  send(msg: object): void {
+    if (this._ws?.readyState === WebSocket.OPEN) {
+      this._ws.send(JSON.stringify(msg));
+    } else {
+      console.warn('[OllMark WS] Cannot send: WebSocket not open');
     }
+  }
 
-    /**
-     * Libère toutes les ressources à la destruction du service.
-     *
-     * - Complète `destroy$` pour terminer le `takeUntil` de `listenForTaskResults`.
-     * - Ferme le WebSocket natif proprement.
-     * - Annule le timer de reconnexion en cours s'il existe.
-     */
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-        this._ws?.close();
-        this.reconnection.destroy();
-    }
-
-    // ── API publique ──────────────────────────────────────────────────────────
-
-    /**
-     * Sérialise et envoie un objet JSON au backend Spring Boot via WebSocket.
-     *
-     * Si le WebSocket n'est pas dans l'état `OPEN`, le message est abandonné
-     * et un avertissement est loggué. Cette méthode ne lève jamais d'exception.
-     *
-     * @param msg - Objet à sérialiser et envoyer. Doit être sérialisable en JSON.
-     *
-     * @example
-     * ```typescript
-     * // Envoi d'une TaskResponseEnvelope
-     * this.send({
-     *   type: 'task-response',
-     *   response: { id: '...', success: true, data: { result: null, log: '' } },
-     * });
-     * ```
-     *
-     * @public
-     */
-    send(msg: object): void {
-        if (this._ws?.readyState === WebSocket.OPEN) {
-            this._ws.send(JSON.stringify(msg));
-        } else {
-            console.warn('[OllMark WS] Cannot send: WebSocket not open');
-        }
-    }
-
-    /**
-     * Ouvre la connexion WebSocket et enregistre les handlers d'événements.
-     *
-     * ### Guard d'idempotence
-     * Si une connexion est déjà en cours ou établie (`readyState <= OPEN`),
-     * la méthode retourne immédiatement sans ouvrir une seconde connexion.
-     *
-     * ### Handlers d'événements
-     *
-     * | Événement   | Action                                                          |
-     * |-------------|------------------------------------------------------------------|
-     * | `onopen`    | Réinitialise le compteur de reconnexion, passe le statut à `'connected'` |
-     * | `onmessage` | Parse le JSON et route vers `session.set()` ou `handleBackendMessage()` |
-     * | `onclose`   | Vide le `sessionId`, passe le statut à `'disconnected'`, planifie une reconnexion |
-     * | `onerror`   | Passe le statut à `'error'`                                      |
-     *
-     * @private
-     */
-    private _connect(): void {
+  /**
+   * Ouvre la connexion WebSocket et enregistre les handlers d'événements.
+   *
+   * ### Guard d'idempotence
+   * Si une connexion est déjà en cours ou établie (`readyState <= OPEN`),
+   * la méthode retourne immédiatement sans ouvrir une seconde connexion.
+   *
+   * ### Handlers d'événements
+   *
+   * | Événement   | Action                                                          |
+   * |-------------|------------------------------------------------------------------|
+   * | `onopen`    | Réinitialise le compteur de reconnexion, passe le statut à `'connected'` |
+   * | `onmessage` | Parse le JSON et route vers `session.set()` ou `handleBackendMessage()` |
+   * | `onclose`   | Vide le `sessionId`, passe le statut à `'disconnected'`, planifie une reconnexion |
+   * | `onerror`   | Passe le statut à `'error'`                                      |
+   *
+   * @private
+   */
+  private _connect(): void {
     if (this._ws && this._ws.readyState <= WebSocket.OPEN) return;
     this._bridge.setConnectionStatus('connecting');
 
@@ -160,108 +155,106 @@ export class WebSocketService implements OnDestroy {
     const authenticatedUrl = `${this._wsUrl}?userToken=${token}`;
 
     try {
-        this._ws = new WebSocket(authenticatedUrl); // ← était : new WebSocket(this._wsUrl)
+      this._ws = new WebSocket(authenticatedUrl); // ← était : new WebSocket(this._wsUrl)
     } catch (err) {
-        console.error('[OllMark WS] Failed to create WebSocket:', err);
-        this._bridge.setConnectionStatus('disconnected');
-        return;
+      console.error('[OllMark WS] Failed to create WebSocket:', err);
+      this._bridge.setConnectionStatus('disconnected');
+      return;
     }
 
     this._ws.onopen = () => {
-        console.log('[OllMark WS] Connected and authenticated');
-        this.reconnection.reset();
-        this._bridge.setConnectionStatus('connected');
+      console.log('[OllMark WS] Connected and authenticated');
+      this.reconnection.reset();
+      this._bridge.setConnectionStatus('connected');
     };
 
     this._ws.onmessage = ({ data }: MessageEvent) => {
-        try {
-            const payload = JSON.parse(data as string);
-            if (payload.type === 'session-id') {
-                this._session.set(payload.sessionId);
-                console.log('[OllMark WS] Session ID stored:', payload.sessionId);
-                return;
-            }
-            this._handleBackendMessage(payload as PluginTaskRequest);
-        } catch (err) {
-            console.error('[OllMark WS] Failed to parse message:', err);
+      try {
+        const payload = JSON.parse(data as string);
+        if (payload.type === 'session-id') {
+          this._session.set(payload.sessionId);
+          console.log('[OllMark WS] Session ID stored:', payload.sessionId);
+          return;
         }
+        this._handleBackendMessage(payload as PluginTaskRequest);
+      } catch (err) {
+        console.error('[OllMark WS] Failed to parse message:', err);
+      }
     };
 
     this._ws.onclose = ({ code, reason }: CloseEvent) => {
-        // Code 1008 = POLICY_VIOLATION = token rejeté par le backend
-        // Inutile de reconnecter : le token ne va pas se corriger tout seul
-        if (code === 1008) {
-            console.error('[OllMark WS] Authentication rejected by backend (code 1008)');
-            this._bridge.setConnectionStatus('error');
-            return; // ← pas de reconnexion
-        }
+      // Code 1008 = POLICY_VIOLATION = token rejeté par le backend
+      // Inutile de reconnecter : le token ne va pas se corriger tout seul
+      if (code === 1008) {
+        console.error('[OllMark WS] Authentication rejected by backend (code 1008)');
+        this._bridge.setConnectionStatus('error');
+        return; // ← pas de reconnexion
+      }
 
-        console.warn('[OllMark WS] Closed', code, reason);
-        this._session.clear();
-        this._bridge.setConnectionStatus('disconnected');
-        if (!this.reconnection.schedule()) {
-            console.error('[OllMark WS] Max reconnect attempts reached');
-        }
+      console.warn('[OllMark WS] Closed', code, reason);
+      this._session.clear();
+      this._bridge.setConnectionStatus('disconnected');
+      if (!this.reconnection.schedule()) {
+        console.error('[OllMark WS] Max reconnect attempts reached');
+      }
     };
 
     this._ws.onerror = () => {
-        console.error('[OllMark WS] Error');
-        this._bridge.setConnectionStatus('error');
+      console.error('[OllMark WS] Error');
+      this._bridge.setConnectionStatus('error');
     };
-}
+  }
 
-    /**
-     * Route un message reçu du backend Spring Boot vers `plugin.ts`.
-     *
-     * Reçoit un {@link PluginTaskRequest} et le transmet à `plugin.ts` via
-     * {@link PluginBridgeService.send} sous la forme d'un message `'execute-task'`.
-     * Les messages malformés (sans `id` ou sans `task`) sont ignorés silencieusement.
-     *
-     * @param payload - Tâche reçue du backend, attendue comme un {@link PluginTaskRequest}.
-     *
-     * @private
-     * @see {@link PluginBridgeService.send} Méthode qui envoie le message à `plugin.ts`.
-     */
-    private _handleBackendMessage(payload: PluginTaskRequest): void {
-        if (!payload?.id || !payload?.task) return;
-        console.log('[OllMark WS] Task received:', payload.task, payload.id);
-        this._bridge.send({
-            type: 'execute-task',
-            taskId: payload.id,
-            task: payload.task,
-            params: payload.params,
-        });
-    }
+  /**
+   * Route un message reçu du backend Spring Boot vers `plugin.ts`.
+   *
+   * Reçoit un {@link PluginTaskRequest} et le transmet à `plugin.ts` via
+   * {@link PluginBridgeService.send} sous la forme d'un message `'execute-task'`.
+   * Les messages malformés (sans `id` ou sans `task`) sont ignorés silencieusement.
+   *
+   * @param payload - Tâche reçue du backend, attendue comme un {@link PluginTaskRequest}.
+   *
+   * @private
+   * @see {@link PluginBridgeService.send} Méthode qui envoie le message à `plugin.ts`.
+   */
+  private _handleBackendMessage(payload: PluginTaskRequest): void {
+    if (!payload?.id || !payload?.task) return;
+    console.log('[OllMark WS] Task received:', payload.task, payload.id);
+    this._bridge.send({
+      type: 'execute-task',
+      taskId: payload.id,
+      task: payload.task,
+      params: payload.params,
+    });
+  }
 
-    /**
-     * Souscrit à `taskResult$` et renvoie chaque résultat au backend via WebSocket.
-     *
-     * Chaque résultat de tâche émis par {@link PluginBridgeService.taskResult$}
-     * est encapsulé dans un {@link TaskResponseEnvelope} et envoyé au backend
-     * via {@link send}. Le backend (handler `PluginWebSocketHandler`) attend
-     * ce format pour corréler la réponse avec la tâche d'origine.
-     *
-     * L'Observable est automatiquement complété par `takeUntil(this.destroy$)`
-     * lors de la destruction du service, évitant les fuites mémoire.
-     *
-     * @private
-     * @see {@link PluginBridgeService.taskResult$} Source du flux de résultats.
-     * @see {@link TaskResponseEnvelope} Format attendu par le backend.
-     */
-    private _listenForTaskResults(): void {
-        this._bridge.taskResult$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe((result) => {
-            const envelope: TaskResponseEnvelope = {
-                type: 'task-response',
-                response: {
-                    id: result.taskId,
-                    success: result.success,
-                    data: result.data ?? null,
-                    error: result.error ?? null,
-                },
-            };
-            this.send(envelope);
-        });
-    }
+  /**
+   * Souscrit à `taskResult$` et renvoie chaque résultat au backend via WebSocket.
+   *
+   * Chaque résultat de tâche émis par {@link PluginBridgeService.taskResult$}
+   * est encapsulé dans un {@link TaskResponseEnvelope} et envoyé au backend
+   * via {@link send}. Le backend (handler `PluginWebSocketHandler`) attend
+   * ce format pour corréler la réponse avec la tâche d'origine.
+   *
+   * L'Observable est automatiquement complété par `takeUntil(this.destroy$)`
+   * lors de la destruction du service, évitant les fuites mémoire.
+   *
+   * @private
+   * @see {@link PluginBridgeService.taskResult$} Source du flux de résultats.
+   * @see {@link TaskResponseEnvelope} Format attendu par le backend.
+   */
+  private _listenForTaskResults(): void {
+    this._bridge.taskResult$.pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      const envelope: TaskResponseEnvelope = {
+        type: 'task-response',
+        response: {
+          id: result.taskId,
+          success: result.success,
+          data: result.data ?? null,
+          error: result.error ?? null,
+        },
+      };
+      this.send(envelope);
+    });
+  }
 }

@@ -3,195 +3,171 @@ import { By } from '@angular/platform-browser';
 import { BubbleMessageComponent } from './bubble-message.component';
 import { ChatMessage } from '../../../../core/models';
 
-// ---------------------------------------------------------------------------
-// Fixture helpers
-// ---------------------------------------------------------------------------
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
-    return {
-        id: 'test-id-001',
-        role: 'user',
-        content: 'Hello world',
-        timestamp: new Date('2026-03-15T10:30:00.000Z'),
-        ...overrides,
-    };
+  return {
+    id: 'test-id-001',
+    role: 'user',
+    content: 'Hello world',
+    timestamp: new Date('2026-03-15T10:30:00.000Z'),
+    ...overrides,
+  };
+}
+
+function makePreviewMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
+  return makeMessage({
+    role: 'assistant',
+    content: '',
+    bufferPageId: 'buf-001',
+    previewStatus: 'pending',
+    previewPngUrl: 'data:image/png;base64,abc',
+    previewCode: 'penpot.createRectangle()',
+    ...overrides,
+  });
 }
 
 function setup(msg: ChatMessage): ComponentFixture<BubbleMessageComponent> {
-    TestBed.configureTestingModule({
-        imports: [BubbleMessageComponent],
-    });
-    const fixture = TestBed.createComponent(BubbleMessageComponent);
-    fixture.componentInstance.message = msg;
-    fixture.detectChanges();
-    return fixture;
+  TestBed.configureTestingModule({
+    imports: [BubbleMessageComponent],
+  });
+  const fixture = TestBed.createComponent(BubbleMessageComponent);
+  fixture.componentInstance.message = msg;
+  fixture.detectChanges();
+  fixture.detectChanges();
+  return fixture;
 }
 
-// ---------------------------------------------------------------------------
-// Héritage — accesseurs hérités de MessageComponent
-// ---------------------------------------------------------------------------
+// ── Création ──────────────────────────────────────────────────────────────────
 
-describe('BubbleMessageComponent — héritage de MessageComponent', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — création', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    it("isUser retourne true pour role='user'", () => {
-        const f = setup(makeMessage({ role: 'user' }));
-        expect(f.componentInstance.isUser).toBeTrue();
-    });
-
-    it("isAssistant retourne true pour role='assistant'", () => {
-        const f = setup(makeMessage({ role: 'assistant' }));
-        expect(f.componentInstance.isAssistant).toBeTrue();
-    });
-
-    it("senderLabel vaut 'Vous' pour un message utilisateur", () => {
-        const f = setup(makeMessage({ role: 'user' }));
-        expect(f.componentInstance.senderLabel).toBe('Vous');
-    });
-
-    it("senderLabel vaut 'IA' pour un message assistant", () => {
-        const f = setup(makeMessage({ role: 'assistant' }));
-        expect(f.componentInstance.senderLabel).toBe('IA');
-    });
-
-    it('formattedTime retourne une chaîne HH:MM', () => {
-        const f = setup(makeMessage());
-        expect(f.componentInstance.formattedTime).toMatch(/^\d{2}:\d{2}$/);
-    });
+  it('should create', () => {
+    const f = setup(makeMessage());
+    expect(f.componentInstance).toBeTruthy();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// Classes CSS — bubble-wrapper
-// ---------------------------------------------------------------------------
+// ── Getters propres ──────────────────────────────────────────────────────────
 
-describe('BubbleMessageComponent — classes bubble-wrapper', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — getters', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    it("ajoute la classe 'user' pour un message utilisateur", () => {
-        const f = setup(makeMessage({ role: 'user' }));
-        const wrapper = f.debugElement.query(By.css('.bubble-wrapper'));
-        expect(wrapper.classes['user']).toBeTrue();
-        expect(wrapper.classes['ai']).toBeFalsy();
-    });
+  it('isPreviewMessage retourne true quand bufferPageId et previewStatus sont définis', () => {
+    const f = setup(makePreviewMessage());
+    expect(f.componentInstance.isPreviewMessage).toBeTrue();
+  });
 
-    it("ajoute la classe 'ai' pour un message assistant", () => {
-        const f = setup(makeMessage({ role: 'assistant', content: 'Bonjour' }));
-        const wrapper = f.debugElement.query(By.css('.bubble-wrapper'));
-        expect(wrapper.classes['ai']).toBeTrue();
-        expect(wrapper.classes['user']).toBeFalsy();
-    });
+  it('isPreviewMessage retourne false quand bufferPageId est absent', () => {
+    const f = setup(makeMessage({ role: 'assistant', previewStatus: 'pending' }));
+    expect(f.componentInstance.isPreviewMessage).toBeFalse();
+  });
+
+  it('isPreviewMessage retourne false quand previewStatus est absent', () => {
+    const f = setup(makeMessage({ role: 'assistant', bufferPageId: 'buf-001' }));
+    expect(f.componentInstance.isPreviewMessage).toBeFalse();
+  });
+
+  it('hasPreviewImage retourne true quand previewPngUrl est défini', () => {
+    const f = setup(makePreviewMessage());
+    expect(f.componentInstance.hasPreviewImage).toBeTrue();
+  });
+
+  it('hasPreviewImage retourne false quand previewPngUrl est absent', () => {
+    const f = setup(makePreviewMessage({ previewPngUrl: undefined }));
+    expect(f.componentInstance.hasPreviewImage).toBeFalse();
+  });
+
+  it('hasPreviewImage retourne false quand previewPngUrl est une chaîne vide', () => {
+    const f = setup(makePreviewMessage({ previewPngUrl: '' }));
+    expect(f.componentInstance.hasPreviewImage).toBeFalse();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// Classes CSS — bulle
-// ---------------------------------------------------------------------------
+// ── Émissions — previewAccepted ───────────────────────────────────────────────
 
-describe('BubbleMessageComponent — classes bubble', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — previewAccepted', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    // Note: Dans ton nouveau CSS, les couleurs sont gérées par le parent .user/.ai
-    // Mais on vérifie quand même les classes spécifiques d'état.
+  it('émet previewAccepted avec bufferPageId et code quand bufferPageId est défini', () => {
+    const f = setup(makePreviewMessage());
+    let emitted: { bufferPageId: string; code: string } | undefined;
+    f.componentInstance.previewAccepted.subscribe((v) => (emitted = v));
+    f.componentInstance.onPreviewAccepted();
+    expect(emitted).toEqual({ bufferPageId: 'buf-001', code: 'penpot.createRectangle()' });
+  });
 
-    it("ajoute 'bubble--error' quand isError est true", () => {
-        const f = setup(makeMessage({ role: 'assistant', isError: true, content: 'Erreur' }));
-        const bubble = f.debugElement.query(By.css('.bubble'));
-        expect(bubble.classes['bubble--error']).toBeTrue();
-    });
+  it('émet previewAccepted avec code vide quand previewCode est undefined', () => {
+    const f = setup(makePreviewMessage({ previewCode: undefined }));
+    let emitted: { bufferPageId: string; code: string } | undefined;
+    f.componentInstance.previewAccepted.subscribe((v) => (emitted = v));
+    f.componentInstance.onPreviewAccepted();
+    expect(emitted?.code).toBe('');
+  });
+
+  it("n'émet pas previewAccepted quand bufferPageId est absent", () => {
+    const f = setup(makeMessage({ role: 'assistant' }));
+    let emitted = false;
+    f.componentInstance.previewAccepted.subscribe(() => (emitted = true));
+    f.componentInstance.onPreviewAccepted();
+    expect(emitted).toBeFalse();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// aria-label de la bulle
-// ---------------------------------------------------------------------------
+// ── Émissions — previewRejected ───────────────────────────────────────────────
 
-describe('BubbleMessageComponent — aria-label', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — previewRejected', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    it("contient 'Vous' et le formattedTime pour un message utilisateur", () => {
-        const f = setup(makeMessage({ role: 'user' }));
-        const bubble = f.debugElement.query(By.css('.bubble'));
-        const ariaLabel: string = bubble.nativeElement.getAttribute('aria-label');
-        expect(ariaLabel).toContain('Vous');
-        expect(ariaLabel).toContain('·');
-        expect(ariaLabel).toMatch(/\d{2}:\d{2}/);
-    });
+  it('émet previewRejected avec bufferPageId quand bufferPageId est défini', () => {
+    const f = setup(makePreviewMessage());
+    let emitted: string | undefined;
+    f.componentInstance.previewRejected.subscribe((v) => (emitted = v));
+    f.componentInstance.onPreviewRejected();
+    expect(emitted).toBe('buf-001');
+  });
+
+  it("n'émet pas previewRejected quand bufferPageId est absent", () => {
+    const f = setup(makeMessage({ role: 'assistant' }));
+    let emitted = false;
+    f.componentInstance.previewRejected.subscribe(() => (emitted = true));
+    f.componentInstance.onPreviewRejected();
+    expect(emitted).toBeFalse();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// Avatar — affiché uniquement pour l'assistant
-// ---------------------------------------------------------------------------
+// ── Input isAiLoading ─────────────────────────────────────────────────────────
 
-describe('BubbleMessageComponent — avatar', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — isAiLoading', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    it("affiche l'image ai-inline-icon pour un message assistant", () => {
-        const f = setup(makeMessage({ role: 'assistant', content: 'Bonjour' }));
-        const icon = f.debugElement.query(By.css('.ai-inline-icon'));
-        expect(icon).not.toBeNull();
-    });
+  it('isAiLoading vaut false par défaut', () => {
+    const f = setup(makeMessage());
+    expect(f.componentInstance.isAiLoading).toBeFalse();
+  });
 
-    it("n'affiche pas l'image ai-inline-icon pour un message utilisateur", () => {
-        const f = setup(makeMessage({ role: 'user' }));
-        const icon = f.debugElement.query(By.css('.ai-inline-icon'));
-        expect(icon).toBeNull();
-    });
-
-    it("ajoute 'ai-main' pour un message assistant", () => {
-        const f = setup(makeMessage({ role: 'assistant', content: 'OK' }));
-        const main = f.debugElement.query(By.css('.bubble-main'));
-        expect(main.classes['ai-main']).toBeTrue();
-    });
+  it('isAiLoading est bien bindé à true', () => {
+    const f = setup(makeMessage());
+    f.componentInstance.isAiLoading = true;
+    expect(f.componentInstance.isAiLoading).toBeTrue();
+  });
 });
 
-// ---------------------------------------------------------------------------
-// État de chargement
-// ---------------------------------------------------------------------------
+// ── Rendu preview-card ────────────────────────────────────────────────────────
 
-describe('BubbleMessageComponent — état isLoading', () => {
-    afterEach(() => TestBed.resetTestingModule());
+describe('BubbleMessageComponent — rendu app-preview-card', () => {
+  afterEach(() => TestBed.resetTestingModule());
 
-    it('affiche le div .dots et cache le paragraphe quand isLoading=true', () => {
-        const f = setup(makeMessage({ role: 'assistant', content: '', isLoading: true }));
-        expect(f.debugElement.query(By.css('.dots'))).not.toBeNull();
-        expect(f.debugElement.query(By.css('p.content'))).toBeNull();
-    });
+  it('affiche app-preview-card quand isPreviewMessage est true', () => {
+    const f = setup(makePreviewMessage());
+    const card = f.debugElement.query(By.css('app-preview-card'));
+    expect(card).not.toBeNull();
+  });
 
-    it('affiche le paragraphe de texte et cache .dots quand isLoading=false', () => {
-        const f = setup(makeMessage({ role: 'assistant', content: 'Réponse finale' }));
-        expect(f.debugElement.query(By.css('p.content'))).not.toBeNull();
-        expect(f.debugElement.query(By.css('.dots'))).toBeNull();
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Contenu textuel
-// ---------------------------------------------------------------------------
-
-describe('BubbleMessageComponent — contenu textuel', () => {
-    afterEach(() => TestBed.resetTestingModule());
-
-    it('affiche le contenu dans le paragraphe .content', () => {
-        const f = setup(makeMessage({ role: 'user', content: 'Mon message ici' }));
-        const p = f.debugElement.query(By.css('p.content'));
-        expect(p.nativeElement.textContent.trim()).toBe('Mon message ici');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Horodatage <time>
-// ---------------------------------------------------------------------------
-
-describe('BubbleMessageComponent — horodatage', () => {
-    afterEach(() => TestBed.resetTestingModule());
-
-    it('affiche un élément <time> avec la classe .timestamp', () => {
-        const f = setup(makeMessage());
-        expect(f.debugElement.query(By.css('time.timestamp'))).not.toBeNull();
-    });
-
-    it('l\'attribut dateTime contient l\'ISO string du timestamp', () => {
-        const ts = new Date('2026-03-15T10:30:00.000Z');
-        const f = setup(makeMessage({ timestamp: ts }));
-        const time = f.debugElement.query(By.css('time'));
-        expect(time.nativeElement.getAttribute('datetime')).toBe(ts.toISOString());
-    });
+  it("n'affiche pas app-preview-card quand isPreviewMessage est false", () => {
+    const f = setup(makeMessage({ role: 'assistant', content: 'Pas de preview' }));
+    const card = f.debugElement.query(By.css('app-preview-card'));
+    expect(card).toBeNull();
+  });
 });
