@@ -150,7 +150,7 @@ build-frontend-image:
 trivy-frontend:
   stage: scan
   image: 
-    name: aquasec/trivy:latest
+    name: aquasec/trivy:canary
     entrypoint: [""]
   variables:
     TRIVY_USERNAME: $CI_REGISTRY_USER
