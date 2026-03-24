@@ -1,6 +1,6 @@
 /// <reference types="@penpot/plugin-types" />
 
-penpot.ui.open('OllMark - Assistant IA', `?theme=${penpot.theme}`, {
+penpot.ui.open('OllMark - Assistant IA', '/ia/index.html', {
   width: 400,
   height: 650,
 });

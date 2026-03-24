@@ -1,7 +1,7 @@
 {
   "name": "Assistant IA",
   "description": "Générateur de contenu marketing IA pour Penpot",
-  "code": "/plugin.js",
+  "code": "/ia/plugin.js",
   "icon": "/icon.png",
   "permissions": [
     "content:read",
