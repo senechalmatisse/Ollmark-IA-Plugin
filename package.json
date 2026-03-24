@@ -1,14 +1,22 @@
 {
   "name": "front",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:development": "ng serve --configuration development",
+    "start:preprod": "ng serve --configuration preprod",
+    "start:prod": "ng serve --configuration production",
     "build": "ng build",
+    "build:development": "ng build --configuration development",
+    "build:preprod": "ng build --configuration preprod",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:coverage": "ng test --code-coverage",
     "lint": "ng lint",
-    "build-plugin": "npx esbuild src/plugin.ts --bundle --outfile=./public/plugin.js"
+    "build-plugin": "npx esbuild src/plugin.ts --bundle --outfile=./public/plugin.js",
+    "docs": "npx compodoc -p tsconfig.json"
   },
   "prettier": {
     "printWidth": 100,
@@ -31,6 +39,7 @@
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@angular/ssr": "^20.3.19",
     "rxjs": "~7.8.0",
     "sass": "^1.97.3",
     "tslib": "^2.3.0",
@@ -40,8 +49,11 @@
     "@angular/build": "^20.3.10",
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
+    "@compodoc/compodoc": "^1.2.1",
     "@penpot/plugin-types": "^1.4.2",
+    "@types/express": "^5.0.6",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^25.3.5",
     "angular-eslint": "20.6.0",
     "eslint": "^9.39.0",
     "jasmine-core": "~5.9.0",
@@ -51,6 +63,8 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "8.46.3"
+    "typescript-eslint": "8.46.3",
+    "vite": "^7.1.11",
+    "vite-live-preview": "^0.4.0"
   }
 }

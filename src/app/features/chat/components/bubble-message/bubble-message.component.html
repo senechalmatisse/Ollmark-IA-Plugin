@@ -1,0 +1,36 @@
+<div class="bubble-wrapper" [class.user]="isUser" [class.ai]="isAssistant">
+  <article
+    class="bubble"
+    [class.bubble--error]="message.isError"
+    [class.bubble--preview]="isPreviewMessage"
+    [attr.aria-label]="senderLabel + ' · ' + formattedTime"
+  >
+    <div class="bubble-main" [class.ai-main]="isAssistant">
+      @if (isAssistant && !isPreviewMessage) {
+        <img src="/ai-icon.svg" alt="" class="ai-inline-icon" aria-hidden="true" />
+      }
+
+      <div class="bubble-text">
+        @if (message.isLoading) {
+          <div class="dots" aria-label="En cours de génération…">
+            <span></span><span></span><span></span>
+          </div>
+        } @else if (isPreviewMessage) {
+          <app-preview-card
+            [pngDataUrl]="message.previewPngUrl ?? ''"
+            [status]="message.previewStatus ?? 'pending'"
+            [hasImage]="hasPreviewImage"
+            [isAiLoading]="isAiLoading"
+            (accepted)="onPreviewAccepted()"
+            (rejected)="onPreviewRejected()"
+          />
+        } @else {
+          <p class="content">{{ message.content }}</p>
+          <time class="timestamp" [dateTime]="message.timestamp.toISOString()">
+            {{ formattedTime }}
+          </time>
+        }
+      </div>
+    </div>
+  </article>
+</div>

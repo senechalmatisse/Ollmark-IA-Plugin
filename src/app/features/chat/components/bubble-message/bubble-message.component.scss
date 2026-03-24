@@ -1,0 +1,90 @@
+@use '../../../../../styles/mixins' as *;
+
+.bubble-wrapper {
+  display: flex;
+  width: 100%;
+  padding: 4px 0;
+
+  &.user {
+    justify-content: flex-end;
+  }
+  &.ai {
+    justify-content: flex-start;
+  }
+}
+
+.bubble {
+  max-width: 82%;
+  border-radius: 40px;
+  padding: 16px 32px;
+  transition: background 0.2s ease;
+
+  .user & {
+    background: var(--widget-surface);
+  }
+  .ai & {
+    background: var(--button-main);
+  }
+
+  &--error {
+    border: 1px solid rgba(200, 8, 87, 0.4);
+    background: rgba(200, 8, 87, 0.1) !important;
+    .content {
+      color: #ff4d4d;
+    }
+  }
+
+  // Preview : pleine largeur, pas de padding, pas de bulle arrondie
+  &--preview {
+    border-radius: 16px;
+    padding: 0;
+    background: transparent !important;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.bubble-main {
+  display: block;
+  &.ai-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.ai-inline-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-top: 5px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.bubble-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.timestamp {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: right;
+}
+
+.dots {
+  @include loading-dots($size: 5px, $color: var(--text-main), $gap: 4px);
+  padding: 8px 0;
+}

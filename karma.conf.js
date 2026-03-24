@@ -37,7 +37,15 @@ module.exports = function (config) {
         { type: 'html' },
         { type: 'text-summary' },
         { type: 'cobertura' }
-      ]
+      ],
+        check: {
+        global: {
+          statements: 70,
+          lines: 70,
+          branches: 70,
+          functions: 70
+        }
+      }
     }
   });
 };
