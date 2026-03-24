@@ -96,14 +96,20 @@ front-unit-test:
     - export CHROME_BIN=/usr/bin/chromium-browser
     - npm ci
   script:
+    # Karma s'arrêtera avec un code d'erreur si coverage < 70% grâce au karma.conf.js
     - npm test -- --no-watch --browsers=ChromeHeadlessCI --code-coverage
   coverage: '/Statements\s*:\s*(\d+\.?\d*)%/'
+  allow_failure: false  # Empêche la suite de la pipeline en cas d'échec
   artifacts:
     when: always
     paths:
       - coverage/
     reports:
       junit: coverage/junit.xml
+      # Ajout du rapport Cobertura pour l'intégration visuelle dans GitLab
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH =~ /^(feat|feature)\/.*/
@@ -112,6 +118,7 @@ front-unit-test:
     - if: $CI_COMMIT_BRANCH == "main"
   needs:
     - job: build-frontend
+
 
 # -----------------------------------------------------------------------------
 # STAGE BUILD IMAGE
@@ -169,50 +176,71 @@ trivy-frontend:
   needs: ["build-frontend-image"]
 
 # -----------------------------------------------------------------------------
-# STAGE DEPLOY
+# STAGE DEPLOY FRONTEND
 # -----------------------------------------------------------------------------
-deploy-front-dev:
-  stage: deploy
+
+.deploy-front-template: &deploy_front_base
   image: docker:20.10.16
   services:
     - docker:20.10.16-dind
   before_script:
-    # Recreate SSH key from Base64
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    # Add VM host to known_hosts to avoid SSH prompt
-    - ssh-keyscan -H $VM_HOST >> ~/.ssh/known_hosts
+    # We'll use StrictHostKeyChecking=no in the script to keep it simple across different hosts
+
+deploy-front-dev:
+  <<: *deploy_front_base
+  stage: deploy
   script:
-    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST "~/ollmark-frontend/pg-ia/deploy.sh"
+    - |
+      ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST << EOF
+        cd ~/ollmark-frontend/pg-ia
+        echo "# CONFIGURATION GENEREE PAR GITLAB CI" > .env
+        echo "PENPOT_SERVER_ADDRESS=$PENPOT_SERVER_ADDRESS" >> .env
+        echo "PENPOT_WEBSOCKET_PORT=$PENPOT_WEBSOCKET_PORT" >> .env
+        echo "PENPOT_PLUGIN_SERVER_PORT=$PENPOT_PLUGIN_SERVER_PORT" >> .env
+        echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
+        ./deploy.sh
+      EOF
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: on_success
   needs: ["build-frontend-image"]
 
 deploy-front-preprod:
+  <<: *deploy_front_base
   stage: deploy
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  before_script:
-    # Recreate SSH key from Base64
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
-    - chmod 600 ~/.ssh/id_ed25519
-    # Add VM host to known_hosts to avoid SSH prompt
-    - ssh-keyscan -H $VM_HOST_PREPROD >> ~/.ssh/known_hosts
   script:
-    - ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD "~/ollmark-frontend/pg-ia/deploy.sh"
+    - |
+      ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PREPROD << EOF
+        cd ~/ollmark-frontend/pg-ia
+        echo "# CONFIGURATION GENEREE PAR GITLAB CI" > .env
+        echo "PENPOT_SERVER_ADDRESS=$PENPOT_SERVER_ADDRESS" >> .env
+        echo "PENPOT_WEBSOCKET_PORT=$PENPOT_WEBSOCKET_PORT" >> .env
+        echo "PENPOT_PLUGIN_SERVER_PORT=$PENPOT_PLUGIN_SERVER_PORT" >> .env
+        echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
+        ./deploy.sh
+      EOF
   rules:
     - if: $CI_COMMIT_BRANCH == "preprod"
       when: manual
   needs: ["trivy-frontend"]
 
 deploy-front-prod:
+  <<: *deploy_front_base
   stage: deploy
   script:
-    - echo "Déploiement Angular manuel en PROD"
+    - |
+      ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST_PROD << EOF
+        cd ~/ollmark-frontend/pg-ia
+        echo "# CONFIGURATION GENEREE PAR GITLAB CI" > .env
+        echo "PENPOT_SERVER_ADDRESS=$PENPOT_SERVER_ADDRESS" >> .env
+        echo "PENPOT_WEBSOCKET_PORT=$PENPOT_WEBSOCKET_PORT" >> .env
+        echo "PENPOT_PLUGIN_SERVER_PORT=$PENPOT_PLUGIN_SERVER_PORT" >> .env
+        echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
+        ./deploy.sh
+      EOF
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual

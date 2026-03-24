@@ -1,0 +1,125 @@
+<div
+  class="preview-card"
+  [class.preview-card--accepted]="isAccepted"
+  [class.preview-card--rejected]="isRejected"
+>
+  <p class="preview-card__label">
+    @if (isLoading) {
+      Prévisualisation en cours…
+    } @else if (isAccepted) {
+      Modifications appliquées.
+    } @else if (isRejected) {
+      Modifications rejetées.
+    } @else {
+      Résultat de la génération :
+    }
+  </p>
+
+  @if (isLoading) {
+    <div class="preview-card__loading">
+      <div class="preview-card__loader">
+        <div class="preview-card__loader-bar"></div>
+        <div class="preview-card__loader-bar"></div>
+        <div class="preview-card__loader-bar"></div>
+      </div>
+      <span class="preview-card__loading-text"
+        >Génération de l'aperçu<span class="preview-card__dots"></span
+      ></span>
+    </div>
+  } @else if (showImage) {
+    <div
+      class="preview-card__viewport"
+      #viewport
+      (wheel)="onWheel($event)"
+      (mousedown)="onMouseDown($event)"
+      (mousemove)="onMouseMove($event)"
+      (mouseup)="onMouseUp()"
+      (mouseleave)="onMouseUp()"
+      (dblclick)="onDblClick()"
+    >
+      <div class="preview-card__content" #content>
+        <img
+          class="preview-card__image"
+          [src]="finalImageUrl"
+          alt="Prévisualisation"
+          draggable="false"
+        />
+      </div>
+    </div>
+    <p class="preview-card__hint">
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 8v4M12 16h.01" />
+      </svg>
+      Molette pour zoomer · Glisser pour déplacer · Double-clic pour recentrer
+    </p>
+  }
+
+  @if (!isAccepted && !isRejected && !isLoading && showImage) {
+    <div class="preview-card__actions">
+      @if (isProcessing) {
+        <div class="preview-card__processing">
+          <div class="preview-card__spinner preview-card__spinner--small"></div>
+          <span>Traitement en cours…</span>
+        </div>
+      } @else {
+        <button
+          class="preview-card__btn preview-card__btn--reject"
+          [disabled]="isAiLoading"
+          [attr.aria-disabled]="isAiLoading"
+          (click)="onReject()"
+        >
+          Rejeter
+        </button>
+        <button
+          class="preview-card__btn preview-card__btn--accept"
+          [disabled]="isAiLoading"
+          [attr.aria-disabled]="isAiLoading"
+          (click)="onAccept()"
+        >
+          Appliquer
+        </button>
+      }
+    </div>
+  }
+
+  @if (isAccepted) {
+    <div class="preview-card__badge preview-card__badge--accepted">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      Appliqué
+    </div>
+  }
+
+  @if (isRejected) {
+    <div class="preview-card__badge preview-card__badge--rejected">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+      Rejeté
+    </div>
+  }
+</div>

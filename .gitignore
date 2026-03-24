@@ -13,6 +13,8 @@ yarn-error.log
 
 # IDEs and editors
 .idea/
+.vscode/
+.angular/
 .project
 .classpath
 .c9/
@@ -42,3 +44,6 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 .env
+documentation/
+
+public/plugin.js

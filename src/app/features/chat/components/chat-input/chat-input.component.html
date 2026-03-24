@@ -1,0 +1,36 @@
+<div class="chat-input-wrapper">
+    <div class="chat-input-inner" [class.focused]="isFocused()">
+      <textarea
+        #textareaEl
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+        (keydown.enter)="onEnterKey($event)"
+        (focus)="isFocused.set(true)"
+        (blur)="isFocused.set(false)"
+        (input)="autoResize($event)"
+        [disabled]="isLoading || !enabled"
+        placeholder="Que voulez-vous générer ?"
+        rows="1"
+        maxlength="2000"
+        aria-label="Votre message"
+      ></textarea>
+  
+      <button
+        class="send-btn"
+        (click)="submit()"
+        [disabled]="isLoading || !enabled || !draft().trim()"
+        aria-label="Envoyer"
+      >
+        @if (!isLoading) {
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+        } @else {
+          <span class="loader-dots">
+            <span></span><span></span><span></span>
+          </span>
+        }
+      </button>
+    </div>
+  </div>
