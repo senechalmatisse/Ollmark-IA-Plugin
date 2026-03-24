@@ -5,15 +5,25 @@
     width: 400,
     height: 650
   });
-  var OFFSET = 5e4;
+  var BASE_OFFSET = 5e4;
+  var SLOT_SIZE = 5e4;
   var HALF_OFFSET = 25e3;
   var MAX_STRUCTURE = 150;
+  function computeUserOffset(uid) {
+    let hash = 0;
+    for (let i = 0; i < uid.length; i++) {
+      hash = (hash << 5) - hash + uid.charCodeAt(i) | 0;
+    }
+    const slot = Math.abs(hash) % 200;
+    return BASE_OFFSET + slot * SLOT_SIZE;
+  }
   var sessions = /* @__PURE__ */ new Map();
   function getSession(uid) {
     let s = sessions.get(uid);
     if (!s) {
       s = {
         userId: uid,
+        userOffset: computeUserOffset(uid),
         originalPageId: null,
         opType: "add",
         previewSent: false,
@@ -110,12 +120,13 @@
     const roots = getVisibleRoots();
     if (!roots.length) return;
     const before = allIds();
+    const uo = session.userOffset;
     let cloned = 0;
     for (const shape of roots) {
       try {
         const clone = shape.clone();
-        clone.x += OFFSET;
-        clone.y += OFFSET;
+        clone.x += uo;
+        clone.y += uo;
         cloned++;
       } catch (err) {
         sendToUi({
@@ -146,8 +157,9 @@
       if (!before.has(id)) newIds.add(id);
     }
     if (newIds.size === 0) return;
+    const uo = session.userOffset;
     const directNew = getDirectChildren().filter(
-      (s) => newIds.has(s.id) && (s.x >= HALF_OFFSET || s.y >= HALF_OFFSET)
+      (s) => newIds.has(s.id) && Math.abs(s.x - uo) < SLOT_SIZE && Math.abs(s.y - uo) < SLOT_SIZE
     );
     for (const s of directNew) {
       session.stagedRootIds.add(s.id);
@@ -168,10 +180,10 @@
     }
     await wait(300);
   }
-  function unstage(shapes) {
+  function unstage(shapes, offset) {
     for (const s of shapes) {
-      s.x -= OFFSET;
-      s.y -= OFFSET;
+      s.x -= offset;
+      s.y -= offset;
     }
   }
   async function cleanupStaging(session) {
@@ -180,6 +192,7 @@
   }
   var _hideIds = /* @__PURE__ */ new Set();
   var _translate = false;
+  var _currentOffset = BASE_OFFSET;
   var _stagingReady = null;
   var _cleanupDone = null;
   var FONT_WEIGHT_MAP = {
@@ -243,8 +256,8 @@
           return () => {
             rm.push({ id: target.id });
           };
-        if (_translate && prop === "x" && isInStaging(target)) return target.x - OFFSET;
-        if (_translate && prop === "y" && isInStaging(target)) return target.y - OFFSET;
+        if (_translate && prop === "x" && isInStaging(target)) return target.x - _currentOffset;
+        if (_translate && prop === "y" && isInStaging(target)) return target.y - _currentOffset;
         const v = target?.[prop];
         return typeof v === "function" ? v.bind(target) : v;
       },
@@ -252,7 +265,7 @@
         const key = prop;
         const shouldTranslate = _translate && (key === "x" || key === "y");
         const sanitized = sanitizeValue(key, value);
-        const actual = shouldTranslate ? sanitized + OFFSET : sanitized;
+        const actual = shouldTranslate ? sanitized + _currentOffset : sanitized;
         target[prop] = actual;
         return true;
       }
@@ -279,8 +292,8 @@
     });
   }
   function offsetNewShape(s) {
-    s.x += OFFSET;
-    s.y += OFFSET;
+    s.x += _currentOffset;
+    s.y += _currentOffset;
     return s;
   }
   function interceptCreate(t, rm, p) {
@@ -545,14 +558,15 @@
     if (session.stagedRootIds.size === 0) return "";
     const staged = getStagedRoots(session);
     if (staged.length === 0) return "";
+    const uo = session.userOffset;
     const pngs = [];
     for (const shape of staged) {
       const png = await exportRootPng(shape);
       if (png) {
         pngs.push({
           url: png,
-          x: shape.x - OFFSET,
-          y: shape.y - OFFSET,
+          x: shape.x - uo,
+          y: shape.y - uo,
           w: shape.width,
           h: shape.height
         });
@@ -583,8 +597,8 @@
       if (s.x >= HALF_OFFSET || s.y >= HALF_OFFSET) {
         if (session.origAllIds.has(s.id)) continue;
         const d = toShapeData(s);
-        d.x -= OFFSET;
-        d.y -= OFFSET;
+        d.x -= uo;
+        d.y -= uo;
         results.push(d);
       }
     }
@@ -643,7 +657,10 @@
   }
   function trackNewShapes(session, newIds) {
     const newIdSet = new Set(newIds);
-    const newRoots = getDirectChildren().filter((s) => newIdSet.has(s.id));
+    const uo = session.userOffset;
+    const newRoots = getDirectChildren().filter(
+      (s) => newIdSet.has(s.id) && Math.abs(s.x - uo) < SLOT_SIZE && Math.abs(s.y - uo) < SLOT_SIZE
+    );
     for (const r of newRoots) {
       session.stagedRootIds.add(r.id);
       for (const id of descIds(r)) session.stagedAllIds.add(id);
@@ -652,6 +669,10 @@
   }
   function buildHideIds(session) {
     const hide = new Set(session.origAllIds);
+    for (const [, other] of sessions) {
+      if (other.userId === session.userId) continue;
+      for (const id of other.stagedAllIds) hide.add(id);
+    }
     if (session.mode === "create") {
       for (const id of session.stagedAllIds) hide.add(id);
     }
@@ -686,16 +707,28 @@
       }
       emitLoadingPreview(session, tid, uid);
       const snap = allIds();
+      _currentOffset = session.userOffset;
       _hideIds = buildHideIds(session);
       _translate = true;
       const result = await runCode(code, logs);
       if (needsStaging) session.aiCode.push(code);
       _hideIds = /* @__PURE__ */ new Set();
       _translate = false;
+      _currentOffset = BASE_OFFSET;
       sendResult(tid, true, { result: result ?? null, log: logs.join("\n") });
-      await wait(500);
-      const newIds = [...allIds()].filter((id) => !snap.has(id));
-      if (newIds.length > 0) trackNewShapes(session, newIds);
+      let newIds = [];
+      const maxAttempts = 5;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        await wait(500);
+        const candidate = [...allIds()].filter((id) => !snap.has(id));
+        if (candidate.length > 0) {
+          newIds = candidate;
+          break;
+        }
+      }
+      if (newIds.length > 0) {
+        trackNewShapes(session, newIds);
+      }
       sendToUi({
         type: "debug",
         step: "done",
@@ -704,10 +737,13 @@
         staged: session.stagedRootIds.size
       });
       await wait(300);
-      emitRealPreview(session, uid, await buildPreview(session));
+      const previewUrl = await buildPreview(session);
+      await wait(100);
+      emitRealPreview(session, uid, previewUrl);
     } catch (e) {
       _hideIds = /* @__PURE__ */ new Set();
       _translate = false;
+      _currentOffset = BASE_OFFSET;
       sendResult(tid, false, null, errStr(e));
     }
   }
@@ -719,7 +755,7 @@
       const sid = s.stagingId;
       if (s.origRootIds.size > 0) await deleteByIds(s.origRootIds);
       const staged = getStagedRoots(s);
-      unstage(staged);
+      unstage(staged, s.userOffset);
       sendToUi({ type: "debug", step: "accept", userId: uid, moved: staged.length });
       await wait(300);
       resetSession(s);
@@ -921,6 +957,26 @@
         break;
       default:
         break;
+    }
+  });
+  penpot.on("finish", () => {
+    let currentUserId = "unknown";
+    try {
+      const name = penpot.currentUser?.name ?? "unknown";
+      const uid = penpot.currentUser?.id ?? "unknown";
+      currentUserId = `${name}_${uid}`;
+    } catch {
+    }
+    const session = sessions.get(currentUserId);
+    if (session && session.stagedRootIds.size > 0) {
+      const targets = getDirectChildren().filter((sh) => session.stagedRootIds.has(sh.id));
+      for (const t of targets) {
+        try {
+          t.remove();
+        } catch {
+        }
+      }
+      sessions.delete(currentUserId);
     }
   });
   penpot.on("themechange", (theme) => {
